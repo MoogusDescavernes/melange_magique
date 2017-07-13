@@ -1,12 +1,9 @@
-/*
+/**
  * This file is part of MountyZilla (http://mountyzilla.tilk.info/),
  * published under GNU License v2.
  *
  * Script MountyZilla :
  * ~ Affichage Stabilisation des compos + Assistant Mélange Magique ~
- * 2014-06-14 - v1.1 by Dabihul (79738)
- * TODO
- * - Gestion des popos de Sorts
  */
 
 if(!isPage('MH_Taniere/TanierePJ_o_Stock')
@@ -18,6 +15,8 @@ if(!isPage('MH_Taniere/TanierePJ_o_Stock')
 	&& !isPage('MH_Play/Actions/Competences/Play_a_Competence25')) {
 	return;
 }
+var WHEREARTTHOU = window.location.pathname;
+window.console.debug("[mmassistant] script ON! sur:"+WHEREARTTHOU);
 
 // url icone Mélange Magique
 var urlImg = 'http://mountyzilla.tilk.info/scripts_1.1/'
@@ -249,12 +248,12 @@ function getSetInfo(snap) {
 	var qualite = snap.childNodes[7].textContent;
 	qualite = trim(qualite.slice(qualite.indexOf('Qualit')+9));
 	var effet = effetQual[epure(qualite)];
-	if(niv && effet) {
+	if(niv && effet) {
 		// Si compo référencé (mob en base), on affiche & stocke les infos
 		addInfo(node,mob,niv,qualite,effet);
 	}
 }
-/*
+
 function mmListeGowap() {
 // Traitement de la page qui liste les gowaps
 	try {
@@ -266,8 +265,7 @@ function mmListeGowap() {
 		for(var i=0 ; i<gogoList.snapshotLength ; i++) {
 			gogoNumbers.push( parseInt(gogoList.snapshotItem(i).textContent) );
 		}
-	}
-	catch(e) { return; }
+	} catch(e) { return; }
 
 	// Puis pour chaque gowap, on recherche les compos portés et on traite
 	for(var j=0 ; j<gogoNumbers.length ; j++) {
@@ -288,8 +286,7 @@ function mmEquipGowap() {
 		var trList = document.evaluate(
 			".//p/table/tbody/tr/td[contains(table/tbody/tr/td/b/text(),'Composant')]"
 			+"/div/table/tbody/tr", document, null, 7, null);
-	}
-	catch(e) { return; }
+	} catch(e) { return; }
 
 	for(var i=0 ; i<trList.snapshotLength ; i++) {
 		getSetInfo(trList.snapshotItem(i));
@@ -302,8 +299,7 @@ function mmStockGT() {
 		// on récupère la liste des compos en stock
 		var mainTab = document.getElementById('stock');
 		var trList = document.evaluate('./tbody[2]/tr', mainTab, null, 7, null);
-	}
-	catch(e) { return; }
+	} catch(e) { return; }
 
 	for(var i=numCompo ; i<trList.snapshotLength ; i++) {
 		getSetInfo(trList.snapshotItem(i));
@@ -319,8 +315,7 @@ function mmViewTaniere() {
 		var trstart = document.evaluate(
 			"./tbody/tr[@class='mh_tdtitre' and contains(td/b/text(),'Composant')]",
 			mainTab, null, 9, null).singleNodeValue;
-	}
-	catch(e) { return; }
+	} catch(e) { return; }
 	
 	var tr = trstart.nextSibling.nextSibling;
 	while(tr && tr.className=='mh_tdpage') {
@@ -338,33 +333,40 @@ function mmViewTaniere() {
 		}
 		tr = tr.nextSibling.nextSibling;
 	}
-}*/
+}
 
 function mmExtracteurMatos() {
 	try {
 		// Si pas de compos / popos, on mime un snapshot vide
 		var trCompos = {snapshotLength:0}, trPopos = trCompos;
 		// Sinon on récupère le snapshot
-		var tr = document.getElementById('mh_objet_hidden_Composant');
+		var tr = document.getElementById('mh_objet_hidden_'+numTroll+'Composant');
 		if(tr) {
 			var trCompos = document.evaluate(
 				"./td/table/tbody/tr[not(starts-with(td[2]/img/@alt,'Pas'))]",
 				tr, null, 7, null);
+		} else {
+			window.console.warn("[mmassistant] Aucun composant trouvé");
 		}
-		tr = document.getElementById('mh_objet_hidden_Potion');
+		tr = document.getElementById('mh_objet_hidden_'+numTroll+'Potion');
 		if(tr) {
 			var trPopos = document.evaluate(
 				"./td/table/tbody/tr[not(starts-with(td[2]/img/@alt,'Pas'))]",
 				tr, null, 7, null);
+		} else {
+			window.console.warn("[mmassistant] Aucune potion trouvée");
 		}
+	} catch(e) {
+		window.console.error("[mmassistant] Impossible d'analyser l'équipement");
+		return;
 	}
-	catch(e) { return; }
+	//window.console.debug("[mmassistant] Extracteur ON!");
 	
-	/* Récupération & Stockage des données des Composants */
+	// Récupération & Stockage des données des Composants
 	var strCompos = '';
 	for(var i=0 ; i<trCompos.snapshotLength ; i++) {
-		var node = trCompos.snapshotItem(i).childNodes[7];
-		var mob = node.firstChild.textContent;
+		var node = trCompos.snapshotItem(i).cells[3];
+		var mob = node.textContent;
 		mob = trim(mob.slice(mob.indexOf("d'un")+5));
 		var niv = nival[epure(mob)];
 		var qualite = trCompos.snapshotItem(i).childNodes[9].textContent;
@@ -375,10 +377,14 @@ function mmExtracteurMatos() {
 			var num = trCompos.snapshotItem(i).childNodes[5].textContent.match(/\d+/);
 			strCompos += num+','+(niv+effet)+';';
 		}
+		/*window.console.debug(
+			"compo"+i+": "+
+			num+','+(niv+effet)
+		);*/
 	}
 	MZ_setValue(numTroll+'.MM_compos',strCompos);
 	
-	/* Récupération & Stockage des données des Potions */
+	// Récupération & Stockage des données des Potions
 	var strPopos = '';
 	for(var i=0 ; i<trPopos.snapshotLength ; i++) {
 		var num = trPopos.snapshotItem(i).childNodes[5].textContent.match(/\d+/);
@@ -391,7 +397,7 @@ function mmExtracteurMatos() {
 		} else {
 			var racine = nom;
 		}
-		var effet = trPopos.snapshotItem(i).childNodes[9].textContent;
+		var effet = trim(trPopos.snapshotItem(i).childNodes[9].textContent);
 		var effets = effet.split(' | ');
 		var duree;
 		// Si popo à effet simple, on l'identifie via lvl = 1er effet
@@ -423,7 +429,8 @@ function mmExtracteurMatos() {
 				duree = 3;
 				break;
 			case 'PufPuff':
-				lvl = effets[effets.length-2].match(/\d+/);
+				lvl = effets.length>4 ?
+					'3 (+Tox.)' : effets[effets.length-2].match(/\d+/);
 				duree = 3;
 				break;
 			case 'Essence de KouleMann':
@@ -432,7 +439,9 @@ function mmExtracteurMatos() {
 				duree = 4;
 				break;
 			case 'Elixir de Corruption':
-				lvl += ' ('+effets[6].match(/\d+/)+'/'+effets[7].match(/\d+/)+')';
+				if(effets.length>6) {
+					lvl += ' ('+effets[6].match(/\d+/)+'/'+effets[7].match(/\d+/)+')';
+				}
 			case 'Elixir de Bonne Bouffe':
 			case 'Elixir de Fertilite':
 			case 'Elixir de Feu':
@@ -445,6 +454,10 @@ function mmExtracteurMatos() {
 				duree = 'NA';
 		}
 		strPopos += num+','+nom+','+lvl+','+duree+','+effet+';';
+		/*window.console.debug(
+			"popo"+i+": "+
+			num+','+nom+','+lvl+','+duree+','+effet+';'
+		);*/
 	}
 	MZ_setValue(numTroll+'.MM_popos',epure(strPopos));
 }
@@ -453,59 +466,75 @@ function mmExtracteurMatos() {
 /*                     Initialisation Compétence Mélange                      */
 
 function addInfosCompos() {
-	// Ajoute les infos de compos au menu déroulant lors d'un mélange
+// Ajoute les infos de compos au menu déroulant lors d'un mélange
+// Génère la liste listeCompo
 	if(!MZ_getValue(numTroll+'.MM_compos')) { return; }
-	/* Récupération des % de stabilisation (précalculés sur le profil) */
+	
+	// Récupération des % de stabilisation (précalculés sur le profil)
 	var dataList = MZ_getValue(numTroll+'.MM_compos').split(';');
 	for(var i=0 ; i<dataList.length ; i++) {
 		var data = dataList[i].split(',');
 		listeCompos[data[0]] = data[1];
 	}
-	/* ... puis insertion des infos dans le menu déroulant */
+	
+	// ... puis insertion des infos dans le menu déroulant
 	var optCompo = selectCompo.getElementsByTagName('option');
+	selectCompo.style.maxWidth = '450px';
 	for(var i=1 ; i<optCompo.length ; i++) {
 		var opt = optCompo[i];
 		if(listeCompos[opt.value]==undefined) { continue; }
 		appendText(opt,' ');
 		opt.appendChild(createMMImage(urlImg));
+		opt.title = '-'+listeCompos[opt.value]+' %';
 		appendText(opt,' [-'+listeCompos[opt.value]+' %]');
 	}
 }
 
 function addInfosPopos(selec) {
 // Ajoute les infos de popo aux 2 menus déroulants lors d'un mélange
+	if(!MZ_getValue(numTroll+'.MM_popos')) { return; }
+	
 	var optPopo = selec.getElementsByTagName('option');
 	for(var i=1 ; i<optPopo.length ; i++) {
 		var opt = optPopo[i];
-		if(!listePopos[opt.value])
-			opt.title = '??? (Ouvrez l\'onglet Équipement)';
-		else if(!listePopos[opt.value]['str'])
+		if(!listePopos[opt.value]) {
+			opt.title = "??? (Ouvrez l'onglet Équipement)";
+		} else if(!listePopos[opt.value]['str']) {
 			opt.title = 'Aucune carac.'
-		else {
-			var lvl = listePopos[opt.value]['lvl'];
-			if(lvl) { appendText(opt,lvl); }
-			if(listePopos[opt.value]['Zone']) { appendText(opt, ' Zone', true); }
+		} else {
+			if(listePopos[opt.value]['Niv']!='NA'
+				&& listePopos[opt.value]['Nom'].indexOf('Potion de Painture')!==0) {
+				appendText(opt," "+listePopos[opt.value]['Niv']);
+			}
+			if(listePopos[opt.value]['Zone']) {
+				appendText(opt,' Zone',true);
+			}
 			opt.title = listePopos[opt.value]['str'];
 		}
 	}
 }
 
 function initRisqueExplo() {
-//
-	/* Récupération des effets des popos */
+// Pré-calcule les bonus/malus liés à chaque popo/compo
+	
+	// Récupération des effets des popos
 	var dataList = MZ_getValue(numTroll+'.MM_popos').split(';');
 	for(var i=0 ; i<dataList.length ; i++) {
 		var data = dataList[i].split(',');
 		// rappel : stocké comme "num,nom,lvl,durée,effet"
 		var num = data[0];
-		listePopos[num] = {'Nom': data[1]};
-		if(data[2]!='NA') { listePopos[num]['lvl'] = data[2]; }
-		if(data[3]!='NA') { listePopos[num]['Duree'] = data[3]; }
-		listePopos[num]['Effets'] = {};
-		/* Pré-traitement des stats de popos pour calcul du Risque */
+		listePopos[num] = {
+			'Nom': data[1], // String
+			'Niv': data[2], // String
+			'Duree': data[3]=='NA' ? 'NA' : Number(data[3]), // Number ou 'NA'
+			'Risque': 0 // Number
+		};
+		
+		// Calcul du risque associé aux effets d'une popo
 		if(data[4]) {
 			listePopos[num]['str'] = data[4];
 			var effets = data[4].split(' | ');
+			var risque = 0, magie = 0;
 			for(var j=0 ; j<effets.length ; j++) {
 				var nb = effets[j].match(/\d+/);
 				if(nb) {
@@ -514,188 +543,218 @@ function initRisqueExplo() {
 						// Si MM/RM, on attrape le signe pour faire la somme algébrique
 						// et on divise la carac par 10
 						nb = effets[j].match(/-?\d+/);
-						listePopos[num]['Effets']['Magie'] =
-							listePopos[num]['Effets']['Magie'] ?
-							nb/10+listePopos[num]['Effets']['Magie'] : nb/10;
-					}
-					else if(carac=='TOUR') {
+						magie = magie ? magie+nb/10 : nb/10;
+					} else if(carac=='TOUR') {
 						// Si effet de durée, malus = nb de 1/2 h
-						listePopos[num]['Effets'][carac] = nb/30;
-					}
-					else if(carac.indexOf('Painture')==0) {
+						risque += nb/30;
+					} else if(carac.indexOf('Painture')==0) {
 						// Si Painture, malus = niv x 10
-						listePopos[num]['Effets'][carac] = nb*10;
+						risque += nb*10;
+					} else {
+						risque += Number(nb);
 					}
-					else {
-						listePopos[num]['Effets'][carac] = Number(nb);
-					}
-				}
-				else if(effets[j].indexOf('Zone')!=-1) {
+				} else if(effets[j].indexOf('Zone')!=-1) {
 					// Si popo de Zone, on enregistre pour malus Zone
 					listePopos[num]['Zone'] = true;
 				}
-				if(listePopos[num]['Effets']['Magie']) {
-					// Si MM/RM, on vire le signe final de la somme algébrique
-					listePopos[num]['Effets']['Magie'] =
-						Math.abs(listePopos[num]['Effets']['Magie']);
-				}
 			}
+			if(magie) {
+				// Si MM/RM, on vire le signe final de la somme algébrique
+				risque += Math.abs(magie);
+			}
+		listePopos[num]['Risque']=Math.round(10*risque)/10;
 		}
 	}
-	/* Insertion des infos dans les menus déroulants */
-	addInfosCompos();
-	addInfosPopos(selectPopo1);
-	addInfosPopos(selectPopo2);
 	
-	/* Initialisation affichage Risques */
-	var divAction = document.getElementsByClassName('Action')[0];
-	afficheRisque.innerHTML = "Risque d'Explosion : (nécessite 2 potions)";
-	appendBr(divAction);
-	divAction.appendChild(afficheRisque);
+	// Insertion des infos dans les menus déroulants
+	addInfosCompos();
+	window.console.debug("[mmassistant] addInfosCompos réussi");
+	addInfosPopos(selectPopo1);
+	window.console.debug("[mmassistant] addInfosPopos 1 réussi");
+	addInfosPopos(selectPopo2);
+	window.console.debug("[mmassistant] addInfosPopos 2 réussi");
+	
+	// Initialisation affichage Risques
+	afficheRisque.innerHTML = "[Risque d'explosion : (nécessite 2 potions)]";
+	titre4.appendChild(afficheRisque);
 	selectPopo1.onchange = refreshRisqueExplo;
 	selectPopo2.onchange = refreshRisqueExplo;
 	selectCompo.onchange = refreshRisqueExplo;
+
+	window.console.debug("[mmassistant] initRisqueExplo réussi");
 }
 
 
-/*                           EventListeners Mélange                           */
-
-function risqueEffet(effet) {
-// Calcule le risque associé à l'effet d'une potion
-// Juste une somme, initRisqueExplo() ayant déjà traité les stats spéciales
-	var risque = 0;
-	for(var carac in effet) {
-		risque += effet[carac];
-	}
-	return risque;
-}
+/*                           EventListener Mélange                            */
 
 function refreshRisqueExplo() {
-// Met à jour le risque d'explosion en fonction des popos / compos sélectionnés
-	/* On vérifie si on a bien 2 popos connues sélectionnées */
+// Met à jour le risque d'explosion en fonction des popos/compos sélectionnés
+	
+	// On vérifie si on a bien 2 popos connues sélectionnées
+	afficheRisque.title = '';
 	if(selectPopo1.value=='' || selectPopo2.value=='') {
-		afficheRisque.innerHTML = "Risque d'Explosion : (nécessite 2 potions)";
+		afficheRisque.innerHTML = "[Risque d'explosion : (nécessite 2 potions)]";
 		return;
 	}
 	var popo1 = listePopos[selectPopo1.value];
 	var popo2 = listePopos[selectPopo2.value];
-	if(popo1==undefined || popo2==undefined) {
-		afficheRisque.innerHTML = "Potion inconnue : ouvrez l'onglet Équipement";
+	if(popo1==undefined || popo2==undefined) {
+		afficheRisque.innerHTML = "[Potion inconnue : ouvrez l'onglet Équipement]";
 		return;
 	}
 	
-	/* Risque de base */
+	// Risque de base
 	var risque = 33;
+	var details = 'Risque de base: +33';
 	
-	/* Bonus de compo */
+	// Malus de caracs
+	risque += popo1['Risque'];
+	details += '\nEffet popo 1: +'+popo1['Risque']+' ('+risque+')';
+	risque += popo2['Risque']
+	details += '\nEffet popo 2: +'+popo2['Risque']+' ('+risque+')';
+	risque = Math.round(risque);
+	
+	// Malus de popo mélangée & Bonus popos de base identiques
+	if(popo1['Nom'].indexOf('Melangees')!=-1
+		|| popo2['Nom'].indexOf('Melangees')!=-1) {
+		risque += 15;
+		details += '\nMalus mélange: +15 ('+risque+')';
+	} else if(popo1['Nom']==popo2['Nom']) {
+		risque -= 15;
+		details += '\nBonus popo id.: -15 ('+risque+')';
+	}
+	
+	// Malus de Zone
+	if(popo1['Zone'] || popo2['Zone']) {
+		risque += 40;
+		details += '\nMalus zone: +40 ('+risque+')';
+	}
+	
+	// Malus mélange hétérogène GPT (Guérison/Painture/Toxine)
+	var popoInco = popo1['Duree']=='NA' || popo2['Duree']=='NA';
+	var rismax = risque+5;
+	if(popo1['Nom'].indexOf('Toxine Violente')
+		+popo2['Nom'].indexOf('Toxine Violente')
+		+popo1['Nom'].indexOf('Potion de Guerison')
+		+popo2['Nom'].indexOf('Potion de Guerison')
+		+popo1['Nom'].indexOf('Potion de Painture')
+		+popo2['Nom'].indexOf('Potion de Painture')==-5) {
+		risque += 40;
+		details += '\nMalus hétérogène GPT: +40 ('+risque+')';
+	} else if(popoInco) {
+		// En cas de popo inconnue, on envisage le pire
+		rismax += 40;
+		details += '\nMalus hétérogène GPT: +40 ??';
+	}
+	
+	// Malus durée
+	if(!popoInco) {
+		// Si les deux popos sont connues RAS
+		var sup = Math.max(popo1['Duree'],popo2['Duree']);
+		risque += sup;
+		rismax=risque;
+		details += '\nMalus de durée: +'+sup+' ('+risque+')';
+	} else if(popo1['Duree']!='NA') {
+		// Sinon on fait au mieux
+		risque += popo1['Duree'];
+		if(popo1['Duree']==5) {
+			details += '\nMalus de durée: +5 ('+risque+')';
+		} else {
+			details += '\nMalus de durée: de +'+popo1['Duree']+' à +5';
+		}
+	} else {
+		risque += popo2['Duree'];
+		if(popo2['Duree']==5) {
+			details += '\nMalus de durée: +5 ('+risque+')';
+		} else {
+			details += '\nMalus de durée: de +'+popo2['Duree']+' à +5';
+		}
+	}
+	
+	// Bonus de compo
 	if(selectCompo.value!=0) {
 		if(listeCompos[selectCompo.value]) {
 			risque -= listeCompos[selectCompo.value];
-		}
-		else {
+			rismax -= listeCompos[selectCompo.value];
+			details += '\nBonus compo: -'+listeCompos[selectCompo.value]
+				+' ('+risque+')';
+		} else {
 			afficheRisque.innerHTML =
 				"Composant inconnu : ouvrez l'onglet Équipement";
 			return;
 		}
 	}
 	
-	/* Malus de popo mélangée & Bonus popos de base identiques */
-	if(popo1['Nom'].indexOf('Melangees')!=-1
-		|| popo2['Nom'].indexOf('Melangees')!=-1) {
-		risque += 15;
-	}
-	else if(popo1['Nom']==popo2['Nom']) {
-		risque -= 15;
-	}
-	/* Malus de Zone */
-	if(popo1['Zone'] || popo2['Zone']) {
-		risque += 40;
-	}
-	/* Malus mélange hétérogène GPT (PV/Painture) */
-	if(popo1['Nom'].indexOf('Toxine Violente')+
-		popo2['Nom'].indexOf('Toxine Violente')+
-		popo1['Nom'].indexOf('Potion de Guerison')+
-		popo2['Nom'].indexOf('Potion de Guerison')+
-		popo1['Nom'].indexOf('Potion de Painture')+
-		popo2['Nom'].indexOf('Potion de Painture')==-5) {
-		risque += 40;
-	}
-	
-	/* Malus de caracs */
-	risque += risqueEffet(popo1['Effets']);
-	risque += risqueEffet(popo2['Effets']);
-	risque = Math.round(risque);
-	
-	/* Malus durée (ou estim) */
-	var rismax = risque+5;
-	if(popo1['Duree']!='NA' && popo2['Duree']!='NA') {
-		risque += Math.max(popo1['Duree'],popo2['Duree']);
-		rismax=risque;
-	}
-	else if(popo1['Duree']!='NA') {
-		risque += popo1['Duree'];
-	}
-	else if(popo2['Duree']!='NA') {
-		risque += popo2['Duree'];
-	}
-	
-	/* Affichage */
+	// Affichage
 	if(risque==rismax) {
-		afficheRisque.innerHTML = "Risque d'Explosion : "
-			+Math.max(15,risque)+' %';
+		afficheRisque.innerHTML = "[Risque d'explosion : "
+			+Math.max(15,risque)+' %]';
+	} else if(rismax<16) {
+		afficheRisque.innerHTML = "[Risque d'explosion : 15 %]";
+	} else {
+		afficheRisque.innerHTML = "[Risque d'explosion : de "
+			+Math.max(15,risque)+' à '+rismax+' %]';
 	}
-	else if(rismax<16) {
-		afficheRisque.innerHTML = "Risque d'Explosion : 15 %";
-	}
-	else {
-		afficheRisque.innerHTML = "Risque d'Explosion : de "
-			+Math.max(15,risque)+' à '+rismax+' %';
-	}
+	afficheRisque.title = details;
+	
+	window.console.debug("[mmassistant] refreshRisqueExplo réussi");
 }
 
 
 /*                               Main Dispatch                                */
 
-if((isPage('MH_Taniere/TanierePJ_o_Stock')
-		|| isPage('MH_Comptoirs/Comptoir_o_Stock'))
-	&& currentURL.indexOf('as_type=Compo')!=-1) {
-	/* Ajout du bouton Relaunch (utile si +500 compos) */
+if(
+		(
+			isPage('MH_Taniere/TanierePJ_o_Stock') ||
+			isPage('MH_Comptoirs/Comptoir_o_Stock')
+		) &&
+		window.location.href.indexOf('as_type=Compo')!=-1
+	) {
+	// Ajout du bouton Relaunch (utile si +500 compos)
 	var numCompo = 0;
 	var footer = document.getElementById('footer1');
 	var relaunchButton = document.createElement('input');
 	relaunchButton.type = 'button';
 	relaunchButton.className = 'mh_form_submit';
 	relaunchButton.value = 'Relancer MountyZilla';
-	relaunchButton.onmouseover = function(){this.style.cursor='pointer';};
+	relaunchButton.onmouseover = function(){
+		this.style.cursor='pointer';
+	};
 	relaunchButton.onclick = mmStockGT;
 	insertBefore(footer,relaunchButton);
+	document.getElementById('stock-ajax-append').addEventListener(
+		'click', function() {
+			window.setTimeout(mmStockGT,5000);
+		}
+	);
 	mmStockGT();
-}
-else if(isPage('MH_Follower/FO_Equipement')) {
+} else if(isPage('MH_Follower/FO_Equipement')) {
 	mmEquipGowap();
-}
-else if(isPage('MH_Play/Play_e_follo')) {
+} else if(isPage('MH_Play/Play_e_follo')) {
 	mmListeGowap();
-}
-else if(isPage('View/TaniereDescription')) {
+} else if(isPage('View/TaniereDescription')) {
 	mmViewTaniere();
-}
-else if(isPage('MH_Play/Play_equipement')) {
+} else if(isPage('MH_Play/Play_equipement')) {
 	mmExtracteurMatos();
-}
-else if(isPage('MH_Play/Actions/Competences/Play_a_Competence25')
-	&& MZ_getValue(numTroll+'.MM_popos')) {
+} else if(isPage('MH_Play/Actions/Competences/Play_a_Competence25')) {
+// DEBUG: on déclenche même si rien en mémoire
+//	&& MZ_getValue(numTroll+'.MM_popos')) {
 	try {
-		var selectPopo1 = document.getElementsByName('ai_IDPotion1')[0];
-		var selectPopo2 = document.getElementsByName('ai_IDPotion2')[0];
-		var selectCompo = document.getElementsByName('ai_IDCompo')[0];
+		var
+			selectPopo1 = document.getElementsByName('ai_IDPotion1')[0],
+			selectPopo2 = document.getElementsByName('ai_IDPotion2')[0],
+			selectCompo = document.getElementsByName('ai_IDCompo')[0],
+			titre4 = document.getElementsByClassName('titre4')[0];
+	} catch(e) {
+		window.console.error("[mmassistant] Structure de page inconnue");
+		return;
 	}
-	catch(e) { return; }
-
+	
+	window.console.debug("[mmassistant] calcul du risque ON!");
 	var listeCompos = {};
 	var listePopos = {};
 	var afficheRisque = document.createElement('span');
 	initRisqueExplo();
 }
 
-
+window.console.debug("[mmassistant] Script OFF sur:"+WHEREARTTHOU);
