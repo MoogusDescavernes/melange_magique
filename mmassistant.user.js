@@ -22,6 +22,8 @@
  * ~ Affichage Stabilisation des compos + Assistant Mélange Magique ~
  */
 
+var numTroll = 92255;
+
 function isPage(url) {
     return window.self.location.toString().indexOf(url) !== -1;
 }
@@ -376,7 +378,7 @@ function mmExtracteurMatos() {
         // Si pas de compos / popos, on mime un snapshot vide
         var trPopos = trCompos = {snapshotLength:0};
         // Sinon on récupère le snapshot
-        var tr = document.getElementById('mh_objet_hidden_92255Composant');
+        var tr = document.getElementById('mh_objet_hidden_' + numTroll + 'Composant');
         if (tr) {
             var trCompos = document.evaluate("./td/table/tbody/tr", tr, null, 7, null);
         } else {
@@ -752,7 +754,12 @@ if ((isPage('MH_Taniere/TanierePJ_o_Stock') || isPage('MH_Comptoirs/Comptoir_o_S
     mmViewTaniere();
 } else if (isPage('MH_Play/Play_equipement')) {
     mmExtracteurMatos();
-} else if (isPage('MH_Play/Actions/Competences/Play_a_Competence25')) {
+} else if (isPage('MH_Play/Actions/Competences/Play_a_CompetenceYY')) {
+	var idComp = document.getElementsByName("ai_IdComp");
+	if(!idComp[0] || !idComp[0].value || idComp[0].value!=25) {
+		window.console.warn("[mmassistant] Compétence non reconnue - OFF");
+		return;
+	}
 // DEBUG: on déclenche même si rien en mémoire
 //    && window.localStorage[numTroll + '.MM_popos']) {
     try {
