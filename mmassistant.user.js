@@ -1,16 +1,18 @@
 // ==UserScript==
-// @name        [Mountyhall] Assistant Mélange Magique
-// @namespace   Mountyhall
-// @description Assistant Mélange Magique & Affichage % de stabilisation des compos
-// @version     1.5
-// @include     */mountyhall/MH_Taniere/TanierePJ_o_Stock*
-// @include     */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
-// @include     */mountyhall/MH_Follower/FO_Equipement*
-// @include     */mountyhall/MH_Play/Play_e_follo*
-// @include     */mountyhall/View/TaniereDescription*
-// @include     */mountyhall/MH_Play/Play_equipement*
-// @include     */mountyhall/MH_Play/Actions/Competences/Play_a_CompetenceYY*
-// @grant       none
+// @name         [Mountyhall] Assistant Mélange Magique
+// @namespace    Mountyhall
+// @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
+// @author       Dabihul
+// @version      2.0a.0.2
+// @downloadURL  XXX
+// @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
+// @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
+// @include      */mountyhall/MH_Follower/FO_Equipement*
+// @include      */mountyhall/MH_Play/Play_e_follo*
+// @include      */mountyhall/View/TaniereDescription*
+// @include      */mountyhall/MH_Play/Play_equipement*
+// @include      */mountyhall/MH_Play/Actions/Competences/Play_a_CompetenceYY*
+// @grant        none
 // ==/UserScript==
 
 var numTroll = XXX;
