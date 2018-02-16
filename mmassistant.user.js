@@ -4,7 +4,6 @@
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
 // @version      2.0a.0.4
-// @downloadURL  XXX
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
