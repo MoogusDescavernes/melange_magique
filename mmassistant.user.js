@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.0a.0.4
+// @version      2.0a.0.7
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -459,7 +459,7 @@ function mmExtracteurMatos() {
 	for(var i=0 ; i<trPopos.snapshotLength ; i++) {
 		var num = trPopos.snapshotItem(i).childNodes[5].textContent.match(/\d+/);
 		var nom = epure(trim(trPopos.snapshotItem(i).childNodes[7].textContent));
-		if(nom.indexOf(' Melangees') != -1) {
+		if(nom.indexOf(' Melangees')!=-1) {
 			// Si popo issue d'un mélange de 2 popos de base de même famille,
 			// on récupère ladite famille pour computer durée+type (GPT/autre)
 			// Si mélange niv sup, on récupère "Potions", sans effet.
@@ -575,7 +575,7 @@ function addInfosPopos(selec) {
 		} else if(!listePopos[opt.value]['str']) {
 			opt.title = 'Aucune carac.'
 		} else {
-			if(listePopos[opt.value]['Niv'] != 'NA' &&
+			if(listePopos[opt.value]['Niv']!='NA' &&
 				listePopos[opt.value]['Nom'].indexOf('Potion de Painture')!==0) {
 				appendText(opt, " "+listePopos[opt.value]['Niv']);
 			}
@@ -626,7 +626,7 @@ function initRisqueExplo() {
 					} else {
 						risque += Number(nb);
 					}
-				} else if(effets[j].indexOf('Zone') != -1) {
+				} else if(effets[j].indexOf('Zone')!=-1) {
 					// Si popo de Zone, on enregistre pour malus Zone
 					listePopos[num]['Zone'] = true;
 				}
@@ -705,8 +705,10 @@ function refreshRisqueExplo() {
 	risque = Math.round(risque);
 	
 	// Malus de popo mélangée & Bonus popos de base identiques
-	if(popo1['Nom'].indexOf('Melangees') != -1 ||
-		popo2['Nom'].indexOf('Melangees') != -1) {
+	if(
+		popo1['Nom'].indexOf('Melangees')!=-1 ||
+		popo2['Nom'].indexOf('Melangees')!=-1
+	) {
 		risque += 15;
 		details += '\nMalus mélange: +15 ('+risque+')';
 	} else if(popo1['Nom']==popo2['Nom']) {
@@ -727,12 +729,13 @@ function refreshRisqueExplo() {
 	if(
 		popo1['Nom'].indexOf('Toxine Violente')+
 		popo2['Nom'].indexOf('Toxine Violente')+
-	 	popo1['Nom'].indexOf('Potion de Guerison')+
-	 	popo2['Nom'].indexOf('Potion de Guerison')+
-	 	popo1['Nom'].indexOf('Potion de Painture')+
-	 	popo2['Nom'].indexOf('Potion de Painture')==-5
-	 ) {
+		popo1['Nom'].indexOf('Potion de Guerison')+
+		popo2['Nom'].indexOf('Potion de Guerison')+
+		popo1['Nom'].indexOf('Potion de Painture')+
+		popo2['Nom'].indexOf('Potion de Painture')==-5
+	) {
 		risque += 40;
+		rismax += 40;
 		details += '\nMalus hétérogène GPT: +40 ('+risque+')';
 	} else if(popoInconnue) {
 		// En cas de popo inconnue, on envisage le pire
@@ -747,7 +750,7 @@ function refreshRisqueExplo() {
 		risque += sup;
 		rismax = risque;
 		details += '\nMalus de durée: +'+sup+' ('+risque+')';
-	} else if(popo1['Duree'] != 'NA') {
+	} else if(popo1['Duree']!='NA') {
 		// Sinon on fait au mieux
 		risque += popo1['Duree'];
 		if(popo1['Duree']==5) {
@@ -798,12 +801,12 @@ function refreshRisqueExplo() {
 getNumTroll();
 
 function isPage(url) {
-	return window.self.location.toString().indexOf(url) != -1;
+	return window.self.location.toString().indexOf(url)!=-1;
 }
 
 if((isPage('MH_Taniere/TanierePJ_o_Stock') ||
 	isPage('MH_Comptoirs/Comptoir_o_Stock')) &&
-	window.location.href.indexOf('as_type=Compo') != -1) {
+	window.location.href.indexOf('as_type=Compo')!=-1) {
 	// Ajout du bouton Relaunch (utile si +500 compos)
 	var
 		numCompo = 0,
