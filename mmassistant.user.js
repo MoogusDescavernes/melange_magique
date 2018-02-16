@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.0a.0.2
+// @version      2.0a.0.4
 // @downloadURL  XXX
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
@@ -15,12 +15,13 @@
 // @grant        none
 // ==/UserScript==
 
-var numTroll = XXX;
 
-// Variables Globales --------------------------------------------------------//
+//---------------------------- Variables Globales ----------------------------//
 
 var WHEREARTTHOU = window.location.pathname;
 window.console.debug("[mmassistant] script ON! sur : "+WHEREARTTHOU);
+
+var numTroll; // définie dans le main avec getNumTroll()
 
 // URL icone Mélange Magique
 var urlImg = 'http://mountyzilla.tilk.info/scripts_1.1/images/Competences/melangeMagique.png';
@@ -205,7 +206,7 @@ var effetQual = {
 }
 
 
-// Utilitaires génériques ----------------------------------------------------//
+//-------------------------- Utilitaires génériques --------------------------//
 
 function trim(str) {
 	return str.replace(/(^\s*)|(\s*$)/g,'');
@@ -221,8 +222,21 @@ function epure(texte) {
 		replace(/[ùûü]/g, 'u');
 }
 
+function getNumTroll() {
+// Récupère le num de trõll dans la frame Menu
+// Menu = top.frames["Sommaire"].document
+// onclick du nom du trõll: "EnterPJView(numTroll,750,550)"
+	var
+		liens = top.frames["Sommaire"].document.getElementsByTagName("a"),
+		str;
+	if(liens.length>0 && liens[0].onclick!==undefined) {
+		str = liens[0].onclick.toString();
+		numTroll = parseInt(/\d+/.exec(str)[0]);
+		window.console.debug("[mmassistant] numTroll = "+numTroll);
+	}
+}
 
-// Gestion du DOM ------------------------------------------------------------//
+//------------------------------ Gestion du DOM ------------------------------//
 
 function appendText(paren, text, bold) {
 	if(bold) {
@@ -779,6 +793,8 @@ function refreshRisqueExplo() {
 
 
 //------------------------------ Main Dispatch -------------------------------//
+
+getNumTroll();
 
 function isPage(url) {
 	return window.self.location.toString().indexOf(url) != -1;
