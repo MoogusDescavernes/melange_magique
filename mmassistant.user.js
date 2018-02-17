@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.0a.0.7
+// @version      2.0a.0.8
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -798,8 +798,6 @@ function refreshRisqueExplo() {
 
 //------------------------------ Main Dispatch -------------------------------//
 
-getNumTroll();
-
 function isPage(url) {
 	return window.self.location.toString().indexOf(url)!=-1;
 }
@@ -832,12 +830,14 @@ if((isPage('MH_Taniere/TanierePJ_o_Stock') ||
 } else if(isPage('View/TaniereDescription')) {
 	mmViewTaniere();
 } else if(isPage('MH_Play/Play_equipement')) {
+	getNumTroll();
 	mmExtracteurMatos();
 } else if(isPage('MH_Play/Actions/Competences/Play_a_CompetenceYY')) {
 	if(document.body.id!="p_competencemlangemagique") {
 		window.console.warn("[mmassistant] Compétence non reconnue - OFF");
 		return;
 	}
+	getNumTroll();
 
 // DEBUG: on déclenche même si rien en mémoire
 //	&& window.localStorage[numTroll+'.MM_popos']) {
