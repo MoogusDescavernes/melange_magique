@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.0a.0.8
+// @version      2.0a.0.9
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -14,6 +14,7 @@
 // @grant        none
 // ==/UserScript==
 
+// Juste un test du webhook
 
 //---------------------------- Variables Globales ----------------------------//
 
