@@ -22,7 +22,7 @@ window.console.debug("[mmassistant] script ON! sur : "+WHEREARTTHOU);
 
 var numTroll; // définie dans le main avec getNumTroll()
 
-//---------------------------- Bases de données -----------------------------//
+//----------------------------- Bases de données -----------------------------//
 
 var niveauDuMonstre = {
 	"Abishaii Bleu":19,
@@ -229,7 +229,7 @@ var dureePotion = {
 	"Zet Crakdedand"        : 3
 }
 
-//--------------------- Icone Mélange Magique (base64) ----------------------//
+//---------------------- Icone Mélange Magique (base64) ----------------------//
 
 var iconeBase64 = "data:image/png;base64," +
 	"iVBORw0KGgoAAAANSUhEUgAAACIAAAAiCAYAAAA6RwvCAAAKT2lDQ1BQaG90b3Nob3AgSU" +
@@ -284,25 +284,20 @@ var iconeBase64 = "data:image/png;base64," +
 	"+Zj8uGDYbrnjg+OTniP3L96fynQ89kzyaeF/6i/suuFxYvfvjV69fO0ZjRoZfyl5O/bXyl" +
 	"/erA6xmv28bCxh6+yXgzMV70VvvtwXfcdx3vo98PT+R8IH8o/2j5sfVT0Kf7kxmTk/8EA5" +
 	"jz/GMzLdsAAAAGYktHRAD/AP8A/6C9p5MAAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElN" +
-	"RQfiAxkJOxdNWSOcAAADmElEQVRYw9WYT0sbQRjGH3dzCyQlNhRjevFQiNiIgmJBC5oGvN" +
-	"gaLx4Kgl6K4CcQ9JCCn8DQetFCT9KDFT3YhsSCFgOWSEIwrYUebIiHxKQbzKlu0sNmJrN/" +
-	"srvRUNqBJYn77rzP/J533kkE/pHR1qqJOI6rGsVUKpWG+SytXNX318/p+/uPx/Ax9JZ+fh" +
-	"r6pPus5W+QUMZqkbG0IokoigCA39/eyP7uedipiuF5/mZEzOLO5Mq4pzNPOCHA32tvzppm" +
-	"cJNViqKIcDYAj0uaMp29BgYDNMbfawfP8w0L1tIq3DzPYy9eQGj3HGP9LkTjWRo31u/SFW" +
-	"FoTbO4/b12eFwWuJ1WAKBi9Cwx7CMcx1VFUUQ4IchxM4PgZumwiyDxRIgeFU6v+ZAkod1z" +
-	"pLPXiMaz9Go0cSZXpqLZWKNhuGvM4K6Jru7FC4jGs6oaCScEjPc7dGvE0BqzuEk8G2N2x5" +
-	"jurJlcGW6nleJWEmFFAKA1RSwKJwSIogie56s3rpFwQkBo9xzhhKDC3WiVxMaWnb5mcJMd" +
-	"Q2gQEWzRmrGIMyOC4D7K2yl2gptNakSCPKPVuTmz6NxOK+a8UsLFAztuakcjMRYzNJRJVk" +
-	"YE2aTkrDE7tIqXMxKxnpREBCPyuKO8XSXmNsNiRGLZJ91b9gGZXD320V2Bsaku5ioTlfpL" +
-	"sQQA6LwqaiY+/QwZFU1r1pNSPQQjoEKUY/HAjpURQdOmnxfjiGULAICNy2HMth/S9wAw23" +
-	"6IIa8DwIy6WFkac96yjAYADKxCs05YYeyQEgFro6eaC3mx363dR4iQnS8XAACb7Y7q4VLp" +
-	"FwCgWCw29HrG3w2e5/HuwyC2OyZRSOUpESWhqSdHtK+orAnGOjDhAVBb8E6aEZL6Kotdne" +
-	"/Cwqsf9LOtpw8z/jqRjf28SsBs+yG1aErZRwgNgp8kX/ZBElUbkZcPaEIAVMTqfFdN6AmN" +
-	"jSULWBs9patnqZg6a44X6smDEUnU1rS0i3xLZ7D19MkSsoKIUADY7phELFmQyFwOUwqEjL" +
-	"J2VEIGVuV2THiAwKaVkiilTigB5atv6Yw+9+ziPYa8DllRDnkddMfEkgV1sSqtOV6oNzBW" +
-	"1NZ0GYFNq4oIa53baTXdadkDUEVka7pMBc15y5jw1K0hIlgLCA1yn01idLGnsExIKXVCk+" +
-	"2kJdTkldy39fTRWmH7h7J2KpVKm9Gl20duO4y+Epr6YtTsL7xm//XwX4w/IwxoRwFwfdsA" +
-	"AAAASUVORK5CYII=";
+	"RQfiAxkSIyf56Mf4AAACqUlEQVRYw82YT2sTQRjGn87srWAktFRi1YMgpDQEcvDoIRCwKI" +
+	"J4VPADePNbiOeAR8Wb4EVyEBeCInioEFzSphrJwRBWQ0qaLeSgdjYewmwnk92Z2T9CB5bd" +
+	"nZnd95nf++zMJMAZKStZvIQQMtP18X1fGcvKakTfn90Pri/dqOJd/WVwf6f+Xvu89b9JyH" +
+	"2jyFhZBGOM4e+35wt1xdLFhXYAoJSmI6LDPhhNsaF43nY81Mq5ZKmJg/3KhXMAgB+/jgEA" +
+	"B+4JcP1u0F4r50ApVRrW0iEHYIy93uijWimg2XKD9mqloBUBAEQ32sFoqmy3HS+4fnT7Mm" +
+	"rlHKqVwgKN1PMIIWTGGIPteCgWrFPsQuHYORkunvfjQnRUiG4S4k6vN/o4cE/QbLnBwQNw" +
+	"EZye2M+0GH01tXIOxYKFzfVVAAgCiKN92xqj2XKXPGI7Hm5W8lqPGKVG9kwYdsbYQlucLy" +
+	"bWzDoYTbG5vhpgl43I08K9xFNkOx4YY6CUzlJ7xHY81Bt92I63hF02Kk9f5qsvT48KO5/I" +
+	"uAjRtKYpskxFaLBD9lLYfKNKEYmDLyl2WUzY8kFMaUSJEKmkEUPSiEgqxsgjcUWEiXE/vp" +
+	"lvGY6OQvt+HWDJL5ltFWUxXx5vRfYr5TeAWw+iPZKUhjJgSGmPh2afb3fSBgAMcX6pzZtM" +
+	"AADHv8Oxv96FQCWFRwDgxZ8PuLp1DcBPAECv0w3axnuHyhfmt9dwDzsBkbDRK6d4npaH+0" +
+	"+Wgs9FnQYSz3IRhZqKUM4jYnCZSH57TUtG5ZGw+kghKiJcjK60x8MgqHg2NmtmRJ7OTV/i" +
+	"98JZXgAzJyLWU0ojD3nhI1FmG+8dotfp4vOrT+h1ugv1shjxLJLyfX8l6lDuR8K2hkmKyd" +
+	"ZQuzGK8wsv6V8QZ7r8AzgV4fJtzqZQAAAAAElFTkSuQmCC";
 
 //-------------------------- Utilitaires génériques --------------------------//
 
