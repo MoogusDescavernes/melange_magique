@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.0a.0.14
+// @version      2.0a.0.17
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -14,7 +14,6 @@
 // @grant        none
 // ==/UserScript==
 
-// Juste un test du webhook
 
 //---------------------------- Variables Globales ----------------------------//
 
@@ -25,7 +24,7 @@ var numTroll; // définie dans le main avec getNumTroll()
 
 //---------------------------- Bases de données -----------------------------//
 
-var nival = {
+var niveauDuMonstre = {
 	'Abishaii Bleu':19,
 	'Abishaii Noir':10,
 	'Abishaii Rouge':23,
@@ -197,7 +196,7 @@ var nival = {
 	'Zombie':2
 }
 
-var effetQual = {
+var effetParQualite = {
 	'Tres Bonne':20,
 	'Bonne':16,
 	'Moyenne':12,
@@ -282,10 +281,6 @@ var iconeBase64 = "data:image/png;base64," +
 
 //-------------------------- Utilitaires génériques --------------------------//
 
-function trim(str) {
-	return str.replace(/(^\s*)|(\s*$)/g,'');
-}
-
 function epure(texte) {
 	return texte.
 		replace(/[àâä]/g, 'a').replace(/Â/g, 'A').
@@ -367,12 +362,12 @@ function getSetInfo(snap) {
 	var
 		node = snap.childNodes[5],
 		mob = node.firstChild.textContent;
-	mob = trim(mob.slice(mob.indexOf("d'un")+5));
+	mob = mob.slice(mob.indexOf("d'un")+5).trim();
 	var
-		niv = nival[epure(mob)],
+		niv = niveauDuMonstre[epure(mob)],
 		qualite = snap.childNodes[7].textContent;
-	qualite = trim(qualite.slice(qualite.indexOf('Qualit')+9));
-	var effet = effetQual[epure(qualite)];
+	qualite = qualite.slice(qualite.indexOf('Qualit')+9).trim();
+	var effet = effetParQualite[epure(qualite)];
 	if(niv && effet) {
 		// Si compo référencé (mob en base), on affiche & stocke les infos
 		addInfo(node, mob, niv, qualite, effet);
@@ -469,10 +464,10 @@ function mmViewTaniere() {
 			node = tr.getElementsByTagName('td')[2],
 			txt = node.textContent,
 			indQ = txt.indexOf('de Qualit'),
-			mob = trim(txt.slice(txt.indexOf("d'un")+5, indQ-1)),
-			niv = nival[epure(mob)],
-			qualite = trim(txt.slice(indQ+11, txt.indexOf('[')-1)),
-			effet = effetQual[epure(qualite)];
+			mob = txt.slice(txt.indexOf("d'un")+5, indQ-1).trim(),
+			niv = niveauDuMonstre[epure(mob)],
+			qualite = txt.slice(indQ+11, txt.indexOf('[')-1).trim(),
+			effet = effetParQualite[epure(qualite)];
 		if(niv && effet && node.lastChild.textContent.indexOf('MM')==-1) {
 			addInfo(node, mob, niv, qualite, effet);
 		}
@@ -513,11 +508,11 @@ function mmExtracteurMatos() {
 	for(var i=0 ; i<trCompos.snapshotLength ; i++) {
 		var node = trCompos.snapshotItem(i).cells[3];
 		var mob = node.textContent;
-		mob = trim(mob.slice(mob.indexOf("d'un")+5));
-		var niv = nival[epure(mob)];
+		mob = mob.slice(mob.indexOf("d'un")+5).trim();
+		var niv = niveauDuMonstre[epure(mob)];
 		var qualite = trCompos.snapshotItem(i).childNodes[9].textContent;
-		qualite = trim(qualite.slice(qualite.indexOf('Qualit')+9));
-		var effet = effetQual[epure(qualite)];
+		qualite = qualite.slice(qualite.indexOf('Qualit')+9).trim();
+		var effet = effetParQualite[epure(qualite)];
 		if(niv && effet) {
 			addInfo(node, mob, niv, qualite, effet);
 			var num = trCompos.snapshotItem(i).
@@ -532,7 +527,7 @@ function mmExtracteurMatos() {
 	var strPopos = '';
 	for(var i=0 ; i<trPopos.snapshotLength ; i++) {
 		var num = trPopos.snapshotItem(i).childNodes[5].textContent.match(/\d+/);
-		var nom = epure(trim(trPopos.snapshotItem(i).childNodes[7].textContent));
+		var nom = epure(trPopos.snapshotItem(i).childNodes[7].textContent.trim());
 		if(nom.indexOf(' Melangees')!=-1) {
 			// Si popo issue d'un mélange de 2 popos de base de même famille,
 			// on récupère ladite famille pour computer durée+type (GPT/autre)
@@ -541,7 +536,7 @@ function mmExtracteurMatos() {
 		} else {
 			var racine = nom;
 		}
-		var effet = trim(trPopos.snapshotItem(i).childNodes[9].textContent);
+		var effet = trPopos.snapshotItem(i).childNodes[9].textContent.trim();
 		var effets = effet.split(' | ');
 		var duree;
 		// Si popo à effet simple, on l'identifie via lvl = 1er effet
@@ -685,7 +680,7 @@ function initRisqueExplo() {
 			for(var j=0 ; j<effets.length ; j++) {
 				var nb = effets[j].match(/\d+/);
 				if(nb) {
-					var carac = trim(effets[j].split(':')[0]);
+					var carac = effets[j].split(':')[0].trim();
 					if(carac=='RM' || carac=='MM') {
 						// Si MM/RM, on attrape le signe pour faire la somme algébrique
 						// et on divise la carac par 10
