@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.0a.0.9
+// @version      2.0a.0.14
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -23,10 +23,8 @@ window.console.debug("[mmassistant] script ON! sur : "+WHEREARTTHOU);
 
 var numTroll; // définie dans le main avec getNumTroll()
 
-// URL icone Mélange Magique
-var urlImg = 'http://mountyzilla.tilk.info/scripts_1.1/images/Competences/melangeMagique.png';
+//---------------------------- Bases de données -----------------------------//
 
-// BDD
 var nival = {
 	'Abishaii Bleu':19,
 	'Abishaii Noir':10,
@@ -207,6 +205,80 @@ var effetQual = {
 	'Tres Mauvaise':4
 }
 
+//--------------------- Icone Mélange Magique (base64) ----------------------//
+
+var iconeBase64 = "data:image/png;base64," +
+	"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" +
+	"MGvfrH5PQ0+BZ7XnIy9jL5FXrdewt6V3qvdh7xc+9j5yn+M+4zw33jLeWV/MN8C3yLfLT8" +
+	"Nvnl+F30N/I/9k/3r/0QCngCUBZwOJgUGBWwL7+Hp8Ib+OPzrbZfay2e1BjKC5QRVBj4Kt" +
+	"guXBrSFoyOyQrSH355jOkc5pDoVQfujW0Adh5mGLw34MJ4WHhVeGP45wiFga0TGXNXfR3E" +
+	"Nz30T6RJZE3ptnMU85ry1KNSo+qi5qPNo3ujS6P8YuZlnM1VidWElsSxw5LiquNm5svt/8" +
+	"7fOH4p3iC+N7F5gvyF1weaHOwvSFpxapLhIsOpZATIhOOJTwQRAqqBaMJfITdyWOCnnCHc" +
+	"JnIi/RNtGI2ENcKh5O8kgqTXqS7JG8NXkkxTOlLOW5hCepkLxMDUzdmzqeFpp2IG0yPTq9" +
+	"MYOSkZBxQqohTZO2Z+pn5mZ2y6xlhbL+xW6Lty8elQfJa7OQrAVZLQq2QqboVFoo1yoHsm" +
+	"dlV2a/zYnKOZarnivN7cyzytuQN5zvn//tEsIS4ZK2pYZLVy0dWOa9rGo5sjxxedsK4xUF" +
+	"K4ZWBqw8uIq2Km3VT6vtV5eufr0mek1rgV7ByoLBtQFr6wtVCuWFfevc1+1dT1gvWd+1Yf" +
+	"qGnRs+FYmKrhTbF5cVf9go3HjlG4dvyr+Z3JS0qavEuWTPZtJm6ebeLZ5bDpaql+aXDm4N" +
+	"2dq0Dd9WtO319kXbL5fNKNu7g7ZDuaO/PLi8ZafJzs07P1SkVPRU+lQ27tLdtWHX+G7R7h" +
+	"t7vPY07NXbW7z3/T7JvttVAVVN1WbVZftJ+7P3P66Jqun4lvttXa1ObXHtxwPSA/0HIw62" +
+	"17nU1R3SPVRSj9Yr60cOxx++/p3vdy0NNg1VjZzG4iNwRHnk6fcJ3/ceDTradox7rOEH0x" +
+	"92HWcdL2pCmvKaRptTmvtbYlu6T8w+0dbq3nr8R9sfD5w0PFl5SvNUyWna6YLTk2fyz4yd" +
+	"lZ19fi753GDborZ752PO32oPb++6EHTh0kX/i+c7vDvOXPK4dPKy2+UTV7hXmq86X23qdO" +
+	"o8/pPTT8e7nLuarrlca7nuer21e2b36RueN87d9L158Rb/1tWeOT3dvfN6b/fF9/XfFt1+" +
+	"cif9zsu72Xcn7q28T7xf9EDtQdlD3YfVP1v+3Njv3H9qwHeg89HcR/cGhYPP/pH1jw9DBY" +
+	"+Zj8uGDYbrnjg+OTniP3L96fynQ89kzyaeF/6i/suuFxYvfvjV69fO0ZjRoZfyl5O/bXyl" +
+	"/erA6xmv28bCxh6+yXgzMV70VvvtwXfcdx3vo98PT+R8IH8o/2j5sfVT0Kf7kxmTk/8EA5" +
+	"jz/GMzLdsAAAAGYktHRAD/AP8A/6C9p5MAAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElN" +
+	"RQfiAxkJOxdNWSOcAAADmElEQVRYw9WYT0sbQRjGH3dzCyQlNhRjevFQiNiIgmJBC5oGvN" +
+	"gaLx4Kgl6K4CcQ9JCCn8DQetFCT9KDFT3YhsSCFgOWSEIwrYUebIiHxKQbzKlu0sNmJrN/" +
+	"srvRUNqBJYn77rzP/J533kkE/pHR1qqJOI6rGsVUKpWG+SytXNX318/p+/uPx/Ax9JZ+fh" +
+	"r6pPus5W+QUMZqkbG0IokoigCA39/eyP7uedipiuF5/mZEzOLO5Mq4pzNPOCHA32tvzppm" +
+	"cJNViqKIcDYAj0uaMp29BgYDNMbfawfP8w0L1tIq3DzPYy9eQGj3HGP9LkTjWRo31u/SFW" +
+	"FoTbO4/b12eFwWuJ1WAKBi9Cwx7CMcx1VFUUQ4IchxM4PgZumwiyDxRIgeFU6v+ZAkod1z" +
+	"pLPXiMaz9Go0cSZXpqLZWKNhuGvM4K6Jru7FC4jGs6oaCScEjPc7dGvE0BqzuEk8G2N2x5" +
+	"jurJlcGW6nleJWEmFFAKA1RSwKJwSIogie56s3rpFwQkBo9xzhhKDC3WiVxMaWnb5mcJMd" +
+	"Q2gQEWzRmrGIMyOC4D7K2yl2gptNakSCPKPVuTmz6NxOK+a8UsLFAztuakcjMRYzNJRJVk" +
+	"YE2aTkrDE7tIqXMxKxnpREBCPyuKO8XSXmNsNiRGLZJ91b9gGZXD320V2Bsaku5ioTlfpL" +
+	"sQQA6LwqaiY+/QwZFU1r1pNSPQQjoEKUY/HAjpURQdOmnxfjiGULAICNy2HMth/S9wAw23" +
+	"6IIa8DwIy6WFkac96yjAYADKxCs05YYeyQEgFro6eaC3mx363dR4iQnS8XAACb7Y7q4VLp" +
+	"FwCgWCw29HrG3w2e5/HuwyC2OyZRSOUpESWhqSdHtK+orAnGOjDhAVBb8E6aEZL6Kotdne" +
+	"/Cwqsf9LOtpw8z/jqRjf28SsBs+yG1aErZRwgNgp8kX/ZBElUbkZcPaEIAVMTqfFdN6AmN" +
+	"jSULWBs9patnqZg6a44X6smDEUnU1rS0i3xLZ7D19MkSsoKIUADY7phELFmQyFwOUwqEjL" +
+	"J2VEIGVuV2THiAwKaVkiilTigB5atv6Yw+9+ziPYa8DllRDnkddMfEkgV1sSqtOV6oNzBW" +
+	"1NZ0GYFNq4oIa53baTXdadkDUEVka7pMBc15y5jw1K0hIlgLCA1yn01idLGnsExIKXVCk+" +
+	"2kJdTkldy39fTRWmH7h7J2KpVKm9Gl20duO4y+Epr6YtTsL7xm//XwX4w/IwxoRwFwfdsA" +
+	"AAAASUVORK5CYII=";
 
 //-------------------------- Utilitaires génériques --------------------------//
 
@@ -252,12 +324,13 @@ function appendText(paren, text, bold) {
 
 //--------------- Fonctions d'affichage des % de Stabilisation ---------------//
 
-function createMMImage(url) {
+function creerIconeMM() {
 // Prépare l'icône à afficher pour les infos MM
-	var img = document.createElement('img');
-	img.src = url;
-	img.align = 'absmiddle';
-	img.alt = 'MM';
+	var img = new Image();
+	img.src = iconeBase64;
+	img.alt = "Mélange_Magique:";
+	img.style.height = "20px";
+	img.style.verticalAlign = "middle";
 	return img;
 }
 
@@ -265,7 +338,7 @@ function addInfo(node, mob, niv, qualite, effet) {
 // Ajoute un span + titre d'infos de compo à la fin de node
 	appendText(node, ' ');
 	var span = document.createElement('span');
-	span.appendChild(createMMImage(urlImg));
+	span.appendChild(creerIconeMM());
 	appendText(span, ' [-'+(niv+effet)+' %]');
 	var str = '';
 	switch(mob[0]) {
