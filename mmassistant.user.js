@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.0a.3.3
+// @version      2.0a.3.4
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -708,7 +708,7 @@ function mmExtracteurMatos() {
 				} else if(carac=="TOUR") {
 					// Si effet de durée, malus = nb de 1/2 h
 					risque += nb/30;
-				} else if(carac.indexOf("Painture")==0) {
+				} else if(carac.indexOf("Pàïntûré")!=-1) {
 					// Si Painture, malus = niv x 10
 					risque += nb*10;
 				} else {
