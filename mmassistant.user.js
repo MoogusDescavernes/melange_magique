@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.0a.3.4
+// @version      2.0a.3.5
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -680,12 +680,12 @@ function mmExtracteurMatos() {
 		}
 		
 		// Malus GPT
-		switch(racine) {
-			case "Potion de Guerison":
-			case "Potion de Painture":
-			case "Toxine Violente":
-				objPopos[num].GPT = 1;
-			default:
+		if(
+			racine=="Potion de Guerison" ||
+			racine=="Toxine Violente" ||
+			effet.indexOf("Pàïntûré")!=-1
+		) {
+			objPopos[num].GPT = 1;
 		}
 		
 		// Malus de Zone
@@ -942,16 +942,9 @@ function refreshRisqueExplo() {
 	}
 	
 	// Malus mélange hétérogène GPT (Guérison/Painture/Toxine)
-	popoInconnue = popo1.duree==void(0) || popo2.duree==void(0),
+	popoInconnue = popo1.duree==void(0) || popo2.duree==void(0);
 	risqueMax = risque+5;
-	if(
-		popo1.nom.indexOf("Toxine Violente")+
-		popo2.nom.indexOf("Toxine Violente")+
-		popo1.nom.indexOf("Potion de Guerison")+
-		popo2.nom.indexOf("Potion de Guerison")+
-		popo1.nom.indexOf("Potion de Painture")+
-		popo2.nom.indexOf("Potion de Painture")==-5
-	) {
+	if((popo1.GPT?1:0)^(popo2.GPT?1:0)) {
 		risque += 40;
 		risqueMax += 40;
 		details += "\nMalus hétérogène GPT: +40 ("+risque+")";
