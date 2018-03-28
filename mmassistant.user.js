@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.0a.3.5
+// @version      2.0a.3.7
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -201,19 +201,19 @@ var niveauDuMonstre = {
 }
 
 var effetParQualite = {
-	"Tres Bonne":20,
+	"Très Bonne":20,
 	"Bonne":16,
 	"Moyenne":12,
 	"Mauvaise":8,
-	"Tres Mauvaise":4
+	"Très Mauvaise":4
 }
 
 var abbreviationQualite = {
-	"Tres Bonne":"TB",
+	"Très Bonne":"TB",
 	"Bonne":"B",
 	"Moyenne":"Moy.",
 	"Mauvaise":"Mauv.",
-	"Tres Mauvaise":"TM"
+	"Très Mauvaise":"TM"
 }
 
 var dureePotion = {
@@ -586,13 +586,13 @@ function mmExtracteurMatos() {
 		niveau = niveauDuMonstre[epure(mob)];
 		qualite = tableCompos.rows[i].cells[4].textContent;
 		qualite = qualite.slice(qualite.indexOf("Qualit")+9).trim();
-		if(niveau && epure(qualite) in effetParQualite) {
+		if(niveau && qualite in effetParQualite) {
 			num = tableCompos.rows[i].cells[2].textContent.match(/\d+/);
 			objCompos[num] = {
 				mob: mob,
 				niveau: niveau,
 				qualite: qualite,
-				bonus: niveau+effetParQualite[epure(qualite)]
+				bonus: niveau+effetParQualite[qualite]
 			}
 			ajouteInfosDuCompo(insertNode, objCompos[num]);
 		}
