@@ -523,10 +523,9 @@ function risqueExplo(popo1, popo2, compo) {
 	
 	// Bonus de compo
 	if(compo) {
-		risque -= objCompos[selectCompo.value].bonus;
-		risqueMax -= objCompos[selectCompo.value].bonus;
-		details += "\nBonus compo: -"+objCompos[selectCompo.value].bonus+
-			" ("+risque+")";
+		risque -= compo.bonus;
+		risqueMax -= compo.bonus;
+		details += "\nBonus compo: -"+compo.bonus+" ("+risque+")";
 	}
 	
 	return {
