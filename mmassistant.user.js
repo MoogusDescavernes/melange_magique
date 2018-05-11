@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.0a.5.2
+// @version      2.0a.5.30
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -23,24 +23,24 @@
 // 
 // Stockage des données de composants : 
 // localStorage["numTroll.MM_compos"] (object) {
-//   numCompo (string/number): {
+//   numCompo (string): {
 //     mob    : libellé nom du monstre (string),
-//     niveau : niveau du monstre (string/number),
+//     niveau : niveau du monstre (string),
 //     qualite: libellé qualité (string),
-//     bonus  : bonus total (number/string)
+//     bonus  : bonus total (number)
 //   }
 // }
 // 
 // Stockage des données de potions : 
 // localStorage["numTroll.MM_popos"] (object) {
-//   numPopo (string/number): {
+//   numPopo (string): {
 //     nom    : libellé nom de la potion (string),
 //     effet  : libellé effet de la potion (string),
-//    [niveau : "niveau" de la potion - cf. mmExtracteurMatos (string),]
-//    [melange: 1 (number/string) - si la potion est un mélange,]
-//    [GPT    : 1 (number/string) - si la potion est du type GPT,]
-//    [zone   : 1 (number/string) - si la potion est de zone,]
-//     risque : risque lié aux effets de la potion (number/string, flottant)
+//    [niveau : "niveau" de la potion - cf. initMatos (string),]
+//    [melange: 1 (number) - si la potion est un mélange,]
+//    [GPT    : 1 (number) - si la potion est du type GPT,]
+//    [zone   : 1 (number) - si la potion est de zone,]
+//     risque : risque lié aux effets de la potion (number, flottant)
 //   }
 // }
 // 
@@ -49,7 +49,13 @@
 var WHEREARTTHOU = window.location.pathname;
 window.console.debug("[mmassistant] script ON! sur : "+WHEREARTTHOU);
 
-var numTroll; // définie dans le main avec getNumTroll()
+var
+	// Défini dans le main avec getNumTroll():
+	numTroll,
+	
+	// Globales dans tous les cas (mémoires ou extraites):
+	objCompos = {},
+	objPopos = {};
 
 var
 	compos_par_bonus = true,
@@ -391,6 +397,29 @@ function appendText(paren, text, bold) {
 	}
 }
 
+function ajouteBouton(node, value) {
+	var input = document.createElement("input");
+	input.type = "button";
+	input.className = "mh_form_submit";
+	if(value) {
+		input.value = value;
+	}
+	node.appendChild(input);
+	return input;
+}
+
+function ajouteCheckboxMelange(node, num, typeItem) {
+	var input = document.createElement("input");
+	input.type = "checkbox";
+	input.className = "mmassistant_"+typeItem;
+	input.num = num;
+	input.typeItem = typeItem;
+	input.style.display = "none";
+	input.onchange = refreshMelangeur;
+	node.appendChild(input);
+	return input;
+}
+
 function creerIconeMM() {
 // Prépare l'icône à afficher pour les infos MM
 	var img = new Image();
@@ -496,6 +525,8 @@ function risqueExplo(popo1, popo2, compo) {
 		risqueMax += 40;
 		details += "\nMalus hétérogène GPT: +40 ??";
 	}
+	
+	window.console.debug(popo1, popo2, popoInconnue);
 	
 	// Malus durée
 	if(!popoInconnue) {
@@ -662,11 +693,11 @@ function mmViewTaniere() {
 
 //-------------------- Traitement de la page d'équipement --------------------//
 
-function mmExtracteurMatos() {
+function initMatos() {
 	var
 		// Si pas de compos / popos, on mime une table vide
 		tablePopos = tableCompos = {rows:{length:0}},
-		tr;
+		titrePopos, tr;
 	try {
 		// Recherche d'éventuels compos
 		tr = document.getElementById("mh_objet_hidden_"+numTroll+"Composant");
@@ -680,18 +711,28 @@ function mmExtracteurMatos() {
 		tr = document.getElementById("mh_objet_hidden_"+numTroll+"Potion");
 		if(tr) {
 			tablePopos = tr.getElementsByTagName("table")[0];
+			
+			// Récupération de la ligne de titre des popos
+			// titrePopos.cells:
+			// 0: [+] / [-]
+			// 1: "Potion"
+			// 2: nb popos
+			// 3: poids total
+			titrePopos = document.evaluate(
+				"./preceding-sibling::tr[1]//table//tr[1]",
+				tr, null, 9, null
+			).singleNodeValue;
 		} else {
 			window.console.warn("[mmassistant] Aucune potion trouvée");
 		}
 	} catch(e) {
 		window.console.error(
-			"[mmassistant] Impossible d'analyser l'équipement", e
+			"[mmassistant] Erreur durant l'analyse de l'équipement", e
 		);
 		return;
 	}
-	window.console.debug("[mmassistant] Extracteur ON!");
+	window.console.debug("[mmassistant] Lancement initMatos");
 	var
-		objCompos = {}, objPopos = {},
 		i, j, insertNode, mob, niveau, qualite, effet,
 		nom, num, effets, racine, risque, magie, nb, carac;
 	
@@ -712,8 +753,8 @@ function mmExtracteurMatos() {
 		niveau = niveauDuMonstre[epure(mob)];
 		qualite = tableCompos.rows[i].cells[4].textContent;
 		qualite = qualite.slice(qualite.indexOf("Qualit")+9).trim();
+		num = String(tableCompos.rows[i].cells[2].textContent.match(/\d+/));
 		if(niveau && qualite in effetParQualite) {
-			num = tableCompos.rows[i].cells[2].textContent.match(/\d+/);
 			objCompos[num] = {
 				mob: mob,
 				niveau: niveau,
@@ -722,6 +763,9 @@ function mmExtracteurMatos() {
 			}
 			ajouteInfosDuCompo(insertNode, objCompos[num]);
 		}
+		
+		// Ajout de la checkbox de mélange
+		ajouteCheckboxMelange(tableCompos.rows[i].cells[0], num, "compo");
 	}
 	window.console.debug(objCompos);
 	window.localStorage.setObject(numTroll+".MM_compos", objCompos);
@@ -739,20 +783,23 @@ function mmExtracteurMatos() {
 	for(i=0 ; i<tablePopos.rows.length ; i++) {
 		insertNode = tablePopos.rows[i].cells[3];
 		nom = epure(insertNode.textContent.trim());
-		if(nom=="Potion") {
-		// Si popo non identifiée, on passe
-			continue;
-		}
-		num = tablePopos.rows[i].cells[2].textContent.match(/\d+/);
+		num = String(tablePopos.rows[i].cells[2].textContent.match(/\d+/));
+		
+		// Ajout de la checkbox de mélange
+		ajouteCheckboxMelange(tablePopos.rows[i].cells[0], num, "popo");
+		
+		// Si popo non identifiée, pas de traitement
+		if(nom=="Potion") { continue; }
+		
+		// Sinon début du stockage
 		effet = tablePopos.rows[i].cells[4].textContent.trim();
 		effets = effet.split(" | ");
-		
 		objPopos[num] = {
 			nom: nom,
 			effet: effet
 		};
 		
-		// Durée & Malus Mélange
+		// Malus Mélange (& extraction racine)
 		if(nom.indexOf(" Melangees")!=-1) {
 		// Si popo issue d'un mélange de 2 popos de base de même famille,
 		// on récupère ladite famille pour computer durée+type (GPT/autre)
@@ -762,6 +809,8 @@ function mmExtracteurMatos() {
 		} else {
 			racine = nom;
 		}
+		
+		// Durée (extrapolée à partir de la racine)
 		if(racine in dureePotion) {
 		// Si popo d'une famille connue:
 			// Ajout de la durée
@@ -769,7 +818,6 @@ function mmExtracteurMatos() {
 		
 			// Attribution d'un "niveau" (pour affichage)
 			// Par défaut, niveau = valeur du 1er effet
-			// typeof niveau = ["number"] casté en number par le calcul
 			niveau = effet.match(/\d+/);
 			// Cas particuliers:
 			switch(racine) {
@@ -801,7 +849,7 @@ function mmExtracteurMatos() {
 					}
 			}
 			if(niveau) {
-				// Force le cast du array[number] en string:
+				// Force le cast du array["number"] en string:
 				objPopos[num].niveau = String(niveau);
 			}
 		}
@@ -853,8 +901,135 @@ function mmExtracteurMatos() {
 	}
 	window.console.debug(objPopos);
 	window.localStorage.setObject(numTroll+".MM_popos", objPopos);
+	
+	// Ajout du bouton de Mélange
+	if(!tr) { return; }
+	titrePopos.cells[1].style.width = "100px";
+	td = titrePopos.insertCell(2);
+	td.id = "mmassistant_tdmelange";
+	btn = ajouteBouton(td, "Mélanger...");
+	btn.id = "mmassistant_btnmelange";
+	btn.onclick = activeMelangeur;
+	
+	window.console.log("[mmassistant] initMatos réussi");
 }
 
+function activeMelangeur() {
+	var
+		checkboxsCompo = document.querySelectorAll(".mmassistant_compo"),
+		checkboxsPopo = document.querySelectorAll(".mmassistant_popo"),
+		tr = document.getElementById("mh_objet_hidden_"+numTroll+"Potion"),
+		plus = document.getElementById("mh_plus_"+numTroll+"Potion"),
+		btn = document.getElementById("mmassistant_btnmelange"),
+		td = document.getElementById("mmassistant_tdmelange"),
+		i, span;
+	if(tr.style.display = "none") {
+		plus.click();
+	}
+	for(i=0 ; i<checkboxsCompo.length ; i++) {
+		checkboxsCompo[i].style.display = "";
+	}
+	for(i=0 ; i<checkboxsPopo.length ; i++) {
+		checkboxsPopo[i].style.display = "";
+	}
+	btn.value = "Mélanger!!";
+	btn.onclick = lanceMelange;
+	
+	appendText(td, " Risque: ", true);
+	span = document.createElement("span");
+	span.id = "mmassistant_risque";
+	span.innerHTML = "Choisir 2 potions"
+	td.appendChild(span);
+}
+
+function refreshMelangeur() {
+	var 
+		checkboxsCompo = document.querySelectorAll(".mmassistant_compo"),
+		checkboxsPopo = document.querySelectorAll(".mmassistant_popo"),
+		td = document.getElementById("mmassistant_tdmelange"),
+		span = document.getElementById("mmassistant_risque"),
+		num = this.num,
+		typeItem = this.typeItem,
+		chercheMemoire = false,
+		erreur = "",
+		popos = [],
+		compo, risque, i;
+	
+	window.console.debug(this);
+	
+	// Parsage des Compos
+	for(i=0 ; i<checkboxsCompo.length ; i++) {
+		if(checkboxsCompo[i].checked) {
+			if(typeItem=="popo" || checkboxsCompo[i].num==num) {
+				// Sélection du compo actif
+				if(checkboxsCompo[i].num in objCompos) {
+					compo = objCompos[checkboxsCompo[i].num];
+				} else {
+					erreur = "Composant inconnu";
+				}
+			} else {
+				// Nettoyage ancien compo
+				checkboxsCompo[i].checked = false;
+			}
+		}
+	}
+	
+	// Parsage des Popos
+	if(typeItem=="popo" && (!numMemoire || num==numMemoire)) {
+		// Si on déselectionne le compo en mémoire
+		chercheMemoire = true;
+		numMemoire = "";
+	}
+	
+	for(i=0 ; i<checkboxsPopo.length ; i++) {
+		if(checkboxsPopo[i].checked) {
+			if(chercheMemoire) {
+				numMemoire = checkboxsPopo[i].num;
+				chercheMemoire = false;
+			}
+			if(
+				typeItem=="popo" &&
+				checkboxsPopo[i].num!=num &&
+				checkboxsPopo[i].num!=numMemoire
+			) {
+				checkboxsPopo[i].checked = false;
+			} else {
+				if(checkboxsPopo[i].num in objPopos) {
+					popos.push(objPopos[checkboxsPopo[i].num]);
+				} else {
+					erreur += (erreur ? "\n" : "") + "Potion inconnue";
+				}
+			}
+		}
+	}
+	if(popos.length<2) {
+		erreur += (erreur ? "\n" : "") + "Nécessite 2 potions";
+	}
+	
+	window.console.log(numMemoire, popos, compo)
+	
+	if(erreur) {
+		td.title = erreur;
+		span.innerHTML = /2/.test(erreur) ? "Choisir 2 potions" : "inconnu";
+		return;
+	}
+	
+	risque = risqueExplo(popos[0], popos[1], compo);
+	td.title = risque.details;
+	if(risque.max<16) {
+		span.innerHTML = "15 %";
+	} else if(risque.min==risque.max) {
+		span.innerHTML = risque.min+" %";
+	} else {
+		span.innerHTML = "de "+risque.min+" à "+risque.max+" %";
+	}
+}
+
+function lanceMelange() {
+	top.frames["Main"].frames["Action"].location.assign(
+		"Play_action.php?ai_ToDo=125&as_Action=ACTION!"
+	);
+}
 
 //--------- Traitement des pages Mélange Magique / Lancer de Potion ----------//
 
@@ -1018,9 +1193,9 @@ function enrichitListePopos(select) {
 	}
 }
 
-function initRisqueExplo() {
+function initCompetenceMelange() {
 // Mise en place du calculateur de risque
-	window.console.debug("[mmassistant] lancement initRisqueExplo");
+	window.console.debug("[mmassistant] lancement initCompetenceMelange");
 	
 	// On vire le message "Vous pouvez ajouter un composant stabilisateur:"
 	var
@@ -1034,16 +1209,12 @@ function initRisqueExplo() {
 	
 	// Insertion des infos dans les menus déroulants
 	enrichitListeCompos();
-	// window.console.debug("[mmassistant] addInfosCompos réussi");
 	enrichitListePopos(selectPopo1);
-	// window.console.debug("[mmassistant] addInfosPopos 1 réussi");
 	enrichitListePopos(selectPopo2);
-	// window.console.debug("[mmassistant] addInfosPopos 2 réussi");
 	
 	// Initialisation affichage Risques
 	var divAction = document.getElementsByClassName("titre4")[1];
-	// On vire le message "[Portée : sur la zone uniquement]";
-	//divAction.textContent = divAction.textContent.replace("[Portée :  sur la zone uniquement]","");
+	// On vire le message "[Portée : sur la zone uniquement]":
 	divAction.innerHTML = "[3 PA] "
 	afficheRisque.innerHTML = "[Risque d'explosion : (nécessite 2 potions)]";
 	divAction.appendChild(afficheRisque);
@@ -1051,7 +1222,7 @@ function initRisqueExplo() {
 	selectPopo2.onchange = refreshRisqueExplo;
 	selectCompo.onchange = refreshRisqueExplo;
 	
-	window.console.debug("[mmassistant] initRisqueExplo réussi");
+	window.console.debug("[mmassistant] initCompetenceMelange réussie");
 }
 
 function refreshRisqueExplo() {
@@ -1136,12 +1307,15 @@ function isPage(url) {
 	mmViewTaniere();
 } else if(isPage("MH_Play/Play_equipement")) {*/
 if(isPage("MH_Play/Play_equipement")) {
+// Page d'équipement
 	getNumTroll();
-	mmExtracteurMatos();
+	initMatos();
 /*} else if(isPage("MH_Play/Actions/Play_a_ActionYY")) {
+// Utiliser une popo / parcho
 */	
 } else if(isPage("MH_Play/Actions/Competences/Play_a_CompetenceYY")) {
 	if(lancer_de_potions && document.body.id=="p_competencelancerdepotions") {
+	// Lancer de Potion	
 		window.console.log("[mmassistant] Compétence : Lancer de potion");
 		getNumTroll();
 		try {
@@ -1160,17 +1334,16 @@ if(isPage("MH_Play/Play_equipement")) {
 		window.console.warn("[mmassistant] Compétence non reconnue - OFF");
 		return;
 	}
+	// Mélange Magique
 	getNumTroll();
-
-// DEBUG: on déclenche même si rien en mémoire
-//	&& window.localStorage[numTroll+".MM_popos"]) {
 	try {
 		var
 			selectPopo1 = document.getElementById("potion1"),
 			selectPopo2 = document.getElementById("potion2"),
 			selectCompo = document.getElementById("cible"),
-			objCompos = window.localStorage.getObject(numTroll+".MM_compos"),
-			objPopos = window.localStorage.getObject(numTroll+".MM_popos");
+			numMemoire, afficheRisque;
+		objCompos = window.localStorage.getObject(numTroll+".MM_compos");
+		objPopos = window.localStorage.getObject(numTroll+".MM_popos");
 	} catch(e) {
 		window.console.error(
 			"[mmassistant] Erreur durant l'initialisation du calculateur", e
@@ -1178,8 +1351,8 @@ if(isPage("MH_Play/Play_equipement")) {
 		return;
 	}
 	window.console.log("[mmassistant] Compétence : Mélange Magique");
-	var afficheRisque = document.createElement("span");
-	initRisqueExplo();
+	afficheRisque = document.createElement("span");
+	initCompetenceMelange();
 }
 
 window.console.debug("[mmassistant] Script OFF sur : "+WHEREARTTHOU);
