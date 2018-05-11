@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.0a.4.6
+// @version      2.0a.5.0
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -391,8 +391,6 @@ function appendText(paren, text, bold) {
 	}
 }
 
-//--------------- Fonctions d'affichage des % de Stabilisation ---------------//
-
 function creerIconeMM() {
 // Prépare l'icône à afficher pour les infos MM
 	var img = new Image();
@@ -429,6 +427,7 @@ function ajouteInfosDuCompo(node, compo) {
 }
 
 function ajouteInfosDeLaPopo(node, popo) {
+// Ajoute une img avec titre d'infos de popo à la fin de node
 	var	
 		img = creerIconeMM(),
 		titre = "Caracs: +"+popo.risque;
@@ -452,9 +451,93 @@ function ajouteInfosDeLaPopo(node, popo) {
 	node.appendChild(img);
 }
 
-/*
- * Désactivé, en attente de refonte
- */
+//------------------- Calculateur de risque (standardisé) --------------------//
+
+function risqueExplo(popo1, popo2, compo) {
+// Calcul les risques min & max d'explosion et génère le texte explicatif
+// pour un Mélange à partir des 2 ou 3 ingrédients fournis.
+	// Risque de base
+	var
+		risque = 33,
+		details = "Risque de base: +33",
+		risqueMax, popoInconnue, sup;
+	
+	// Malus de caracs
+	risque += popo1.risque;
+	details += "\nEffet popo 1: +"+popo1.risque+" ("+risque+")";
+	risque += popo2.risque;
+	details += "\nEffet popo 2: +"+popo2.risque+" ("+risque+")";
+	risque = Math.round(risque);
+	
+	// Malus de popo mélangée & Bonus popos de base identiques
+	if(popo1.melange || popo2.melange) {
+		risque += 15;
+		details += "\nMalus mélange: +15 ("+risque+")";
+	} else if(popo1.nom==popo2.nom) {
+		risque -= 15;
+		details += "\nBonus popo id.: -15 ("+risque+")";
+	}
+	
+	// Malus de Zone
+	if(popo1.zone || popo2.zone) {
+		risque += 40;
+		details += "\nMalus zone: +40 ("+risque+")";
+	}
+	
+	// Malus mélange hétérogène GPT (Guérison/Painture/Toxine)
+	popoInconnue = popo1.duree==void(0) || popo2.duree==void(0);
+	risqueMax = risque+5;
+	if((popo1.GPT?1:0)^(popo2.GPT?1:0)) { // ^ = XOR binaire
+		risque += 40;
+		risqueMax += 40;
+		details += "\nMalus hétérogène GPT: +40 ("+risque+")";
+	} else if(popoInconnue) {
+		// En cas de popo inconnue, on envisage le pire
+		risqueMax += 40;
+		details += "\nMalus hétérogène GPT: +40 ??";
+	}
+	
+	// Malus durée
+	if(!popoInconnue) {
+		// Si les deux popos sont connues RAS
+		sup = Math.max(popo1.duree, popo2.duree);
+		risque += sup;
+		risqueMax = risque;
+		details += "\nMalus de durée: +"+sup+" ("+risque+")";
+	} else if(popo1.duree) {
+		// Sinon on fait au mieux
+		risque += popo1.duree;
+		if(popo1.duree==5) {
+			details += "\nMalus de durée: +5 ("+risque+")";
+		} else {
+			details += "\nMalus de durée: de +"+popo1.duree+" à +5";
+		}
+	} else {
+		risque += popo2.duree;
+		if(popo2.duree==5) {
+			details += "\nMalus de durée: +5 ("+risque+")";
+		} else {
+			details += "\nMalus de durée: de +"+popo2.duree+" à +5";
+		}
+	}
+	
+	// Bonus de compo
+	if(compo) {
+		risque -= objCompos[selectCompo.value].bonus;
+		risqueMax -= objCompos[selectCompo.value].bonus;
+		details += "\nBonus compo: -"+objCompos[selectCompo.value].bonus+
+			" ("+risque+")";
+	}
+	
+	return {
+		min: Math.max(15, risque),
+		max: Math.max(15, risqueMax),
+		details: details
+	}
+}
+
+//--------------------- Désactivé, en attente de refonte ---------------------//
+
 /*function getSetInfo(snap) {
 // Extrait et affiche les infos MM d'un compo *dans un tr standard*
 	if(isNaN(snap.childNodes[1].getElementsByTagName("img")[0].alt[0])) {
@@ -577,6 +660,8 @@ function mmViewTaniere() {
 		tr = tr.nextSibling.nextSibling;
 	}
 }*/
+
+//-------------------- Traitement de la page d'équipement --------------------//
 
 function mmExtracteurMatos() {
 	var
@@ -731,11 +816,6 @@ function mmExtracteurMatos() {
 			objPopos[num].GPT = 1;
 		}
 		
-		// Malus de Zone
-		if(effet.indexOf("Zone")!=-1) {
-			objPopos[num].zone = 1;
-		}
-		
 		// Calcul du risque associé aux effets de la popo
 		risque=0;
 		magie=0;
@@ -757,12 +837,15 @@ function mmExtracteurMatos() {
 				} else {
 					risque += Number(nb);
 				}
+			} else if(/Zone/.test(effets[j])) {
+				// Malus de Zone
+				objPopos[num].zone = 1;
 			} else {
 				window.console.warn("[mmassistant] Effet inconnu:", effets[j]);
 			}
 		}
 		if(magie) {
-		// Si MM/RM, on vire le signe final de la somme algébrique
+			// Si MM/RM, on vire le signe final de la somme algébrique
 			risque += Math.abs(magie);
 		}
 		objPopos[num].risque = Math.round(10*risque)/10;
@@ -774,7 +857,7 @@ function mmExtracteurMatos() {
 }
 
 
-// ------------------- Initialisation Compétence Mélange -------------------- //
+//--------- Traitement des pages Mélange Magique / Lancer de Potion ----------//
 
 function enrichitListeCompos() {
 // Ajoute les infos de compos au menu déroulant lors d'un mélange
@@ -966,98 +1049,29 @@ function initRisqueExplo() {
 	window.console.debug("[mmassistant] initRisqueExplo réussi");
 }
 
-
-//-------------------------- EventListener Mélange ---------------------------//
-
 function refreshRisqueExplo() {
-// Met à jour le risque d"explosion en fonction des popos/compos sélectionnés
+// Met à jour le risque d'explosion en fonction des popos/compos sélectionnés
+	var popo1, popo2, compo, risque;
 	
 	// On vérifie si on a bien 2 popos connues sélectionnées
 	afficheRisque.title = "";
 	if(selectPopo1.value=="" || selectPopo2.value=="") {
-		afficheRisque.innerHTML = "[Risque d'explosion : (nécessite 2 potions)]";
+		afficheRisque.innerHTML =
+			"[Risque d'explosion : (nécessite 2 potions)]";
 		return;
 	}
-	var
-		popo1 = objPopos[selectPopo1.value],
-		popo2 = objPopos[selectPopo2.value];
+	
+	popo1 = objPopos[selectPopo1.value];
+	popo2 = objPopos[selectPopo2.value];
 	if(popo1==void(0) || popo2==void(0)) {
-		afficheRisque.innerHTML = "[Potion inconnue : ouvrez l'onglet Équipement]";
+		afficheRisque.innerHTML =
+			"[Potion inconnue : ouvrez l'onglet Équipement]";
 		return;
 	}
 	
-	// Risque de base
-	var
-		risque = 33,
-		details = "Risque de base: +33",
-		risqueMax, popoInconnue, sup;
-	
-	// Malus de caracs
-	risque += popo1.risque;
-	details += "\nEffet popo 1: +"+popo1.risque+" ("+risque+")";
-	risque += popo2.risque;
-	details += "\nEffet popo 2: +"+popo2.risque+" ("+risque+")";
-	risque = Math.round(risque);
-	
-	// Malus de popo mélangée & Bonus popos de base identiques
-	if(popo1.melange || popo2.melange) {
-		risque += 15;
-		details += "\nMalus mélange: +15 ("+risque+")";
-	} else if(popo1.nom==popo2.nom) {
-		risque -= 15;
-		details += "\nBonus popo id.: -15 ("+risque+")";
-	}
-	
-	// Malus de Zone
-	if(popo1.zone || popo2.zone) {
-		risque += 40;
-		details += "\nMalus zone: +40 ("+risque+")";
-	}
-	
-	// Malus mélange hétérogène GPT (Guérison/Painture/Toxine)
-	popoInconnue = popo1.duree==void(0) || popo2.duree==void(0);
-	risqueMax = risque+5;
-	if((popo1.GPT?1:0)^(popo2.GPT?1:0)) { // ^ = XOR binaire
-		risque += 40;
-		risqueMax += 40;
-		details += "\nMalus hétérogène GPT: +40 ("+risque+")";
-	} else if(popoInconnue) {
-		// En cas de popo inconnue, on envisage le pire
-		risqueMax += 40;
-		details += "\nMalus hétérogène GPT: +40 ??";
-	}
-	
-	// Malus durée
-	if(!popoInconnue) {
-		// Si les deux popos sont connues RAS
-		var sup = Math.max(popo1.duree, popo2.duree);
-		risque += sup;
-		risqueMax = risque;
-		details += "\nMalus de durée: +"+sup+" ("+risque+")";
-	} else if(popo1.duree!="NA") {
-		// Sinon on fait au mieux
-		risque += popo1.duree;
-		if(popo1.duree==5) {
-			details += "\nMalus de durée: +5 ("+risque+")";
-		} else {
-			details += "\nMalus de durée: de +"+popo1.duree+" à +5";
-		}
-	} else {
-		risque += popo2.duree;
-		if(popo2.duree==5) {
-			details += "\nMalus de durée: +5 ("+risque+")";
-		} else {
-			details += "\nMalus de durée: de +"+popo2.duree+" à +5";
-		}
-	}
-	
-	// Bonus de compo
-	if(selectCompo.value!=0) {
+	if(selectCompo.value && selectCompo.value!=0) {
 		if(objCompos[selectCompo.value]) {
-			risque -= objCompos[selectCompo.value].bonus;
-			risqueMax -= objCompos[selectCompo.value].bonus;
-			details += "\nBonus compo: -"+objCompos[selectCompo.value].bonus+
-				" ("+risque+")";
+			compo = objCompos[selectCompo.value];
 		} else {
 			afficheRisque.innerHTML =
 				"[Composant inconnu : ouvrez l'onglet Équipement]";
@@ -1065,19 +1079,18 @@ function refreshRisqueExplo() {
 		}
 	}
 	
+	risque = risqueExplo(popo1, popo2, compo);
+	
 	// Affichage
-	if(risqueMax<16) {
-		afficheRisque.innerHTML =
-			"[Risque d'explosion : 15 %]";
-	} else if(risque==risqueMax) {
-		afficheRisque.innerHTML =	
-			"[Risque d'explosion : "+risque+" %]";
+	if(risque.max<16) {
+		afficheRisque.innerHTML = "[Risque d'explosion : 15 %]";
+	} else if(risque.min==risque.max) {
+		afficheRisque.innerHTML = "[Risque d'explosion : "+risque.min+" %]";
 	} else {
 		afficheRisque.innerHTML =
-			"[Risque d'explosion : de "+Math.max(15, risque)+
-			" à "+risqueMax+" %]";
+			"[Risque d'explosion : de "+risque.min+" à "+risque.max+" %]";
 	}
-	afficheRisque.title = details;
+	afficheRisque.title = risque.details;
 	
 	window.console.debug("[mmassistant] refreshRisqueExplo réussi");
 }
