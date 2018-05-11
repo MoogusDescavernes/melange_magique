@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.0a.3.7
+// @version      2.0a.3.10
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -15,6 +15,35 @@
 // ==/UserScript==
 
 
+//---------------------- À l'intention des programmeurs ----------------------//
+// 
+// À propos des types de variables :
+// Lors d'une conversion en JSON, suivant le navigateur, les types string/number
+// peuvent être permutés (y compris pour les keys). À manier avec précaution.
+// 
+// Stockage des données de composants : 
+// localStorage["numTroll.MM_compos"] (object) {
+//   numCompo (string/number): {
+//     mob    : libellé nom du monstre (string),
+//     niveau : niveau du monstre (string/number),
+//     qualite: libellé qualité (string),
+//     bonus  : bonus total (number/string)
+//   }
+// }
+// 
+// Stockage des données de potions : 
+// localStorage["numTroll.MM_popos"] (object) {
+//   numPopo (string/number): {
+//     nom    : libellé nom de la potion (string),
+//     effet  : libellé effet de la potion (string),
+//    [niveau : "niveau" de la potion - cf. mmExtracteurMatos (string),]
+//    [melange: 1 (number/string) - si la potion est un mélange,]
+//    [GPT    : 1 (number/string) - si la potion est du type GPT,]
+//    [zone   : 1 (number/string) - si la potion est de zone,]
+//     risque : risque lié aux effets de la potion (number/string, flottant)
+//   }
+// }
+// 
 //---------------------------- Variables Globales ----------------------------//
 
 var WHEREARTTHOU = window.location.pathname;
@@ -313,6 +342,17 @@ var iconeBase64 = "data:image/png;base64," +
 
 //-------------------------- Utilitaires génériques --------------------------//
 
+// Gestion des objets pour Storage
+// https://stackoverflow.com/questions/2010892/storing-objects-in-html5-localstorage#answer-3146971
+Storage.prototype.setObject = function(key, value) {
+	this.setItem(key, JSON.stringify(value));
+}
+
+Storage.prototype.getObject = function(key) {
+	var value = this.getItem(key);
+	return value && JSON.parse(value);
+}
+
 function epure(texte) {
 	return texte.
 		replace(/[àâä]/g,"a").replace(/Â/g,"A").
@@ -598,7 +638,7 @@ function mmExtracteurMatos() {
 		}
 	}
 	window.console.debug(objCompos);
-	window.localStorage[numTroll+".MM_compos"] = JSON.stringify(objCompos);
+	window.localStorage.setObject(numTroll+".MM_compos", objCompos);
 	
 	// Récupération & Stockage des données des Potions
 	// trPopos.cells:
@@ -642,7 +682,8 @@ function mmExtracteurMatos() {
 			objPopos[num].duree = dureePotion[racine];
 		
 			// Attribution d'un "niveau" (pour affichage)
-			// Pae défaut, niveau = valeur du 1er effet
+			// Par défaut, niveau = valeur du 1er effet
+			// typeof niveau = ["number"] casté en number par le calcul
 			niveau = effet.match(/\d+/);
 			// Cas particuliers:
 			switch(racine) {
@@ -661,6 +702,7 @@ function mmExtracteurMatos() {
 					break;
 				case "PufPuff":
 					// niveau = malus Vue
+					// Si malus PV, on ajoute "Tox."
 					niveau = effets.length>4 ?
 						"3 Tox." : effets[effets.length-2].match(/\d+/);
 					break;
@@ -671,10 +713,9 @@ function mmExtracteurMatos() {
 							effets[6].match(/\d+/)+"/"+
 							effets[7].match(/\d+/)+")";
 					}
-				default:
 			}
-			niveau = String(niveau);
-			if(niveau && racine in dureePotion) {
+			if(niveau) {
+				// Force le cast du array[number] en string:
 				objPopos[num].niveau = String(niveau);
 			}
 		}
@@ -701,8 +742,8 @@ function mmExtracteurMatos() {
 			if(nb) {
 				carac = effets[j].split(":")[0].trim();
 				if(carac=="RM" || carac=="MM") {
-				// Si MM/RM, on attrape le signe pour faire la somme algébrique
-				// et on divise la carac par 10
+					// Si MM/RM, on attrape le signe pour faire la somme
+					// algébrique et on divise la carac par 10
 					nb = effets[j].match(/-?\d+/);
 					magie = magie ? magie+nb/10 : nb/10;
 				} else if(carac=="TOUR") {
@@ -727,7 +768,7 @@ function mmExtracteurMatos() {
 		ajouteInfosDeLaPopo(insertNode, objPopos[num]);
 	}
 	window.console.debug(objPopos);
-	window.localStorage[numTroll+".MM_popos"] = JSON.stringify(objPopos);
+	window.localStorage.setObject(numTroll+".MM_popos", objPopos);
 }
 
 
@@ -735,12 +776,8 @@ function mmExtracteurMatos() {
 
 function enrichitListeCompos() {
 // Ajoute les infos de compos au menu déroulant lors d'un mélange
-	if(!window.localStorage[numTroll+".MM_compos"]) {
-		return;
-	}
-	var
-		objCompos = JSON.parse(window.localStorage[numTroll+".MM_compos"]),
-		i, option, compo;
+	if(!objCompos) { return; }
+	var i, option, compo;
 	
 	selectCompo.style.maxWidth = "300px";
 	
@@ -780,11 +817,14 @@ function enrichitListeCompos() {
 		numCompos.sort(function(a, b) {
 			if(objCompos[a].bonus==objCompos[b].bonus) {
 				if(objCompos[a].mob==objCompos[b].mob) {
-					return a>b;
+					// Tri 3: Par numéro de compo (numérique) croissant
+					return Number(a)>Number(b);
 				}
+				// Tri 2: Par Nom de monstre (alpha) croissant
 				return objCompos[a].mob>objCompos[b].mob;
 			}
-			return objCompos[a].bonus>objCompos[b].bonus;
+			// Tri 1: Par bonus (numérique) croissant
+			return Number(objCompos[a].bonus)>Number(objCompos[b].bonus);
 		});
 		
 		for(i=0 ; i<numCompos.length ; i++) {
@@ -794,13 +834,9 @@ function enrichitListeCompos() {
 }
 
 function enrichitListePopos(select) {
-// Ajoute les infos de popo aux 2 menus déroulants lors d'un mélange
-	if(!window.localStorage[numTroll+".MM_popos"]) {
-		return;
-	}	
-	var
-		objPopos = JSON.parse(window.localStorage[numTroll+".MM_popos"]),
-		i, option, popo;
+// Ajoute les infos de popo à un menu déroulant lors d'un MM / LdP
+	if(!objPopos) { return; }
+	var i, option, popo;
 	
 	for(i=1 ; i<select.options.length ; i++) {
 		option = select.options[i];
@@ -845,10 +881,36 @@ function enrichitListePopos(select) {
 		numPopos.sort(function(a, b) {
 			if(objPopos[a].nom==objPopos[b].nom) {
 				if(objPopos[a].niveau==objPopos[b].niveau) {
-					return a>b;
+					// Tri 3: Par numéro de popo (numérique) croissant
+					return Number(a)>Number(b);
 				}
-				return objPopos[a].niveau>objPopos[b].niveau;
+				// Tri 2: Par niveau (mixte) croissant
+				if(isNaN(objPopos[a].niveau)) {
+					if(isNaN(objPopos[b].niveau)) {
+						// Si on est dans un cas alpha pur : DP/SK/Corruption
+						// on range dans l'ordre lexicographique (numérique)
+						var
+							da = objPopos[a].niveau.match(/\d+/g),
+							db = objPopos[a].niveau.match(/\d+/g);
+						for(var i=0 ; i<da.length ; i++) {
+							if(!db[i]) {
+								// N'est pas censé se produire
+								return true;
+							}
+							if(da[i]!=db[i]) {
+								return Number(da[i])>Number(db[i]);
+							}
+						}
+						// N'est pas censé se produire.
+						// Dans le doute, ne rien faire.
+						return false;
+					}
+					// Si a = PufPuff Tox et b = PufPuff num, inversion
+					return true;
+				}
+				return Number(objPopos[a].niveau)>Number(objPopos[b].niveau);
 			}
+			// Tri 1: Par nom de potion (alpha) croissant
 			return objPopos[a].nom>objPopos[b].nom;
 		});
 		
@@ -1061,8 +1123,8 @@ if(isPage("MH_Play/Play_equipement")) {
 			selectPopo1 = document.getElementById("potion1"),
 			selectPopo2 = document.getElementById("potion2"),
 			selectCompo = document.getElementById("cible"),
-			objCompos = JSON.parse(window.localStorage[numTroll+".MM_compos"]),
-			objPopos = JSON.parse(window.localStorage[numTroll+".MM_popos"]);
+			objCompos = window.localStorage.getObject(numTroll+".MM_compos"),
+			objPopos = window.localStorage.getObject(numTroll+".MM_popos");
 	} catch(e) {
 		window.console.error(
 			"[mmassistant] Erreur durant l'initialisation du calculateur", e
@@ -1075,4 +1137,3 @@ if(isPage("MH_Play/Play_equipement")) {
 }
 
 window.console.debug("[mmassistant] Script OFF sur : "+WHEREARTTHOU);
-
