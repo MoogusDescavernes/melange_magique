@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.0a.3.10
+// @version      2.0a.3.13
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -88,7 +88,7 @@ var niveauDuMonstre = {
 	"Champi-Glouton":3,
 	"Chauve-Souris Geante":4,
 	"Cheval a Dents de Sabre":23,
-	"Chevalier du Chaos":20,
+	"Chevalier du Chaos":22,
 	"Chimere":13,
 	"Chonchon":24,
 	"Coccicruelle":22,
@@ -370,7 +370,7 @@ function getNumTroll() {
 	var
 		liens = top.frames["Sommaire"].document.getElementsByTagName("a"),
 		str;
-	if(liens.length>0 && liens[0].onclick!==undefined) {
+	if(liens.length>0 && liens[0].onclick!==void(0)) {
 		str = liens[0].onclick.toString();
 		numTroll = parseInt(/\d+/.exec(str)[0]);
 		window.console.debug("[mmassistant] numTroll = "+numTroll);
@@ -970,7 +970,7 @@ function refreshRisqueExplo() {
 	var
 		popo1 = objPopos[selectPopo1.value],
 		popo2 = objPopos[selectPopo2.value];
-	if(popo1==undefined || popo2==undefined) {
+	if(popo1==void(0) || popo2==void(0)) {
 		afficheRisque.innerHTML = "[Potion inconnue : ouvrez l'onglet Équipement]";
 		return;
 	}
@@ -1006,7 +1006,7 @@ function refreshRisqueExplo() {
 	// Malus mélange hétérogène GPT (Guérison/Painture/Toxine)
 	popoInconnue = popo1.duree==void(0) || popo2.duree==void(0);
 	risqueMax = risque+5;
-	if((popo1.GPT?1:0)^(popo2.GPT?1:0)) {
+	if((popo1.GPT?1:0)^(popo2.GPT?1:0)) { // ^ = XOR binaire
 		risque += 40;
 		risqueMax += 40;
 		details += "\nMalus hétérogène GPT: +40 ("+risque+")";
@@ -1055,12 +1055,12 @@ function refreshRisqueExplo() {
 	}
 	
 	// Affichage
-	if(risque==risqueMax) {
+	if(risqueMax<16) {
 		afficheRisque.innerHTML =
-			"[Risque d'explosion : "+Math.max(15, risque)+" %]";
-	} else if(risqueMax<16) {
-		afficheRisque.innerHTML =	
 			"[Risque d'explosion : 15 %]";
+	} else if(risque==risqueMax) {
+		afficheRisque.innerHTML =	
+			"[Risque d'explosion : "+risque+" %]";
 	} else {
 		afficheRisque.innerHTML =
 			"[Risque d'explosion : de "+Math.max(15, risque)+
