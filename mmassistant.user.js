@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.0a.3.13
+// @version      2.0a.4.6
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -53,7 +53,9 @@ var numTroll; // définie dans le main avec getNumTroll()
 
 var
 	compos_par_bonus = true,
-	popos_par_nom = true;
+	popos_par_nom = true,
+	//utiliser_potion = true,
+	lancer_de_potions = true;
 
 //----------------------------- Bases de données -----------------------------//
 
@@ -756,7 +758,7 @@ function mmExtracteurMatos() {
 					risque += Number(nb);
 				}
 			} else {
-				window.console.log("[mmassistant] Effet inconnu:", effets[j]);
+				window.console.warn("[mmassistant] Effet inconnu:", effets[j]);
 			}
 		}
 		if(magie) {
@@ -841,6 +843,14 @@ function enrichitListePopos(select) {
 	for(i=1 ; i<select.options.length ; i++) {
 		option = select.options[i];
 		if(option.value in objPopos) {
+			// Cas de Lancer de Potion:
+			// on supprime la mention inutile " (Potion)"
+			if(option.innerHTML.indexOf("(Potion)")!=-1) {
+				option.innerHTML = option.textContent.slice(0,
+					option.textContent.indexOf(" (Potion)")
+				).trim();
+			}
+			
 			popo = objPopos[option.value];
 			if(popo.effet) {
 				option.title = popo.effet;
@@ -922,6 +932,7 @@ function enrichitListePopos(select) {
 
 function initRisqueExplo() {
 // Mise en place du calculateur de risque
+	window.console.debug("[mmassistant] lancement initRisqueExplo");
 	
 	// On vire le message "Vous pouvez ajouter un composant stabilisateur:"
 	var
@@ -935,11 +946,11 @@ function initRisqueExplo() {
 	
 	// Insertion des infos dans les menus déroulants
 	enrichitListeCompos();
-	window.console.debug("[mmassistant] addInfosCompos réussi");
+	// window.console.debug("[mmassistant] addInfosCompos réussi");
 	enrichitListePopos(selectPopo1);
-	window.console.debug("[mmassistant] addInfosPopos 1 réussi");
+	// window.console.debug("[mmassistant] addInfosPopos 1 réussi");
 	enrichitListePopos(selectPopo2);
-	window.console.debug("[mmassistant] addInfosPopos 2 réussi");
+	// window.console.debug("[mmassistant] addInfosPopos 2 réussi");
 	
 	// Initialisation affichage Risques
 	var divAction = document.getElementsByClassName("titre4")[1];
@@ -1109,8 +1120,25 @@ function isPage(url) {
 if(isPage("MH_Play/Play_equipement")) {
 	getNumTroll();
 	mmExtracteurMatos();
+/*} else if(isPage("MH_Play/Actions/Play_a_ActionYY")) {
+*/	
 } else if(isPage("MH_Play/Actions/Competences/Play_a_CompetenceYY")) {
-	if(document.body.id!="p_competencemlangemagique") {
+	if(lancer_de_potions && document.body.id=="p_competencelancerdepotions") {
+		window.console.log("[mmassistant] Compétence : Lancer de potion");
+		getNumTroll();
+		try {
+			var
+				selectPopo = document.getElementById("potion"),
+				objPopos = window.localStorage.getObject(numTroll+".MM_popos");
+		} catch(e) {
+			window.console.error(
+				"[mmassistant] Erreur durant l'initialisation - OFF", e
+			);
+			return;
+		}
+		enrichitListePopos(selectPopo);
+		return;
+	} else if(document.body.id!="p_competencemlangemagique") {
 		window.console.warn("[mmassistant] Compétence non reconnue - OFF");
 		return;
 	}
@@ -1131,7 +1159,7 @@ if(isPage("MH_Play/Play_equipement")) {
 		);
 		return;
 	}
-	window.console.debug("[mmassistant] calcul du risque ON!");
+	window.console.log("[mmassistant] Compétence : Mélange Magique");
 	var afficheRisque = document.createElement("span");
 	initRisqueExplo();
 }
