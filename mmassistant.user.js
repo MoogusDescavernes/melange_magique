@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.0a.5.0
+// @version      2.0a.5.2
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -973,8 +973,13 @@ function enrichitListePopos(select) {
 		}
 		numPopos.sort(function(a, b) {
 			if(objPopos[a].nom==objPopos[b].nom) {
-				if(objPopos[a].niveau==objPopos[b].niveau) {
+				if(
+					objPopos[a].niveau!=void(0) ||
+					objPopos[b].niveau!=void(0) ||
+					objPopos[a].niveau==objPopos[b].niveau
+				) {
 					// Tri 3: Par numéro de popo (numérique) croissant
+					// S'applique directement si absence de de niveau
 					return Number(a)>Number(b);
 				}
 				// Tri 2: Par niveau (mixte) croissant
@@ -988,6 +993,7 @@ function enrichitListePopos(select) {
 						for(var i=0 ; i<da.length ; i++) {
 							if(!db[i]) {
 								// N'est pas censé se produire
+								// Si b plus court que a, inverser
 								return true;
 							}
 							if(da[i]!=db[i]) {
