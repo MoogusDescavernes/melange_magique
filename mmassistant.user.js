@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.0a.5.30
+// @version      2.0a.5.35
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -489,7 +489,7 @@ function risqueExplo(popo1, popo2, compo) {
 	var
 		risque = 33,
 		details = "Risque de base: +33",
-		risqueMax, popoInconnue, sup;
+		risqueMax, popoInconnue, dureeMin, texte;
 	
 	// Malus de caracs
 	risque += popo1.risque;
@@ -526,32 +526,19 @@ function risqueExplo(popo1, popo2, compo) {
 		details += "\nMalus hétérogène GPT: +40 ??";
 	}
 	
-	window.console.debug(popo1, popo2, popoInconnue);
-	
 	// Malus durée
+	dureeMin = popo1.duree ? popo1.duree : 0;
+	dureeMin = popo2.duree ? Math.max(dureeMin, popo2.duree) : dureeMin;
+	risque += dureeMin;
 	if(!popoInconnue) {
-		// Si les deux popos sont connues RAS
-		sup = Math.max(popo1.duree, popo2.duree);
-		risque += sup;
 		risqueMax = risque;
-		details += "\nMalus de durée: +"+sup+" ("+risque+")";
-	} else if(popo1.duree) {
-		// Sinon on fait au mieux
-		risque += popo1.duree;
-		if(popo1.duree==5) {
-			details += "\nMalus de durée: +5 ("+risque+")";
-		} else {
-			details += "\nMalus de durée: de +"+popo1.duree+" à +5";
-		}
-	} else {
-		risque += popo2.duree;
-		if(popo2.duree==5) {
-			details += "\nMalus de durée: +5 ("+risque+")";
-		} else {
-			details += "\nMalus de durée: de +"+popo2.duree+" à +5";
-		}
 	}
-	
+	if(!popoInconnue || dureeMin==5) {
+		details += "\nMalus de durée: +"+dureeMin+" ("+risque+")";
+	} else {
+		details += "\nMalus de durée: de +"+dureeMin+" à +5";
+	}
+		
 	// Bonus de compo
 	if(compo) {
 		risque -= compo.bonus;
@@ -559,9 +546,17 @@ function risqueExplo(popo1, popo2, compo) {
 		details += "\nBonus compo: -"+compo.bonus+" ("+risque+")";
 	}
 	
+	// Affichage
+	if(risqueMax<16) {
+		texte = "15 %";
+	} else if(risque==risqueMax) {
+		texte = risque+" %";
+	} else {
+		texte = "de "+Math.max(risque, 15)+" à "+risqueMax+" %";
+	}
+	
 	return {
-		min: Math.max(15, risque),
-		max: Math.max(15, risqueMax),
+		texte: texte,
 		details: details
 	}
 }
@@ -911,7 +906,7 @@ function initMatos() {
 	btn.id = "mmassistant_btnmelange";
 	btn.onclick = activeMelangeur;
 	
-	window.console.log("[mmassistant] initMatos réussi");
+	window.console.debug("[mmassistant] initMatos réussi");
 }
 
 function activeMelangeur() {
@@ -923,7 +918,7 @@ function activeMelangeur() {
 		btn = document.getElementById("mmassistant_btnmelange"),
 		td = document.getElementById("mmassistant_tdmelange"),
 		i, span;
-	if(tr.style.display = "none") {
+	if(tr.style.display=="none") {
 		plus.click();
 	}
 	for(i=0 ; i<checkboxsCompo.length ; i++) {
@@ -955,8 +950,6 @@ function refreshMelangeur() {
 		popos = [],
 		compo, risque, i;
 	
-	window.console.debug(this);
-	
 	// Parsage des Compos
 	for(i=0 ; i<checkboxsCompo.length ; i++) {
 		if(checkboxsCompo[i].checked) {
@@ -976,7 +969,6 @@ function refreshMelangeur() {
 	
 	// Parsage des Popos
 	if(typeItem=="popo" && (!numMemoire || num==numMemoire)) {
-		// Si on déselectionne le compo en mémoire
 		chercheMemoire = true;
 		numMemoire = "";
 	}
@@ -1015,14 +1007,8 @@ function refreshMelangeur() {
 	}
 	
 	risque = risqueExplo(popos[0], popos[1], compo);
+	span.innerHTML = risque.texte;
 	td.title = risque.details;
-	if(risque.max<16) {
-		span.innerHTML = "15 %";
-	} else if(risque.min==risque.max) {
-		span.innerHTML = risque.min+" %";
-	} else {
-		span.innerHTML = "de "+risque.min+" à "+risque.max+" %";
-	}
 }
 
 function lanceMelange() {
@@ -1256,16 +1242,7 @@ function refreshRisqueExplo() {
 	}
 	
 	risque = risqueExplo(popo1, popo2, compo);
-	
-	// Affichage
-	if(risque.max<16) {
-		afficheRisque.innerHTML = "[Risque d'explosion : 15 %]";
-	} else if(risque.min==risque.max) {
-		afficheRisque.innerHTML = "[Risque d'explosion : "+risque.min+" %]";
-	} else {
-		afficheRisque.innerHTML =
-			"[Risque d'explosion : de "+risque.min+" à "+risque.max+" %]";
-	}
+	afficheRisque.innerHTML = "[Risque d'explosion : "+risque.texte+"]";
 	afficheRisque.title = risque.details;
 	
 	window.console.debug("[mmassistant] refreshRisqueExplo réussi");
