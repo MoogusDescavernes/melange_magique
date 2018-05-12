@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.0.0.0
+// @version      2.1.0.0
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -767,7 +767,7 @@ function initMatos() {
 		ajouteCheckboxMelange(tableCompos.rows[i].cells[0], num, "compo");
 	}
 	window.console.debug(objCompos);
-	window.localStorage.setObject(numTroll+".MM_compos", objCompos);
+	window.localStorage.setObject("mmassistant.compos."+numTroll, objCompos);
 	
 	// Récupération & Stockage des données des Potions
 	// trPopos.cells:
@@ -899,7 +899,7 @@ function initMatos() {
 		ajouteInfosDeLaPopo(insertNode, objPopos[num]);
 	}
 	window.console.debug(objPopos);
-	window.localStorage.setObject(numTroll+".MM_popos", objPopos);
+	window.localStorage.setObject("mmassistant.popos."+numTroll, objPopos);
 	
 	// Ajout du bouton de Mélange
 	if(!tr) { return; }
@@ -1358,7 +1358,7 @@ if(isPage("MH_Play/Play_equipement")) {
 		try {
 			var
 				selectPopo = document.getElementById("potion"),
-				objPopos = window.localStorage.getObject(numTroll+".MM_popos");
+				objPopos = window.localStorage.getObject("mmassistant.popos."+numTroll);
 		} catch(e) {
 			window.console.error(
 				"[mmassistant] Erreur durant l'initialisation - OFF", e
@@ -1379,8 +1379,10 @@ if(isPage("MH_Play/Play_equipement")) {
 			selectPopo2 = document.getElementById("potion2"),
 			selectCompo = document.getElementById("cible"),
 			numMemoire, afficheRisque;
-		objCompos = window.localStorage.getObject(numTroll+".MM_compos");
-		objPopos = window.localStorage.getObject(numTroll+".MM_popos");
+		objCompos =
+			window.localStorage.getObject("mmassistant.compos."+numTroll);
+		objPopos =
+			window.localStorage.getObject("mmassistant.popos."+numTroll);
 	} catch(e) {
 		window.console.error(
 			"[mmassistant] Erreur durant l'initialisation du calculateur", e
