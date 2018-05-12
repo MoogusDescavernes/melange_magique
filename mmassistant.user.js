@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.0a.5.35
+// @version      2.0.0.0
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -359,6 +359,10 @@ Storage.prototype.setObject = function(key, value) {
 Storage.prototype.getObject = function(key) {
 	var value = this.getItem(key);
 	return value && JSON.parse(value);
+}
+
+Storage.prototype.removeObject = function(key) {
+	this.removeItem(key);
 }
 
 function epure(texte) {
@@ -972,7 +976,6 @@ function refreshMelangeur() {
 		chercheMemoire = true;
 		numMemoire = "";
 	}
-	
 	for(i=0 ; i<checkboxsPopo.length ; i++) {
 		if(checkboxsPopo[i].checked) {
 			if(chercheMemoire) {
@@ -989,6 +992,7 @@ function refreshMelangeur() {
 				if(checkboxsPopo[i].num in objPopos) {
 					popos.push(objPopos[checkboxsPopo[i].num]);
 				} else {
+					popos.push({});
 					erreur += (erreur ? "\n" : "") + "Potion inconnue";
 				}
 			}
@@ -997,8 +1001,6 @@ function refreshMelangeur() {
 	if(popos.length<2) {
 		erreur += (erreur ? "\n" : "") + "Nécessite 2 potions";
 	}
-	
-	window.console.log(numMemoire, popos, compo)
 	
 	if(erreur) {
 		td.title = erreur;
@@ -1012,6 +1014,38 @@ function refreshMelangeur() {
 }
 
 function lanceMelange() {
+	var 
+		checkboxsCompo = document.querySelectorAll(".mmassistant_compo"),
+		checkboxsPopo = document.querySelectorAll(".mmassistant_popo"),
+		utiliser = {
+			popos: [],
+			compo: ""
+		};
+	
+	// Récupération d'un éventuel compo
+	// On s'arrête dès qu'on en trouve un
+	for(i=0 ; i<checkboxsCompo.length ; i++) {
+		if(checkboxsCompo[i].checked) {
+			utiliser.compo = checkboxsCompo[i].num;
+			break;
+		}
+	}
+	
+	// Récupération des popos
+	// On s'arrête à la 2e popo trouvée
+	for(i=0 ; i<checkboxsPopo.length ; i++) {
+		if(checkboxsPopo[i].checked) {
+			utiliser.popos.push(checkboxsPopo[i].num);
+			if(utiliser.popos.length>=2) {
+				break;
+			}
+		}
+	}
+	
+	// Stockage temporaire des éléments à utiliser
+	window.sessionStorage.setObject("mmassistant.utiliser", utiliser);
+	
+	// Lancement de la compétence Mélange
 	top.frames["Main"].frames["Action"].location.assign(
 		"Play_action.php?ai_ToDo=125&as_Action=ACTION!"
 	);
@@ -1189,7 +1223,8 @@ function initCompetenceMelange() {
 			"../text()[contains(.,'stabilisateur')]",
 			selectPopo1, null, 9, null
 		).singleNodeValue,
-		br = selectPopo1.parentNode.getElementsByTagName("br")[1];
+		br = selectPopo1.parentNode.getElementsByTagName("br")[1],
+		utiliser;
 	msg.parentNode.removeChild(msg);
 	br.parentNode.removeChild(br);
 	
@@ -1207,6 +1242,31 @@ function initCompetenceMelange() {
 	selectPopo1.onchange = refreshRisqueExplo;
 	selectPopo2.onchange = refreshRisqueExplo;
 	selectCompo.onchange = refreshRisqueExplo;
+	
+	if(utiliser = window.sessionStorage.getObject("mmassistant.utiliser")) {
+		window.console.debug("Items à utiliser:", utiliser);
+		window.sessionStorage.removeObject("mmassistant.utiliser");
+		if(utiliser.compo) {
+			selectCompo.value = String(utiliser.compo);
+			if(!selectCompo.value) {
+				selectCompo.value = "0";
+			}
+		}
+		if(utiliser.popos && utiliser.popos[0]) {
+			selectPopo1.value = String(utiliser.popos[0]);
+			if(!selectPopo1.value) {
+				selectPopo1.selectedIndex = 0;
+			}
+			if(utiliser.popos[1]) {
+				selectPopo2.value = String(utiliser.popos[1]);
+				if(!selectPopo2.value) {
+					selectPopo2.selectedIndex = 0;
+				}
+			}
+		}
+		window.console.log("[mmassistant] Items à utiliser appliqués");
+		refreshRisqueExplo();
+	}
 	
 	window.console.debug("[mmassistant] initCompetenceMelange réussie");
 }
