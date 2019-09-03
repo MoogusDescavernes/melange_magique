@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.1.0.1
+// @version      2.1.0.2
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -1225,6 +1225,10 @@ function initCompetenceMelange() {
 			divAction, null, 9, null
 		).singleNodeValue,
 		br = divAction.getElementsByTagName("br")[1],
+		titre4 = document.evaluate(
+            "//div[@class='titre4' and contains(text(),'PA')]",
+            document, null, 9, null
+        ).singleNodeValue,
 		utiliser;
 	msg.parentNode.removeChild(msg);
 	br.parentNode.removeChild(br);
@@ -1235,11 +1239,10 @@ function initCompetenceMelange() {
 	enrichitListePopos(selectPopo2);
 	
 	// Initialisation affichage Risques
-	var divAction = document.getElementsByClassName("titre4")[1];
 	// On vire le message "[Portée : sur la zone uniquement]":
-	divAction.innerHTML = "[3 PA] "
+	titre4.innerHTML = "[2 PA] ";
 	afficheRisque.innerHTML = "[Risque d'explosion : (nécessite 2 potions)]";
-	divAction.appendChild(afficheRisque);
+	titre4.appendChild(afficheRisque);
 	selectPopo1.onchange = refreshRisqueExplo;
 	selectPopo2.onchange = refreshRisqueExplo;
 	selectCompo.onchange = refreshRisqueExplo;
