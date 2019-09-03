@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.1.0.0
+// @version      2.1.0.1
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -1219,11 +1219,12 @@ function initCompetenceMelange() {
 	
 	// On vire le message "Vous pouvez ajouter un composant stabilisateur:"
 	var
+		divAction = document.querySelector("div.Action"),
 		msg = document.evaluate(
-			"../text()[contains(.,'stabilisateur')]",
-			selectPopo1, null, 9, null
+			".//text()[contains(.,'stabilisateur')]",
+			divAction, null, 9, null
 		).singleNodeValue,
-		br = selectPopo1.parentNode.getElementsByTagName("br")[1],
+		br = divAction.getElementsByTagName("br")[1],
 		utiliser;
 	msg.parentNode.removeChild(msg);
 	br.parentNode.removeChild(br);
