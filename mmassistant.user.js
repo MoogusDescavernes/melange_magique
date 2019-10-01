@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.1.0.2
+// @version      2.1.1.0
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -22,7 +22,7 @@
 // peuvent être permutés (y compris pour les keys). À manier avec précaution.
 // 
 // Stockage des données de composants : 
-// localStorage["numTroll.MM_compos"] (object) {
+// localStorage["mmassistant.compos.numTroll"] (object) {
 //   numCompo (string): {
 //     mob    : libellé nom du monstre (string),
 //     niveau : niveau du monstre (string),
@@ -32,7 +32,7 @@
 // }
 // 
 // Stockage des données de potions : 
-// localStorage["numTroll.MM_popos"] (object) {
+// localStorage["mmassistant.popos.numTroll"] (object) {
 //   numPopo (string): {
 //     nom    : libellé nom de la potion (string),
 //     effet  : libellé effet de la potion (string),
@@ -60,7 +60,7 @@ var
 var
 	compos_par_bonus = true,
 	popos_par_nom = true,
-	//utiliser_potion = true,
+	refaire_mise_en_page = true,
 	lancer_de_potions = true;
 
 //----------------------------- Bases de données -----------------------------//
@@ -379,14 +379,22 @@ function getNumTroll() {
 // Récupère le num de trõll dans la frame Menu
 // Menu = top.frames["Sommaire"].document
 // onclick du nom du trõll: "EnterPJView(numTroll,750,550)"
-	var
-		liens = top.frames["Sommaire"].document.getElementsByTagName("a"),
-		str;
-	if(liens.length>0 && liens[0].onclick!==void(0)) {
-		str = liens[0].onclick.toString();
-		numTroll = parseInt(/\d+/.exec(str)[0]);
-		window.console.debug("[mmassistant] numTroll = "+numTroll);
+	var liens, str;
+	try {
+		liens = top.frames["Sommaire"].document.getElementsByTagName("a");
+		if(liens.length>0 && liens[0].onclick!==void(0)) {
+			str = liens[0].onclick.toString();
+			numTroll = parseInt(/\d+/.exec(str)[0]);
+			window.console.debug("[mmassistant] numTroll = "+numTroll);
+		}
+	} catch(e) {
+		window.console.warn(
+			"[mmassistant] Aucun numéro de troll trouvé : choix par défaut"
+		);
+		numTroll = window.localStorage.getItem("mmassistant.lastNumTroll");
+		numTroll = numTroll ? numTroll : "defaut";
 	}
+	window.localStorage.setItem("mmassistant.lastNumTroll", numTroll);
 }
 
 //------------------------------ Gestion du DOM ------------------------------//
@@ -1056,7 +1064,8 @@ function lanceMelange() {
 function enrichitListeCompos() {
 // Ajoute les infos de compos au menu déroulant lors d'un mélange
 	if(!objCompos) { return; }
-	var i, option, compo;
+	var i, option, compo,
+		optgroup = selectCompo.getElementsByTagName("optgroup")[0];
 	
 	selectCompo.style.maxWidth = "300px";
 	
@@ -1078,7 +1087,7 @@ function enrichitListeCompos() {
 			composDispos = {},
 			numCompos = [],
 			num;
-		for(i=selectCompo.options.length-1 ; i>0 ; i--) {
+		for(i=selectCompo.options.length-1 ; i>=0 ; i--) {
 			option = selectCompo.options[i];
 			if(option.value) {
 				composDispos[option.value] = option;
@@ -1107,7 +1116,7 @@ function enrichitListeCompos() {
 		});
 		
 		for(i=0 ; i<numCompos.length ; i++) {
-			selectCompo.appendChild(composDispos[numCompos[i]]);
+			optgroup.appendChild(composDispos[numCompos[i]]);
 		}
 	}
 }
@@ -1115,9 +1124,10 @@ function enrichitListeCompos() {
 function enrichitListePopos(select) {
 // Ajoute les infos de popo à un menu déroulant lors d'un MM / LdP
 	if(!objPopos) { return; }
-	var i, option, popo;
+	var i, option, popo,
+		optgroup = select.getElementsByTagName("optgroup")[0];
 	
-	for(i=1 ; i<select.options.length ; i++) {
+	for(i=0 ; i<select.options.length ; i++) {
 		option = select.options[i];
 		if(option.value in objPopos) {
 			// Cas de Lancer de Potion:
@@ -1150,7 +1160,7 @@ function enrichitListePopos(select) {
 			poposDispos = {},
 			numPopos = [],
 			num;
-		for(i=select.options.length-1 ; i>0 ; i--) {
+		for(i=select.options.length-1 ; i>=0 ; i--) {
 			option = select.options[i];
 			if(option.value) {
 				poposDispos[option.value] = option;
@@ -1168,12 +1178,12 @@ function enrichitListePopos(select) {
 		numPopos.sort(function(a, b) {
 			if(objPopos[a].nom==objPopos[b].nom) {
 				if(
-					objPopos[a].niveau!=void(0) ||
-					objPopos[b].niveau!=void(0) ||
+					objPopos[a].niveau==void(0) ||
+					objPopos[b].niveau==void(0) ||
 					objPopos[a].niveau==objPopos[b].niveau
 				) {
 					// Tri 3: Par numéro de popo (numérique) croissant
-					// S'applique directement si absence de de niveau
+					// S'applique directement si pas de niveau (e.g. Potions Mélangées)
 					return Number(a)>Number(b);
 				}
 				// Tri 2: Par niveau (mixte) croissant
@@ -1208,7 +1218,7 @@ function enrichitListePopos(select) {
 		});
 		
 		for(i=0 ; i<numPopos.length ; i++) {
-			select.appendChild(poposDispos[numPopos[i]]);
+			optgroup.appendChild(poposDispos[numPopos[i]]);
 		}
 	}
 }
@@ -1216,22 +1226,29 @@ function enrichitListePopos(select) {
 function initCompetenceMelange() {
 // Mise en place du calculateur de risque
 	window.console.debug("[mmassistant] lancement initCompetenceMelange");
-	
-	// On vire le message "Vous pouvez ajouter un composant stabilisateur:"
 	var
 		divAction = document.querySelector("div.Action"),
-		msg = document.evaluate(
-			".//text()[contains(.,'stabilisateur')]",
-			divAction, null, 9, null
-		).singleNodeValue,
-		br = divAction.getElementsByTagName("br")[1],
+		labels = document.evaluate(
+			".//text()[contains(.,'Choisir')]",
+			divAction, null, 7, null
+		),
 		titre4 = document.evaluate(
             "//div[@class='titre4' and contains(text(),'PA')]",
             document, null, 9, null
         ).singleNodeValue,
-		utiliser;
-	msg.parentNode.removeChild(msg);
-	br.parentNode.removeChild(br);
+		i, node, utiliser;
+	
+	if(refaire_mise_en_page) {
+		// On vire tous les messages "Choisir un xxx:"
+		for(i=0 ; i<labels.snapshotLength ; i++) {
+			labels.snapshotItem(i).parentNode.removeChild(labels.snapshotItem(i));
+		}
+		
+		// On étend les boîtes
+		selectCompo.style.maxWidth = "300px";
+		selectPopo1.style.maxWidth = "300px";
+		selectPopo2.style.maxWidth = "300px";
+	}
 	
 	// Insertion des infos dans les menus déroulants
 	enrichitListeCompos();
@@ -1356,7 +1373,7 @@ if(isPage("MH_Play/Play_equipement")) {
 */	
 } else if(isPage("MH_Play/Actions/Competences/Play_a_CompetenceYY")) {
 	if(lancer_de_potions && document.body.id=="p_competencelancerdepotions") {
-	// Lancer de Potion	
+	// Lancer de Potion
 		window.console.log("[mmassistant] Compétence : Lancer de potion");
 		getNumTroll();
 		try {
