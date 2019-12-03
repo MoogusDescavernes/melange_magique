@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.1.2.0
+// @version      2.1.3.0
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -253,29 +253,104 @@ var abbreviationQualite = {
 	"Très Mauvaise":"TM"
 }
 
-var dureePotion = {
-	"Dover Powa"            : 2,
-	"Elixir de Bonne Bouffe": 5,
-	"Elixir de Corruption"  : 4,
-	"Elixir de Fertilite"   : 5,
-	"Elixir de Feu"         : 5,
-	"Elixir de Longue-Vue"  : 3,
-	"Essence de KouleMann"  : 4,
-	"Extrait de DjhinTonik" : 4,
-	"Extrait du Glacier"    : 5,
-	"Grippe en Conserve"    : 3,
-	"Jus de Chronometre"    : 3,
-	"Metomol"               : 2,
-	"Pneumonie en Conserve" : 3,
-	"Potion de Guerison"    : 0,
-	"Potion de Painture"    : 0,
-	"PufPuff"               : 3,
-	"Rhume en Conserve"     : 3,
-	"Sang de Toh Reroh"     : 4,
-	"Sinne Khole"           : 2,
-	"Toxine Violente"       : 0,
-	"Voi'Pu'Rin"            : 2,
-	"Zet Crakdedand"        : 3
+var PotionsDeBase = {
+	"Dover Powa" : {
+		duree  : 2,
+		nivMax : 100
+	},
+	"Elixir de Bonne Bouffe" : {
+		duree  : 5,
+		nivMax : 7
+	},
+	"Elixir de Corruption" : {
+		duree  : 4,
+		nivMax : 7
+	},
+	"Elixir de Fertilite" : {
+		duree  : 5,
+		nivMax : 7
+	},
+	"Elixir de Feu" : {
+		duree  : 5,
+		nivMax : 7
+	},
+	"Elixir de Longue-Vue" : {
+		duree   : 3,
+		niveaux : {
+			1: 1,
+			2: 1,
+			3: 1,
+			5: 1,
+			8: 1
+		}
+	},
+	"Essence de KouleMann" : {
+		duree  : 4,
+		nivMax : 100
+	},
+	"Extrait de DjhinTonik" : {
+		duree  : 4,
+		nivMax : 100
+	},
+	"Extrait du Glacier" : {
+		duree  : 5,
+		nivMax : 100
+	},
+	"Grippe en Conserve" : {
+		duree  : 3,
+		nivMax : 5
+	},
+	"Jus de Cervelle" : {
+		duree  : 0,
+		nivMax : 30
+	},
+	"Jus de Chronometre" : {
+		duree  : 3,
+		nivMax : 150
+	},
+	"Metomol" : {
+		duree  : 2,
+		nivMax : 10
+	},
+	"Pneumonie en Conserve" : {
+		duree  : 3,
+		nivMax : 5
+	},
+	"Potion de Guerison" : {
+		duree  : 0,
+		nivMax : 10
+	},
+	"Potion de Painture" : {
+		duree  : 0,
+		nivMax : 5
+	},
+	"PufPuff" : {
+		duree  : 3
+	},
+	"Rhume en Conserve" : {
+		duree  : 3,
+		nivMax : 5
+	},
+	"Sang de Toh Reroh" : {
+		duree  : 4,
+		nivMax : 5
+	},
+	"Sinne Khole" : {
+		duree  : 2,
+		nivMax : 100
+	},
+	"Toxine Violente" : {
+		duree  : 0,
+		nivMax : 10
+	},
+	"Voi'Pu'Rin" : {
+		duree  : 2,
+		nivMax : 50
+	},
+	"Zet Crakdedand" : {
+		duree  : 3,
+		nivMax : 5
+	}
 }
 
 //---------------------- Icone Mélange Magique (base64) ----------------------//
@@ -510,13 +585,38 @@ function risqueExplo(popo1, popo2, compo) {
 	details += "\nEffet popo 2: +"+popo2.risque+" ("+risque+")";
 	risque = Math.round(risque);
 	
-	// Malus de popo mélangée & Bonus popos de base identiques
+	// Malus de popo mélangée, Bonus popos de base identiques & Mini-mélange
 	if(popo1.melange || popo2.melange) {
 		risque += 15;
 		details += "\nMalus mélange: +15 ("+risque+")";
-	} else if(popo1.nom==popo2.nom) {
+	} else if(
+		popo1.nom in PotionsDeBase &&
+		popo2.nom in PotionsDeBase &&
+		(
+			popo1.nom==popo2.nom ||
+			(
+				popo1.nom.indexOf("Conserve")!=0 &&
+				popo2.nom.indexOf("Conserve")!=0
+			)
+		)
+	) {
 		risque -= 15;
 		details += "\nBonus popo id.: -15 ("+risque+")";
+		if(
+			popo1.nom!="PufPuff" &&
+			(
+				PotionsDeBase[popo1.nom].nivMax &&
+				Number(popo1.niveau)+Number(popo2.niveau) <=
+					PotionsDeBase[popo1.nom].nivMax
+			) || (
+				PotionsDeBase[popo1.nom].niveaux &&
+				Number(popo1.niveau)+Number(popo2.niveau) in
+					PotionsDeBase[popo1.nom].niveaux
+			)
+		) {
+				risque -= 20;
+				details += "\nBonus popo ex.: -20 ("+risque+")";
+		}
 	}
 	
 	// Malus de Zone
@@ -818,10 +918,10 @@ function initMatos() {
 		}
 		
 		// Durée (extrapolée à partir de la racine)
-		if(racine in dureePotion) {
+		if(racine in PotionsDeBase) {
 		// Si popo d'une famille connue:
 			// Ajout de la durée
-			objPopos[num].duree = dureePotion[racine];
+			objPopos[num].duree = PotionsDeBase[racine].duree;
 		
 			// Attribution d'un "niveau" (pour affichage)
 			// Par défaut, niveau = valeur du 1er effet
