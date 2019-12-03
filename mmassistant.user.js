@@ -432,7 +432,7 @@ function ajouteCheckboxMelange(node, num, typeItem) {
 	return input;
 }
 
-function creerIconeMM() {
+function creeIconeMelange() {
 // Prépare l'icône à afficher pour les infos MM
 	var img = new Image();
 	img.src = iconeBase64;
@@ -448,7 +448,7 @@ function ajouteInfosDuCompo(node, compo) {
 		span = document.createElement("span"),
 		str;
 	appendText(node," ");
-	span.appendChild(creerIconeMM());
+	span.appendChild(creeIconeMelange());
 	appendText(span," [-"+compo.bonus+" %]");
 	switch(compo.mob[0]) {
 		case "A":
@@ -470,7 +470,7 @@ function ajouteInfosDuCompo(node, compo) {
 function ajouteInfosDeLaPopo(node, popo) {
 // Ajoute une img avec titre d'infos de popo à la fin de node
 	var	
-		img = creerIconeMM(),
+		img = creeIconeMelange(),
 		titre = "Caracs: +"+popo.risque;
 	if(popo.melange) {
 		titre += "\nMélangée: +15";
