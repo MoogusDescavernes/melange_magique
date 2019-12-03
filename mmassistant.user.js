@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.1.1.0
+// @version      2.1.2.0
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -1064,7 +1064,8 @@ function lanceMelange() {
 function enrichitListeCompos() {
 // Ajoute les infos de compos au menu déroulant lors d'un mélange
 	if(!objCompos) { return; }
-	var i, option, compo,
+	var
+		i, option, compo,
 		optgroup = selectCompo.getElementsByTagName("optgroup")[0];
 	
 	selectCompo.style.maxWidth = "300px";
@@ -1124,9 +1125,9 @@ function enrichitListeCompos() {
 function enrichitListePopos(select) {
 // Ajoute les infos de popo à un menu déroulant lors d'un MM / LdP
 	if(!objPopos) { return; }
-	var i, option, popo,
-		optgroup = select.getElementsByTagName("optgroup")[0];
+	var i, option, popo;
 	
+	// Enrichissement de la liste (niveaux, effet en title)
 	for(i=0 ; i<select.options.length ; i++) {
 		option = select.options[i];
 		if(option.value in objPopos) {
@@ -1150,16 +1151,28 @@ function enrichitListePopos(select) {
 			if(popo.zone) {
 				appendText(option, " (Zone)");
 			}
-		} else {
+		} else {
 			option.title = "Potion inconnue: ouvrez l'onglet Équipement";
 		}
 	}
 	
+	// Tri des potions (si l'option est activée)
 	if(popos_par_nom) {
 		var
+			optgroup = select.getElementsByTagName("optgroup"),
+			insertPoint,
 			poposDispos = {},
 			numPopos = [],
 			num;
+		
+		// Choix du point d'insertion (LdP foireux)
+		if (optgroup.length>0) {
+			insertPoint = optgroup[0];
+		} else {
+			insertPoint = select;
+		}
+		
+		// Sauvegarde des options
 		for(i=select.options.length-1 ; i>=0 ; i--) {
 			option = select.options[i];
 			if(option.value) {
@@ -1170,6 +1183,7 @@ function enrichitListePopos(select) {
 			}
 		}
 		
+		// Tri
 		for(num in objPopos) {
 			if(num in poposDispos) {
 				numPopos.push(num);
@@ -1217,8 +1231,9 @@ function enrichitListePopos(select) {
 			return objPopos[a].nom>objPopos[b].nom;
 		});
 		
+		// Réinjection des options
 		for(i=0 ; i<numPopos.length ; i++) {
-			optgroup.appendChild(poposDispos[numPopos[i]]);
+			insertPoint.appendChild(poposDispos[numPopos[i]]);
 		}
 	}
 }
