@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.1.3.0
+// @version      2.1.3.1
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -263,7 +263,7 @@ var PotionsDeBase = {
 		nivMax : 7
 	},
 	"Elixir de Corruption" : {
-		duree  : 4,
+		duree  : 5,
 		nivMax : 7
 	},
 	"Elixir de Fertilite" : {
@@ -286,15 +286,15 @@ var PotionsDeBase = {
 	},
 	"Essence de KouleMann" : {
 		duree  : 4,
-		nivMax : 100
+		nivMax : 5
 	},
 	"Extrait de DjhinTonik" : {
 		duree  : 4,
-		nivMax : 100
+		nivMax : 5
 	},
 	"Extrait du Glacier" : {
 		duree  : 5,
-		nivMax : 100
+		nivMax : 7
 	},
 	"Grippe en Conserve" : {
 		duree  : 3,
