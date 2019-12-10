@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.1.3.2
+// @version      2.1.3.3
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -255,8 +255,8 @@ var abbreviationQualite = {
 
 var PotionsDeBase = {
 	"Dover Powa" : {
-		duree  : 2,
-		nivMax : 100
+		duree    : 2,
+		magieMax : 100
 	},
 	"Elixir de Bonne Bouffe" : {
 		duree  : 5,
@@ -336,8 +336,8 @@ var PotionsDeBase = {
 		nivMax : 5
 	},
 	"Sinne Khole" : {
-		duree  : 2,
-		nivMax : 100
+		duree    : 2,
+		magieMax : 100
 	},
 	"Toxine Violente" : {
 		duree  : 0,
@@ -595,24 +595,33 @@ function risqueExplo(popo1, popo2, compo) {
 		(
 			popo1.nom==popo2.nom ||
 			(
-				popo1.nom.indexOf("Conserve")!=-1 &&
-				popo2.nom.indexOf("Conserve")!=-1
+				// Famille 'en Conserve': considrérées comme identiques
+				/Conserve/.test(popo1.nom) && /Conserve/.test(popo2.nom)
 			)
 		)
 	) {
 		risque -= 15;
 		details += "\nBonus popo id.: -15 ("+risque+")";
 		if(
-			popo1.nom!="PufPuff" &&
 			(
+				// Cas standard (parseInt pour les Corruptions)
 				PotionsDeBase[popo1.nom].nivMax &&
-				Number(popo1.niveau)+Number(popo2.niveau) <=
+				parseInt(popo1.niveau)+parseInt(popo2.niveau) <=
 					PotionsDeBase[popo1.nom].nivMax
 			) || (
+				// Elixir de Longue-Vue
 				PotionsDeBase[popo1.nom].niveaux &&
 				Number(popo1.niveau)+Number(popo2.niveau) in
 					PotionsDeBase[popo1.nom].niveaux
+			) || (
+				// Dover / Sinne
+				PotionsDeBase[popo1.nom].magieMax &&
+				Number(popo1.MM)+Number(popo2.MM) <=
+					PotionsDeBase[popo1.nom].magieMax &&
+				Number(popo1.RM)+Number(popo2.RM) <=
+					PotionsDeBase[popo1.nom].magieMax
 			)
+			// PufPuff sans spec limite: exclue de mini-mélange
 		) {
 				risque -= 20;
 				details += "\nBonus popo ex.: -20 ("+risque+")";
@@ -982,6 +991,8 @@ function initMatos() {
 					// algébrique et on divise la carac par 10
 					nb = effets[j].match(/-?\d+/);
 					magie = magie ? magie+nb/10 : nb/10;
+					// Mini-mélange: on stocke la valeur pour le cap
+					objPopos[num][carac] = Math.abs(nb);
 				} else if(carac=="TOUR") {
 					// Si effet de durée, malus = nb de 1/2 h
 					risque += nb/30;
