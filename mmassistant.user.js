@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.1.3.1
+// @version      2.1.3.2
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -595,8 +595,8 @@ function risqueExplo(popo1, popo2, compo) {
 		(
 			popo1.nom==popo2.nom ||
 			(
-				popo1.nom.indexOf("Conserve")!=0 &&
-				popo2.nom.indexOf("Conserve")!=0
+				popo1.nom.indexOf("Conserve")!=-1 &&
+				popo2.nom.indexOf("Conserve")!=-1
 			)
 		)
 	) {
