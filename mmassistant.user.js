@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.1.3.3
+// @version      2.1.3.4
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -243,6 +243,14 @@ var effetParQualite = {
 	"Moyenne":12,
 	"Mauvaise":8,
 	"Très Mauvaise":4
+}
+// Genère la regex pour récupérer la qualité d'un composant
+var listeQualiteRegex= '';
+for (let [key, value] of Object.entries(effetParQualite)) {
+  if(listeQualiteRegex.length > 0){
+    listeQualiteRegex += '|';
+  }
+  listeQualiteRegex += key;
 }
 
 var abbreviationQualite = {
@@ -682,29 +690,32 @@ function risqueExplo(popo1, popo2, compo) {
 	}
 }
 
-//--------------------- Désactivé, en attente de refonte ---------------------//
 
-/*function getSetInfo(snap) {
+function getSetInfo(snap) {
 // Extrait et affiche les infos MM d'un compo *dans un tr standard*
-	if(isNaN(snap.childNodes[1].getElementsByTagName("img")[0].alt[0])) {
+  	if(isNaN(snap.childNodes[1].getElementsByTagName("img")[0].alt[0])) {
 		// Si non identifié, on laisse
+    console.warning('non identifié');
 		return;
 	}
-	var
-		node = snap.childNodes[5],
-		mob = node.firstChild.textContent;
+	var node = snap.childNodes[5],
+      mob = node.firstChild.textContent;
 	mob = mob.slice(mob.indexOf("d'un")+5).trim();
-	var
-		niv = niveauDuMonstre[epure(mob)],
-		qualite = snap.childNodes[7].textContent;
-	qualite = qualite.slice(qualite.indexOf("Qualit")+9).trim();
-	var effet = effetParQualite[epure(qualite)];
-	if(niv && effet) {
-		// Si compo référencé (mob en base), on affiche & stocke les infos
-		addInfo(node, mob, niv, qualite, effet);
-	}
+	var niv = niveauDuMonstre[epure(mob)],
+      qualite = snap.childNodes[7].textContent;  
+  qualite = qualite.match(listeQualiteRegex);  	
+  if(niv && qualite in effetParQualite) {
+    ajouteInfosDuCompo(node, {
+      mob: mob,
+      niveau: niv,
+      qualite: qualite,
+      bonus: niv+effetParQualite[qualite]
+    });
+  }
 }
 
+//--------------------- Désactivé, en attente de refonte ---------------------//
+/*
 function mmListeGowap() {
 // Traitement de la page qui liste les gowaps
 	try {
@@ -757,13 +768,13 @@ function mmEquipGowap() {
 		getSetInfo(trList.snapshotItem(i));
 	}
 }
-
+*/
 function mmStockGT() {
 // Traitement du stock de tanière perso (onglet tanière)
 	try {
 		// On récupère la liste des compos en stock
 		var mainTab = document.getElementById("stock");
-		var trList = document.evaluate("./tbody[2]/tr", mainTab, null, 7, null);
+		var trList = document.evaluate("./tbody[2]/tr", mainTab, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);    
 	} catch(e) {
 		return;
 	}
@@ -773,7 +784,7 @@ function mmStockGT() {
 		numCompo++;
 	}
 }
-
+/*
 function mmViewTaniere() {
 // Traitement de l'étal d'une tanière dans la vue (popup)
 	try {
@@ -1462,7 +1473,7 @@ function isPage(url) {
 	return window.self.location.toString().indexOf(url)!=-1;
 }
 
-/*if((isPage("MH_Taniere/TanierePJ_o_Stock") ||
+if((isPage("MH_Taniere/TanierePJ_o_Stock") ||
 	isPage("MH_Comptoirs/Comptoir_o_Stock")) &&
 	window.location.href.indexOf("as_type=Compo")!=-1) {
 	// Ajout du bouton Relaunch (utile si +500 compos)
@@ -1483,14 +1494,15 @@ function isPage(url) {
 			window.setTimeout(mmStockGT, 5000);
 	});
 	mmStockGT();
-} else if(isPage("MH_Follower/FO_Equipement")) {
+
+/*} else if(isPage("MH_Follower/FO_Equipement")) {
 	mmEquipGowap();
 } else if(isPage("MH_Play/Play_e_follo")) {
 	mmListeGowap();
 } else if(isPage("View/TaniereDescription")) {
 	mmViewTaniere();
 } else if(isPage("MH_Play/Play_equipement")) {*/
-if(isPage("MH_Play/Play_equipement")) {
+} else if(isPage("MH_Play/Play_equipement")) {
 // Page d'équipement
 	getNumTroll();
 	initMatos();
@@ -1542,3 +1554,4 @@ if(isPage("MH_Play/Play_equipement")) {
 }
 
 window.console.debug("[mmassistant] Script OFF sur : "+WHEREARTTHOU);
+
