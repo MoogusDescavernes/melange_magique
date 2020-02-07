@@ -1473,26 +1473,28 @@ function isPage(url) {
 	return window.self.location.toString().indexOf(url)!=-1;
 }
 
-if((isPage("MH_Taniere/TanierePJ_o_Stock") ||
-	isPage("MH_Comptoirs/Comptoir_o_Stock")) &&
-	window.location.href.indexOf("as_type=Compo")!=-1) {
-	// Ajout du bouton Relaunch (utile si +500 compos)
-	var
-		numCompo = 0,
-		footer = document.getElementById("footer1"),
-		relaunchButton = document.createElement("input");
-	relaunchButton.type = "button";
-	relaunchButton.className = "mh_form_submit";
-	relaunchButton.value = "Relancer MountyZilla";
-	relaunchButton.onmouseover = function() {
-		this.style.cursor="pointer";
-	};
-	relaunchButton.onclick = mmStockGT;
-	footer.parentNode.insertBefore(relaunchButton, footer);
-	document.getElementById("stock-ajax-append").addEventListener("click",
-		function() {
-			window.setTimeout(mmStockGT, 5000);
-	});
+if( (isPage("MH_Taniere/TanierePJ_o_Stock") || isPage("MH_Comptoirs/Comptoir_o_Stock")) 
+	&& window.location.href.indexOf("as_type=Compo")!=-1) {
+	var numCompo = 0,
+		linkAppendNextPage = document.getElementById("stock-ajax-append");
+		
+	if(linkAppendNextPage){		
+		// Ajout du bouton Relaunch (utile si +500 compos)
+		var footer = document.getElementById("footer1"),
+			relaunchButton = document.createElement("input");
+		relaunchButton.type = "button";
+		relaunchButton.className = "mh_form_submit";
+		relaunchButton.value = "Relancer MountyZilla";
+		relaunchButton.onmouseover = function() {
+			this.style.cursor="pointer";
+		};
+		relaunchButton.onclick = mmStockGT;
+		footer.parentNode.insertBefore(relaunchButton, footer);
+		linkAppendNextPage.addEventListener("click",
+			function() {
+				window.setTimeout(mmStockGT, 5000);
+		});
+	}
 	mmStockGT();
 
 /*} else if(isPage("MH_Follower/FO_Equipement")) {
