@@ -3,13 +3,14 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.1.3.4
+// @version      2.1.4.0
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
 // @include      */mountyhall/MH_Play/Play_e_follo*
 // @include      */mountyhall/View/TaniereDescription*
 // @include      */mountyhall/MH_Play/Play_equipement*
+// @include      */mountyhall/MH_Play/Actions/Play_a_ActionYY*
 // @include      */mountyhall/MH_Play/Actions/Competences/Play_a_CompetenceYY*
 // @grant        none
 // ==/UserScript==
@@ -61,7 +62,8 @@ var
 	compos_par_bonus = true,
 	popos_par_nom = true,
 	refaire_mise_en_page = true,
-	lancer_de_potions = true;
+	lancer_de_potions = true,
+	utiliser_popo = true;
 
 //----------------------------- Bases de données -----------------------------//
 
@@ -1247,11 +1249,20 @@ function enrichitListeCompos() {
 function enrichitListePopos(select) {
 // Ajoute les infos de popo à un menu déroulant lors d'un MM / LdP
 	if(!objPopos) { return; }
-	var i, option, popo;
+	var
+		i, option, popo,
+		container = document.evaluate(
+			"./optgroup[@label='Potion']",
+			select, null, 9, null
+		).singleNodeValue ?? select;
 
 	// Enrichissement de la liste (niveaux, effet en title)
-	for(i=0 ; i<select.options.length ; i++) {
-		option = select.options[i];
+	for(i=0 ; i<container.children.length ; i++) {
+		option = container.children[i];
+		if (!option.value) {
+			// On saute l'option "choisir" pour LdP
+			continue;
+		}
 		if(option.value in objPopos) {
 			// Cas de Lancer de Potion:
 			// on supprime la mention inutile " (Potion)"
@@ -1281,26 +1292,17 @@ function enrichitListePopos(select) {
 	// Tri des potions (si l'option est activée)
 	if(popos_par_nom) {
 		var
-			optgroup = select.getElementsByTagName("optgroup"),
-			insertPoint,
 			poposDispos = {},
 			numPopos = [],
 			num;
 
-		// Choix du point d'insertion (LdP foireux)
-		if (optgroup.length>0) {
-			insertPoint = optgroup[0];
-		} else {
-			insertPoint = select;
-		}
-
 		// Sauvegarde des options
-		for(i=select.options.length-1 ; i>=0 ; i--) {
-			option = select.options[i];
+		for(i=container.children.length-1 ; i>=0 ; i--) {
+			option = container.children[i];
 			if(option.value) {
 				poposDispos[option.value] = option;
 				if(option.value in objPopos) {
-					select.remove(i);
+					option.remove();
 				}
 			}
 		}
@@ -1355,7 +1357,7 @@ function enrichitListePopos(select) {
 
 		// Réinjection des options
 		for(i=0 ; i<numPopos.length ; i++) {
-			insertPoint.appendChild(poposDispos[numPopos[i]]);
+			container.appendChild(poposDispos[numPopos[i]]);
 		}
 	}
 }
@@ -1401,6 +1403,7 @@ function initCompetenceMelange() {
 	selectPopo2.onchange = refreshRisqueExplo;
 	selectCompo.onchange = refreshRisqueExplo;
 
+	// Récupération des items à utiliser si activation via inventaire
 	if(utiliser = window.sessionStorage.getObject("mmassistant.utiliser")) {
 		window.console.debug("Items à utiliser:", utiliser);
 		window.sessionStorage.removeObject("mmassistant.utiliser");
@@ -1511,9 +1514,25 @@ if(
 	// Page d'équipement
 	getNumTroll();
 	initMatos();
-// } else if(isPage("MH_Play/Actions/Play_a_ActionYY")) {
-// // Utiliser une popo / parcho
-// TODO
+} else if(
+	utiliser_popo &&
+	isPage("MH_Play/Actions/Play_a_ActionYY") &&
+	document.body.id=="p_utiliserunepotionouunparchemin"
+) {
+	// Utiliser une popo / parcho
+	window.console.log("[mmassistant] Utiliser une potion");
+	getNumTroll();
+	try {
+		var
+			select = document.getElementsByTagName("select")[0],
+			objPopos = window.localStorage.getObject("mmassistant.popos."+numTroll);
+	} catch(e) {
+		window.console.error(
+			"[mmassistant] Erreur durant l'initialisation - OFF", e
+		);
+		return;
+	}
+	enrichitListePopos(select);
 } else if(isPage("MH_Play/Actions/Competences/Play_a_CompetenceYY")) {
 	if(lancer_de_potions && document.body.id=="p_competencelancerdepotions") {
 		// Lancer de Potion
