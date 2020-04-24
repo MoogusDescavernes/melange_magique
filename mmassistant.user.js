@@ -47,10 +47,17 @@
 //
 //---------------------------- Variables Globales ----------------------------//
 
-var WHEREARTTHOU = window.location.pathname;
-window.console.debug("[mmassistant] script ON! sur : "+WHEREARTTHOU);
-
 var
+	// Options du Script:
+	compos_par_bonus = true,
+	popos_par_nom = true,
+	refaire_mise_en_page = true,
+	lancer_de_potions = true,
+	utiliser_popo = true,
+
+	// Activer les logs de débugage:
+	MODE_DEBUG = false,
+
 	// Défini dans le main avec getNumTroll():
 	numTroll,
 
@@ -58,12 +65,10 @@ var
 	objCompos = {},
 	objPopos = {};
 
-var
-	compos_par_bonus = true,
-	popos_par_nom = true,
-	refaire_mise_en_page = true,
-	lancer_de_potions = true,
-	utiliser_popo = true;
+if(MODE_DEBUG) {
+	var URL = window.location.pathname;
+	window.console.debug("[mmassistant] script ON! sur :"+URL);
+}
 
 //----------------------------- Bases de données -----------------------------//
 
@@ -470,7 +475,9 @@ function getNumTroll() {
 		if(liens.length>0 && liens[0].onclick!==void(0)) {
 			str = liens[0].onclick.toString();
 			numTroll = parseInt(/\d+/.exec(str)[0]);
-			window.console.debug("[mmassistant] numTroll = "+numTroll);
+			if (MODE_DEBUG) {
+				window.console.debug("[mmassistant] numTroll = "+numTroll);
+			}
 		}
 	} catch(e) {
 		window.console.warn(
@@ -860,7 +867,9 @@ function initMatos() {
 		);
 		return;
 	}
-	window.console.debug("[mmassistant] Lancement initMatos");
+	if(MODE_DEBUG) {
+		window.console.debug("[mmassistant] Lancement initMatos");
+	}
 	var
 		i, j, insertNode, mob, niveau, qualite, effet,
 		nom, num, effets, racine, risque, magie, nb, carac;
@@ -896,7 +905,9 @@ function initMatos() {
 		// Ajout de la checkbox de mélange
 		ajouteCheckboxMelange(tableCompos.rows[i].cells[0], num, "compo");
 	}
-	window.console.debug(objCompos);
+	if(MODE_DEBUG) {
+		window.console.debug(objCompos);
+	}
 	window.localStorage.setObject("mmassistant.compos."+numTroll, objCompos);
 
 	// Récupération & Stockage des données des Potions
@@ -1030,7 +1041,9 @@ function initMatos() {
 
 		ajouteInfosDeLaPopo(insertNode, objPopos[num]);
 	}
-	window.console.debug(objPopos);
+	if(MODE_DEBUG) {
+		window.console.debug(objPopos);
+	}
 	window.localStorage.setObject("mmassistant.popos."+numTroll, objPopos);
 
 	// Ajout du bouton de Mélange
@@ -1041,8 +1054,9 @@ function initMatos() {
 	btn = ajouteBouton(td, "Mélanger...");
 	btn.id = "mmassistant_btnmelange";
 	btn.onclick = activeMelangeur;
-
-	window.console.debug("[mmassistant] initMatos réussi");
+	if(MODE_DEBUG) {
+		window.console.debug("[mmassistant] initMatos réussi");
+	}
 }
 
 function activeMelangeur() {
@@ -1373,7 +1387,9 @@ function enrichitListePopos(select) {
 
 function initCompetenceMelange() {
 // Mise en place du calculateur de risque
-	window.console.debug("[mmassistant] lancement initCompetenceMelange");
+	if(MODE_DEBUG) {
+		window.console.debug("[mmassistant] lancement initCompetenceMelange");
+	}
 	var
 		divAction = document.querySelector("div.Action"),
 		labels = document.evaluate(
@@ -1414,7 +1430,9 @@ function initCompetenceMelange() {
 
 	// Récupération des items à utiliser si activation via inventaire
 	if(utiliser = window.sessionStorage.getObject("mmassistant.utiliser")) {
-		window.console.debug("Items à utiliser:", utiliser);
+		if(MODE_DEBUG) {
+			window.console.debug("Items à utiliser:", utiliser);
+		}
 		window.sessionStorage.removeObject("mmassistant.utiliser");
 		if(utiliser.compo) {
 			selectCompo.value = String(utiliser.compo);
@@ -1437,8 +1455,9 @@ function initCompetenceMelange() {
 		window.console.log("[mmassistant] Items à utiliser appliqués");
 		refreshRisqueExplo();
 	}
-
-	window.console.debug("[mmassistant] initCompetenceMelange réussie");
+	if(MODE_DEBUG) {
+		window.console.debug("[mmassistant] initCompetenceMelange réussie");
+	}
 }
 
 function refreshRisqueExplo() {
@@ -1475,7 +1494,9 @@ function refreshRisqueExplo() {
 	afficheRisque.innerHTML = "[Risque d'explosion : "+risque.texte+"]";
 	afficheRisque.title = risque.details;
 
-	window.console.debug("[mmassistant] refreshRisqueExplo réussi");
+	if(MODE_DEBUG) {
+		window.console.debug("[mmassistant] refreshRisqueExplo réussi");
+	}
 }
 
 
@@ -1507,9 +1528,8 @@ if(
 		};
 		relaunchButton.onclick = mmStockGT;
 		footer.parentNode.insertBefore(relaunchButton, footer);
-		linkAppendNextPage.addEventListener("click",
-			function() {
-				window.setTimeout(mmStockGT, 5000);
+		linkAppendNextPage.addEventListener("click", function() {
+			window.setTimeout(mmStockGT, 5000);
 		});
 	}
 	mmStockGT();
@@ -1586,4 +1606,6 @@ if(
 	initCompetenceMelange();
 }
 
-window.console.debug("[mmassistant] Script OFF sur : "+WHEREARTTHOU);
+if(MODE_DEBUG) {
+	window.console.debug("[mmassistant] Script OFF sur : "+URL);
+}
