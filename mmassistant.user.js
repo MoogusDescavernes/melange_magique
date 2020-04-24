@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.1.4.0
+// @version      2.1.4.1
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -1254,7 +1254,8 @@ function enrichitListePopos(select) {
 		container = document.evaluate(
 			"./optgroup[@label='Potion']",
 			select, null, 9, null
-		).singleNodeValue ?? select;
+		).singleNodeValue ?? select,
+		initialValue = select.value;
 
 	// Enrichissement de la liste (niveaux, effet en title)
 	for(i=0 ; i<container.children.length ; i++) {
@@ -1296,7 +1297,7 @@ function enrichitListePopos(select) {
 			numPopos = [],
 			num;
 
-		// Sauvegarde des options
+		// Sauvegarde et suppression des options
 		for(i=container.children.length-1 ; i>=0 ; i--) {
 			option = container.children[i];
 			if(option.value) {
@@ -1307,7 +1308,7 @@ function enrichitListePopos(select) {
 			}
 		}
 
-		// Tri
+		// Tri des options sauvegardées
 		for(num in objPopos) {
 			if(num in poposDispos) {
 				numPopos.push(num);
@@ -1355,9 +1356,17 @@ function enrichitListePopos(select) {
 			return objPopos[a].nom>objPopos[b].nom;
 		});
 
-		// Réinjection des options
+		// Réinjection des options sauvegardées
 		for(i=0 ; i<numPopos.length ; i++) {
 			container.appendChild(poposDispos[numPopos[i]]);
+		}
+
+		// Resélection de l'élément précédemment sélectionné (JS call sur Use)
+		// ou par défaut du nouveau premier élément de la liste
+		if(initialValue>0) {
+			select.value = initialValue;
+		} else {
+			select.selectedIndex = 0;
 		}
 	}
 }
