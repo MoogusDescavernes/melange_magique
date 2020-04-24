@@ -237,28 +237,28 @@ var niveauDuMonstre = {
 	"Zombie": 2
 };
 
-var effetParQualite = {
-	"Très Bonne": 20,
-	"Bonne": 16,
-	"Moyenne": 12,
-	"Mauvaise": 8,
-	"Très Mauvaise": 4
-};
-// Genère la regex pour récupérer la qualité d'un composant
-var listeQualiteRegex = '';
-for(let [key, value] of Object.entries(effetParQualite)) {
-	if(listeQualiteRegex.length > 0) {
-		listeQualiteRegex += '|';
-	}
-	listeQualiteRegex += key;
-}
-
-var abbreviationQualite = {
-	"Très Bonne": "TB",
-	"Bonne": "B",
-	"Moyenne": "Moy.",
-	"Mauvaise": "Mauv.",
-	"Très Mauvaise": "TM"
+var Qualites = {
+	"Très Bonne": {
+		bonus: 20,
+		abbr: "TB"
+	},
+	"Bonne": {
+		bonus: 16,
+		abbr: "B"
+	},
+	"Moyenne": {
+		bonus: 12,
+		abbr: "Moy."
+	},
+	"Mauvaise": {
+		bonus: 8,
+		abbr: "Mauv."
+	},
+	"Très Mauvaise": {
+		bonus: 4,
+		abbr: "TM"
+	},
+	regex: "Très Bonne|Bonne|Moyenne|Mauvaise|Très Mauvaise"
 };
 
 var PotionsDeBase = {
@@ -546,7 +546,7 @@ function ajouteInfosDuCompo(node, compo) {
 	}
 	span.title =
 		str+compo.mob+" : -"+compo.niveau+
-		"\nQualité "+compo.qualite+" : -"+effetParQualite[compo.qualite];
+		"\nQualité "+compo.qualite+" : -"+Qualites[compo.qualite].bonus;
 	node.appendChild(span);
 }
 
@@ -703,13 +703,13 @@ function getSetInfo(snap) {
 	mob = mob.slice(mob.indexOf("d'un")+5).trim();
 	var niv = niveauDuMonstre[epure(mob)],
 		qualite = snap.childNodes[7].textContent;
-	qualite = qualite.match(listeQualiteRegex);
-	if(niv && qualite in effetParQualite) {
+	qualite = qualite.match(Qualites.regex);
+	if(niv && qualite in Qualites) {
 		ajouteInfosDuCompo(node, {
 			mob: mob,
 			niveau: niv,
 			qualite: qualite,
-			bonus: niv+effetParQualite[qualite]
+			bonus: niv+Qualites[qualite].bonus
 		});
 	}
 }
@@ -881,12 +881,12 @@ function initMatos() {
 		qualite = tableCompos.rows[i].cells[4].textContent;
 		qualite = qualite.slice(qualite.indexOf("Qualit")+9).trim();
 		num = String(tableCompos.rows[i].cells[2].textContent.match(/\d+/));
-		if(niveau && qualite in effetParQualite) {
+		if(niveau && qualite in Qualites) {
 			objCompos[num] = {
 				mob: mob,
 				niveau: niveau,
 				qualite: qualite,
-				bonus: niveau+effetParQualite[qualite]
+				bonus: niveau+Qualites[qualite].bonus
 			}
 			ajouteInfosDuCompo(insertNode, objCompos[num]);
 		}
@@ -1197,7 +1197,7 @@ function enrichitListeCompos() {
 		if(option.value in objCompos) {
 			compo = objCompos[option.value];
 			appendText(option,
-				" "+abbreviationQualite[compo.qualite]+
+				" "+Qualites[compo.qualite].abbr+
 				" (-"+compo.bonus+"%)"
 			);
 		} else if(option.value!=0) {
