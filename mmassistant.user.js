@@ -111,6 +111,7 @@ var niveauDuMonstre = {
 	"Crasc": 10,
 	"Crasc Maexus": 25,
 	"Crasc Medius": 17,
+	"Crasc Parasitus": 14,
 	"Croquemitaine": 6,
 	"Cube Gelatineux": 32,
 	"Daemonite": 27,
