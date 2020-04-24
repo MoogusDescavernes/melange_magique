@@ -16,12 +16,12 @@
 
 
 //---------------------- À l'intention des programmeurs ----------------------//
-// 
+//
 // À propos des types de variables :
 // Lors d'une conversion en JSON, suivant le navigateur, les types string/number
 // peuvent être permutés (y compris pour les keys). À manier avec précaution.
-// 
-// Stockage des données de composants : 
+//
+// Stockage des données de composants :
 // localStorage["mmassistant.compos.numTroll"] (object) {
 //   numCompo (string): {
 //     mob    : libellé nom du monstre (string),
@@ -30,8 +30,8 @@
 //     bonus  : bonus total (number)
 //   }
 // }
-// 
-// Stockage des données de potions : 
+//
+// Stockage des données de potions :
 // localStorage["mmassistant.popos.numTroll"] (object) {
 //   numPopo (string): {
 //     nom    : libellé nom de la potion (string),
@@ -43,7 +43,7 @@
 //     risque : risque lié aux effets de la potion (number, flottant)
 //   }
 // }
-// 
+//
 //---------------------------- Variables Globales ----------------------------//
 
 var WHEREARTTHOU = window.location.pathname;
@@ -52,7 +52,7 @@ window.console.debug("[mmassistant] script ON! sur : "+WHEREARTTHOU);
 var
 	// Défini dans le main avec getNumTroll():
 	numTroll,
-	
+
 	// Globales dans tous les cas (mémoires ou extraites):
 	objCompos = {},
 	objPopos = {};
@@ -66,200 +66,200 @@ var
 //----------------------------- Bases de données -----------------------------//
 
 var niveauDuMonstre = {
-	"Abishaii Bleu":19,
-	"Abishaii Noir":10,
-	"Abishaii Rouge":23,
-	"Abishaii Vert":15,
-	"Ame-en-peine":8,
-	"Amibe Geante":9,
-	"Anaconda des Catacombes":8,
-	"Ankheg":10,
-	"Anoploure Purpurin":36,
+	"Abishaii Bleu": 19,
+	"Abishaii Noir": 10,
+	"Abishaii Rouge": 23,
+	"Abishaii Vert": 15,
+	"Ame-en-peine": 8,
+	"Amibe Geante": 9,
+	"Anaconda des Catacombes": 8,
+	"Ankheg": 10,
+	"Anoploure Purpurin": 36,
 	"Aragnarok du Chaos": 16,
-	"Araignee Geante":2,
-	"Ashashin":35,
-	"Balrog":50,
-	"Banshee":16,
-	"Barghest":36,
-	"Basilisk":11,
-	"Behemoth":34,
-	"Behir":14,
-	"Beholder":50,
-	"Boggart":3,
-	"Bondin":9,
-	"Bouj'Dla":19,
-	"Bouj'Dla Placide":37,
-	"Bulette":19,
-	"Caillouteux":1,
-	"Capitan":35,
-	"Carnosaure":25,
-	"Champi-Glouton":3,
-	"Chauve-Souris Geante":4,
-	"Cheval a Dents de Sabre":23,
-	"Chevalier du Chaos":22,
-	"Chimere":13,
-	"Chonchon":24,
-	"Coccicruelle":22,
-	"Cockatrice":5,
-	"Crasc":10,
-	"Crasc Maexus":25,
-	"Crasc Medius":17,
-	"Croquemitaine":6,
-	"Cube Gelatineux":32,
-	"Daemonite":27,
-	"Diablotin":5,
-	"Dindon du Chaos":1,
-	"Djinn":29,
-	"Ectoplasme":18,
-	"Effrit":27,
-	"Elementaire d'Air":23,
-	"Elementaire d'Eau":17,
-	"Elementaire de Feu":21,
-	"Elementaire de Terre":21,
-	"Elementaire du Chaos":26,
-	"Erinyes":7,
-	"Esprit-Follet":16,
-	"Essaim Craterien":30,
-	"Essaim Sanguinaire":25,
-	"Ettin":8,
-	"Familier":1,
-	"Fantome":24,
-	"Feu Follet":20,
-	"Flagelleur Mental":33,
-	"Foudroyeur":38,
-	"Fumeux":22,
-	"Fungus Geant":9,
-	"Fungus Violet":4,
-	"Furgolin":10,
-	"Gargouille":3,
-	"Geant de Pierre":13,
-	"Geant des Gouffres":22,
-	"Geck'oo Majestueux":40,
-	"Geck'oo":15,
-	"Glouton":20,
-	"Gnoll":5,
-	"Gnu Domestique":1,
-	"Gnu Sauvage":1,
-	"Goblin":4,
-	"Goblours":4,
-	"Golem d'Argile":15,
-	"Golem de cuir":1,
-	"Golem de Chair":8,
-	"Golem de Fer":31,
-	"Golem de metal":1,
-	"Golem de mithril":1,
-	"Golem de papier":1,
-	"Golem de Pierre":23,
-	"Gorgone":11,
-	"Goule":4,
-	"Gowap Apprivoise":1,
-	"Gowap Sauvage":1,
-	"Gremlins":3,
-	"Gritche":39,
-	"Grouilleux":4,
-	"Grylle":31,
-	"Harpie":4,
-	"Hellrot":18,
-	"Homme-Lezard":4,
-	"Hurleur":8,
-	"Hydre":50,
-	"Incube":13,
-	"Kobold":2,
-	"Labeilleux":26,
-	"Lezard Geant":5,
-	"Liche":50,
-	"Limace Geante":10,
-	"Loup-Garou":8,
-	"Lutin":4,
-	"Mante Fulcreuse":30,
-	"Manticore":9,
-	"Marilith":33,
-	"Meduse":6,
-	"Megacephale":38,
-	"Mille-Pattes Geant":14,
-	"Mimique":6,
-	"Minotaure":7,
+	"Araignee Geante": 2,
+	"Ashashin": 35,
+	"Balrog": 50,
+	"Banshee": 16,
+	"Barghest": 36,
+	"Basilisk": 11,
+	"Behemoth": 34,
+	"Behir": 14,
+	"Beholder": 50,
+	"Boggart": 3,
+	"Bondin": 9,
+	"Bouj'Dla": 19,
+	"Bouj'Dla Placide": 37,
+	"Bulette": 19,
+	"Caillouteux": 1,
+	"Capitan": 35,
+	"Carnosaure": 25,
+	"Champi-Glouton": 3,
+	"Chauve-Souris Geante": 4,
+	"Cheval a Dents de Sabre": 23,
+	"Chevalier du Chaos": 22,
+	"Chimere": 13,
+	"Chonchon": 24,
+	"Coccicruelle": 22,
+	"Cockatrice": 5,
+	"Crasc": 10,
+	"Crasc Maexus": 25,
+	"Crasc Medius": 17,
+	"Croquemitaine": 6,
+	"Cube Gelatineux": 32,
+	"Daemonite": 27,
+	"Diablotin": 5,
+	"Dindon du Chaos": 1,
+	"Djinn": 29,
+	"Ectoplasme": 18,
+	"Effrit": 27,
+	"Elementaire d'Air": 23,
+	"Elementaire d'Eau": 17,
+	"Elementaire de Feu": 21,
+	"Elementaire de Terre": 21,
+	"Elementaire du Chaos": 26,
+	"Erinyes": 7,
+	"Esprit-Follet": 16,
+	"Essaim Craterien": 30,
+	"Essaim Sanguinaire": 25,
+	"Ettin": 8,
+	"Familier": 1,
+	"Fantome": 24,
+	"Feu Follet": 20,
+	"Flagelleur Mental": 33,
+	"Foudroyeur": 38,
+	"Fumeux": 22,
+	"Fungus Geant": 9,
+	"Fungus Violet": 4,
+	"Furgolin": 10,
+	"Gargouille": 3,
+	"Geant de Pierre": 13,
+	"Geant des Gouffres": 22,
+	"Geck'oo Majestueux": 40,
+	"Geck'oo": 15,
+	"Glouton": 20,
+	"Gnoll": 5,
+	"Gnu Domestique": 1,
+	"Gnu Sauvage": 1,
+	"Goblin": 4,
+	"Goblours": 4,
+	"Golem d'Argile": 15,
+	"Golem de cuir": 1,
+	"Golem de Chair": 8,
+	"Golem de Fer": 31,
+	"Golem de metal": 1,
+	"Golem de mithril": 1,
+	"Golem de papier": 1,
+	"Golem de Pierre": 23,
+	"Gorgone": 11,
+	"Goule": 4,
+	"Gowap Apprivoise": 1,
+	"Gowap Sauvage": 1,
+	"Gremlins": 3,
+	"Gritche": 39,
+	"Grouilleux": 4,
+	"Grylle": 31,
+	"Harpie": 4,
+	"Hellrot": 18,
+	"Homme-Lezard": 4,
+	"Hurleur": 8,
+	"Hydre": 50,
+	"Incube": 13,
+	"Kobold": 2,
+	"Labeilleux": 26,
+	"Lezard Geant": 5,
+	"Liche": 50,
+	"Limace Geante": 10,
+	"Loup-Garou": 8,
+	"Lutin": 4,
+	"Mante Fulcreuse": 30,
+	"Manticore": 9,
+	"Marilith": 33,
+	"Meduse": 6,
+	"Megacephale": 38,
+	"Mille-Pattes Geant": 14,
+	"Mimique": 6,
+	"Minotaure": 7,
 	"Mohrg": 35,
-	"Molosse Satanique":8,
-	"Momie":4,
-	"Monstre Rouilleur":3,
-	"Mouch'oo Domestique":14,
-	"Mouch'oo Majestueux Sauvage":33,
-	"Mouch'oo Sauvage":14,
-	"Naga":10,
-//	"Na-Haniym-Heee":0,
-	"Necrochore":37,
-	"Necromant":39,
-	"Necrophage":8,
-	"Nuage d'Insectes":7,
-	"Nuee de Vermine":13,
-	"Ogre":7,
-	"Ombre de Roches":13,
-	"Ombre":2,
-	"Orque":3,
-	"Ours-Garou":18,
-	"Palefroi Infernal":29,
-	"Phoenix":32,
-//	"Pititabeille":0,
-	"Plante Carnivore":4,
-	"Pseudo-Dragon":5,
-	"Rat Geant":2,
-	"Rat-Garou":3,
-	"Rocketeux":5,
-	"Sagouin":3,
-	"Scarabee Geant":4,
-	"Scorpion Geant":10,
-	"Shai":28,
-	"Sirene":8,
-	"Slaad":5,
-	"Sorciere":17,
-	"Spectre":14,
-	"Sphinx":30,
-	"Squelette":1,
-	"Strige":2,
-	"Succube":13,
-	"Tertre Errant":20,
-	"Thri-kreen":10,
-	"Tigre-Garou":12,
-	"Titan":26,
-	"Trancheur":35,
-	"Tubercule Tueur":14,
-	"Tutoki":4,
-	"Vampire":29,
-	"Ver Carnivore Geant":12,
-	"Ver Carnivore":11,
-	"Veskan Du Chaos":14,
-	"Vouivre":33,
-	"Worg":5,
-	"Xorn":14,
-	"Yeti":8,
-	"Yuan-ti":15,
-	"Zombie":2
-}
+	"Molosse Satanique": 8,
+	"Momie": 4,
+	"Monstre Rouilleur": 3,
+	"Mouch'oo Domestique": 14,
+	"Mouch'oo Majestueux Sauvage": 33,
+	"Mouch'oo Sauvage": 14,
+	"Naga": 10,
+	// "Na-Haniym-Heee":0,
+	"Necrochore": 37,
+	"Necromant": 39,
+	"Necrophage": 8,
+	"Nuage d'Insectes": 7,
+	"Nuee de Vermine": 13,
+	"Ogre": 7,
+	"Ombre de Roches": 13,
+	"Ombre": 2,
+	"Orque": 3,
+	"Ours-Garou": 18,
+	"Palefroi Infernal": 29,
+	"Phoenix": 32,
+	// "Pititabeille":0,
+	"Plante Carnivore": 4,
+	"Pseudo-Dragon": 5,
+	"Rat Geant": 2,
+	"Rat-Garou": 3,
+	"Rocketeux": 5,
+	"Sagouin": 3,
+	"Scarabee Geant": 4,
+	"Scorpion Geant": 10,
+	"Shai": 28,
+	"Sirene": 8,
+	"Slaad": 5,
+	"Sorciere": 17,
+	"Spectre": 14,
+	"Sphinx": 30,
+	"Squelette": 1,
+	"Strige": 2,
+	"Succube": 13,
+	"Tertre Errant": 20,
+	"Thri-kreen": 10,
+	"Tigre-Garou": 12,
+	"Titan": 26,
+	"Trancheur": 35,
+	"Tubercule Tueur": 14,
+	"Tutoki": 4,
+	"Vampire": 29,
+	"Ver Carnivore Geant": 12,
+	"Ver Carnivore": 11,
+	"Veskan Du Chaos": 14,
+	"Vouivre": 33,
+	"Worg": 5,
+	"Xorn": 14,
+	"Yeti": 8,
+	"Yuan-ti": 15,
+	"Zombie": 2
+};
 
 var effetParQualite = {
-	"Très Bonne":20,
-	"Bonne":16,
-	"Moyenne":12,
-	"Mauvaise":8,
-	"Très Mauvaise":4
-}
+	"Très Bonne": 20,
+	"Bonne": 16,
+	"Moyenne": 12,
+	"Mauvaise": 8,
+	"Très Mauvaise": 4
+};
 // Genère la regex pour récupérer la qualité d'un composant
-var listeQualiteRegex= '';
-for (let [key, value] of Object.entries(effetParQualite)) {
-  if(listeQualiteRegex.length > 0){
-    listeQualiteRegex += '|';
-  }
-  listeQualiteRegex += key;
+var listeQualiteRegex = '';
+for(let [key, value] of Object.entries(effetParQualite)) {
+	if(listeQualiteRegex.length > 0) {
+		listeQualiteRegex += '|';
+	}
+	listeQualiteRegex += key;
 }
 
 var abbreviationQualite = {
-	"Très Bonne":"TB",
-	"Bonne":"B",
-	"Moyenne":"Moy.",
-	"Mauvaise":"Mauv.",
-	"Très Mauvaise":"TM"
-}
+	"Très Bonne": "TB",
+	"Bonne": "B",
+	"Moyenne": "Moy.",
+	"Mauvaise": "Mauv.",
+	"Très Mauvaise": "TM"
+};
 
 var PotionsDeBase = {
 	"Dover Powa" : {
@@ -359,7 +359,7 @@ var PotionsDeBase = {
 		duree  : 3,
 		nivMax : 5
 	}
-}
+};
 
 //---------------------- Icone Mélange Magique (base64) ----------------------//
 
@@ -437,16 +437,16 @@ var iconeBase64 = "data:image/png;base64," +
 // https://stackoverflow.com/questions/2010892/storing-objects-in-html5-localstorage#answer-3146971
 Storage.prototype.setObject = function(key, value) {
 	this.setItem(key, JSON.stringify(value));
-}
+};
 
 Storage.prototype.getObject = function(key) {
 	var value = this.getItem(key);
 	return value && JSON.parse(value);
-}
+};
 
 Storage.prototype.removeObject = function(key) {
 	this.removeItem(key);
-}
+};
 
 function epure(texte) {
 	return texte.
@@ -474,8 +474,7 @@ function getNumTroll() {
 		window.console.warn(
 			"[mmassistant] Aucun numéro de troll trouvé : choix par défaut"
 		);
-		numTroll = window.localStorage.getItem("mmassistant.lastNumTroll");
-		numTroll = numTroll ? numTroll : "defaut";
+		numTroll = window.localStorage.getItem("mmassistant.lastNumTroll") ?? "defaut";
 	}
 	window.localStorage.setItem("mmassistant.lastNumTroll", numTroll);
 }
@@ -519,7 +518,7 @@ function creeIconeMelange() {
 // Prépare l'icône à afficher pour les infos MM
 	var img = new Image();
 	img.src = iconeBase64;
-	img.alt = "Mélange_Magique:";
+	img.alt = "Mélange_Magique";
 	img.style.height = "20px";
 	img.style.verticalAlign = "middle";
 	return img;
@@ -552,7 +551,7 @@ function ajouteInfosDuCompo(node, compo) {
 
 function ajouteInfosDeLaPopo(node, popo) {
 // Ajoute une img avec titre d'infos de popo à la fin de node
-	var	
+	var
 		img = creeIconeMelange(),
 		titre = "Caracs: +"+popo.risque;
 	if(popo.melange) {
@@ -585,14 +584,14 @@ function risqueExplo(popo1, popo2, compo) {
 		risque = 33,
 		details = "Risque de base: +33",
 		risqueMax, popoInconnue, dureeMin, texte;
-	
+
 	// Malus de caracs
 	risque += popo1.risque;
 	details += "\nEffet popo 1: +"+popo1.risque+" ("+risque+")";
 	risque += popo2.risque;
 	details += "\nEffet popo 2: +"+popo2.risque+" ("+risque+")";
 	risque = Math.round(risque);
-	
+
 	// Malus de popo mélangée, Bonus popos de base identiques & Mini-mélange
 	if(popo1.melange || popo2.melange) {
 		risque += 15;
@@ -635,13 +634,13 @@ function risqueExplo(popo1, popo2, compo) {
 				details += "\nBonus popo ex.: -20 ("+risque+")";
 		}
 	}
-	
+
 	// Malus de Zone
 	if(popo1.zone || popo2.zone) {
 		risque += 40;
 		details += "\nMalus zone: +40 ("+risque+")";
 	}
-	
+
 	// Malus mélange hétérogène GPT (Guérison/Painture/Toxine)
 	popoInconnue = popo1.duree==void(0) || popo2.duree==void(0);
 	risqueMax = risque+5;
@@ -654,7 +653,7 @@ function risqueExplo(popo1, popo2, compo) {
 		risqueMax += 40;
 		details += "\nMalus hétérogène GPT: +40 ??";
 	}
-	
+
 	// Malus durée
 	dureeMin = popo1.duree ? popo1.duree : 0;
 	dureeMin = popo2.duree ? Math.max(dureeMin, popo2.duree) : dureeMin;
@@ -667,14 +666,14 @@ function risqueExplo(popo1, popo2, compo) {
 	} else {
 		details += "\nMalus de durée: de +"+dureeMin+" à +5";
 	}
-		
+
 	// Bonus de compo
 	if(compo) {
 		risque -= compo.bonus;
 		risqueMax -= compo.bonus;
 		details += "\nBonus compo: -"+compo.bonus+" ("+risque+")";
 	}
-	
+
 	// Affichage
 	if(risqueMax<16) {
 		texte = "15 %";
@@ -683,7 +682,7 @@ function risqueExplo(popo1, popo2, compo) {
 	} else {
 		texte = "de "+Math.max(risque, 15)+" à "+risqueMax+" %";
 	}
-	
+
 	return {
 		texte: texte,
 		details: details
@@ -693,25 +692,25 @@ function risqueExplo(popo1, popo2, compo) {
 
 function getSetInfo(snap) {
 // Extrait et affiche les infos MM d'un compo *dans un tr standard*
-  	if(isNaN(snap.childNodes[1].getElementsByTagName("img")[0].alt[0])) {
+	if(isNaN(snap.childNodes[1].getElementsByTagName("img")[0].alt[0])) {
 		// Si non identifié, on laisse
-    console.warning('non identifié');
+		console.warning('non identifié');
 		return;
 	}
 	var node = snap.childNodes[5],
-      mob = node.firstChild.textContent;
+		mob = node.firstChild.textContent;
 	mob = mob.slice(mob.indexOf("d'un")+5).trim();
 	var niv = niveauDuMonstre[epure(mob)],
-      qualite = snap.childNodes[7].textContent;  
-  qualite = qualite.match(listeQualiteRegex);  	
-  if(niv && qualite in effetParQualite) {
-    ajouteInfosDuCompo(node, {
-      mob: mob,
-      niveau: niv,
-      qualite: qualite,
-      bonus: niv+effetParQualite[qualite]
-    });
-  }
+		qualite = snap.childNodes[7].textContent;
+	qualite = qualite.match(listeQualiteRegex);
+	if(niv && qualite in effetParQualite) {
+		ajouteInfosDuCompo(node, {
+			mob: mob,
+			niveau: niv,
+			qualite: qualite,
+			bonus: niv+effetParQualite[qualite]
+		});
+	}
 }
 
 //--------------------- Désactivé, en attente de refonte ---------------------//
@@ -774,7 +773,7 @@ function mmStockGT() {
 	try {
 		// On récupère la liste des compos en stock
 		var mainTab = document.getElementById("stock");
-		var trList = document.evaluate("./tbody[2]/tr", mainTab, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);    
+		var trList = document.evaluate("./tbody[2]/tr", mainTab, null, 7, null);
 	} catch(e) {
 		return;
 	}
@@ -798,7 +797,7 @@ function mmViewTaniere() {
 	} catch(e) {
 		return;
 	}
-	
+
 	var tr = trstart.nextSibling.nextSibling;
 	while(tr && tr.className=="mh_tdpage") {
 		// Les tr sont non-standard dans la vue,
@@ -833,12 +832,12 @@ function initMatos() {
 		} else {
 			window.console.warn("[mmassistant] Aucun composant trouvé");
 		}
-		
+
 		// Recherche d'éventuelles popos
 		tr = document.getElementById("mh_objet_hidden_"+numTroll+"Potion");
 		if(tr) {
 			tablePopos = tr.getElementsByTagName("table")[0];
-			
+
 			// Récupération de la ligne de titre des popos
 			// titrePopos.cells:
 			// 0: [+] / [-]
@@ -862,7 +861,7 @@ function initMatos() {
 	var
 		i, j, insertNode, mob, niveau, qualite, effet,
 		nom, num, effets, racine, risque, magie, nb, carac;
-	
+
 	// Récupération & Stockage des données des Composants
 	// trCompos.cells:
 	// 0: ?
@@ -890,13 +889,13 @@ function initMatos() {
 			}
 			ajouteInfosDuCompo(insertNode, objCompos[num]);
 		}
-		
+
 		// Ajout de la checkbox de mélange
 		ajouteCheckboxMelange(tableCompos.rows[i].cells[0], num, "compo");
 	}
 	window.console.debug(objCompos);
 	window.localStorage.setObject("mmassistant.compos."+numTroll, objCompos);
-	
+
 	// Récupération & Stockage des données des Potions
 	// trPopos.cells:
 	// 0: ?
@@ -911,13 +910,13 @@ function initMatos() {
 		insertNode = tablePopos.rows[i].cells[3];
 		nom = epure(insertNode.textContent.trim());
 		num = String(tablePopos.rows[i].cells[2].textContent.match(/\d+/));
-		
+
 		// Ajout de la checkbox de mélange
 		ajouteCheckboxMelange(tablePopos.rows[i].cells[0], num, "popo");
-		
+
 		// Si popo non identifiée, pas de traitement
 		if(nom=="Potion") { continue; }
-		
+
 		// Sinon début du stockage
 		effet = tablePopos.rows[i].cells[4].textContent.trim();
 		effets = effet.split(" | ");
@@ -925,7 +924,7 @@ function initMatos() {
 			nom: nom,
 			effet: effet
 		};
-		
+
 		// Malus Mélange (& extraction racine)
 		if(nom.indexOf(" Melangees")!=-1) {
 		// Si popo issue d'un mélange de 2 popos de base de même famille,
@@ -936,13 +935,13 @@ function initMatos() {
 		} else {
 			racine = nom;
 		}
-		
+
 		// Durée (extrapolée à partir de la racine)
 		if(racine in PotionsDeBase) {
 		// Si popo d'une famille connue:
 			// Ajout de la durée
 			objPopos[num].duree = PotionsDeBase[racine].duree;
-		
+
 			// Attribution d'un "niveau" (pour affichage)
 			// Par défaut, niveau = valeur du 1er effet
 			niveau = effet.match(/\d+/);
@@ -980,7 +979,7 @@ function initMatos() {
 				objPopos[num].niveau = String(niveau);
 			}
 		}
-		
+
 		// Malus GPT
 		if(
 			racine=="Potion de Guerison" ||
@@ -989,7 +988,7 @@ function initMatos() {
 		) {
 			objPopos[num].GPT = 1;
 		}
-		
+
 		// Calcul du risque associé aux effets de la popo
 		risque=0;
 		magie=0;
@@ -1025,12 +1024,12 @@ function initMatos() {
 			risque += Math.abs(magie);
 		}
 		objPopos[num].risque = Math.round(10*risque)/10;
-		
+
 		ajouteInfosDeLaPopo(insertNode, objPopos[num]);
 	}
 	window.console.debug(objPopos);
 	window.localStorage.setObject("mmassistant.popos."+numTroll, objPopos);
-	
+
 	// Ajout du bouton de Mélange
 	if(!tr) { return; }
 	titrePopos.cells[1].style.width = "100px";
@@ -1039,7 +1038,7 @@ function initMatos() {
 	btn = ajouteBouton(td, "Mélanger...");
 	btn.id = "mmassistant_btnmelange";
 	btn.onclick = activeMelangeur;
-	
+
 	window.console.debug("[mmassistant] initMatos réussi");
 }
 
@@ -1063,7 +1062,7 @@ function activeMelangeur() {
 	}
 	btn.value = "Mélanger!!";
 	btn.onclick = lanceMelange;
-	
+
 	appendText(td, " Risque: ", true);
 	span = document.createElement("span");
 	span.id = "mmassistant_risque";
@@ -1072,7 +1071,7 @@ function activeMelangeur() {
 }
 
 function refreshMelangeur() {
-	var 
+	var
 		checkboxsCompo = document.querySelectorAll(".mmassistant_compo"),
 		checkboxsPopo = document.querySelectorAll(".mmassistant_popo"),
 		td = document.getElementById("mmassistant_tdmelange"),
@@ -1083,7 +1082,7 @@ function refreshMelangeur() {
 		erreur = "",
 		popos = [],
 		compo, risque, i;
-	
+
 	// Parsage des Compos
 	for(i=0 ; i<checkboxsCompo.length ; i++) {
 		if(checkboxsCompo[i].checked) {
@@ -1100,7 +1099,7 @@ function refreshMelangeur() {
 			}
 		}
 	}
-	
+
 	// Parsage des Popos
 	if(typeItem=="popo" && (!numMemoire || num==numMemoire)) {
 		chercheMemoire = true;
@@ -1131,27 +1130,27 @@ function refreshMelangeur() {
 	if(popos.length<2) {
 		erreur += (erreur ? "\n" : "") + "Nécessite 2 potions";
 	}
-	
+
 	if(erreur) {
 		td.title = erreur;
 		span.innerHTML = /2/.test(erreur) ? "Choisir 2 potions" : "inconnu";
 		return;
 	}
-	
+
 	risque = risqueExplo(popos[0], popos[1], compo);
 	span.innerHTML = risque.texte;
 	td.title = risque.details;
 }
 
 function lanceMelange() {
-	var 
+	var
 		checkboxsCompo = document.querySelectorAll(".mmassistant_compo"),
 		checkboxsPopo = document.querySelectorAll(".mmassistant_popo"),
 		utiliser = {
 			popos: [],
 			compo: ""
 		};
-	
+
 	// Récupération d'un éventuel compo
 	// On s'arrête dès qu'on en trouve un
 	for(i=0 ; i<checkboxsCompo.length ; i++) {
@@ -1160,7 +1159,7 @@ function lanceMelange() {
 			break;
 		}
 	}
-	
+
 	// Récupération des popos
 	// On s'arrête à la 2e popo trouvée
 	for(i=0 ; i<checkboxsPopo.length ; i++) {
@@ -1171,10 +1170,10 @@ function lanceMelange() {
 			}
 		}
 	}
-	
+
 	// Stockage temporaire des éléments à utiliser
 	window.sessionStorage.setObject("mmassistant.utiliser", utiliser);
-	
+
 	// Lancement de la compétence Mélange
 	top.frames["Main"].frames["Action"].location.assign(
 		"Play_action.php?ai_ToDo=125&as_Action=ACTION!"
@@ -1189,9 +1188,9 @@ function enrichitListeCompos() {
 	var
 		i, option, compo,
 		optgroup = selectCompo.getElementsByTagName("optgroup")[0];
-	
+
 	selectCompo.style.maxWidth = "300px";
-	
+
 	for(i=1 ; i<selectCompo.options.length ; i++) {
 		option = selectCompo.options[i];
 		if(option.value in objCompos) {
@@ -1204,7 +1203,7 @@ function enrichitListeCompos() {
 			option.title = "Composant inconnu: ouvrez l'onglet Équipement";
 		}
 	}
-	
+
 	if(compos_par_bonus) {
 		var
 			composDispos = {},
@@ -1219,7 +1218,7 @@ function enrichitListeCompos() {
 				}
 			}
 		}
-		
+
 		for(num in objCompos) {
 			if(num in composDispos) {
 				numCompos.push(num);
@@ -1237,7 +1236,7 @@ function enrichitListeCompos() {
 			// Tri 1: Par bonus (numérique) croissant
 			return Number(objCompos[a].bonus)>Number(objCompos[b].bonus);
 		});
-		
+
 		for(i=0 ; i<numCompos.length ; i++) {
 			optgroup.appendChild(composDispos[numCompos[i]]);
 		}
@@ -1248,7 +1247,7 @@ function enrichitListePopos(select) {
 // Ajoute les infos de popo à un menu déroulant lors d'un MM / LdP
 	if(!objPopos) { return; }
 	var i, option, popo;
-	
+
 	// Enrichissement de la liste (niveaux, effet en title)
 	for(i=0 ; i<select.options.length ; i++) {
 		option = select.options[i];
@@ -1260,7 +1259,7 @@ function enrichitListePopos(select) {
 					option.textContent.indexOf(" (Potion)")
 				).trim();
 			}
-			
+
 			popo = objPopos[option.value];
 			if(popo.effet) {
 				option.title = popo.effet;
@@ -1277,7 +1276,7 @@ function enrichitListePopos(select) {
 			option.title = "Potion inconnue: ouvrez l'onglet Équipement";
 		}
 	}
-	
+
 	// Tri des potions (si l'option est activée)
 	if(popos_par_nom) {
 		var
@@ -1286,14 +1285,14 @@ function enrichitListePopos(select) {
 			poposDispos = {},
 			numPopos = [],
 			num;
-		
+
 		// Choix du point d'insertion (LdP foireux)
 		if (optgroup.length>0) {
 			insertPoint = optgroup[0];
 		} else {
 			insertPoint = select;
 		}
-		
+
 		// Sauvegarde des options
 		for(i=select.options.length-1 ; i>=0 ; i--) {
 			option = select.options[i];
@@ -1304,7 +1303,7 @@ function enrichitListePopos(select) {
 				}
 			}
 		}
-		
+
 		// Tri
 		for(num in objPopos) {
 			if(num in poposDispos) {
@@ -1352,7 +1351,7 @@ function enrichitListePopos(select) {
 			// Tri 1: Par nom de potion (alpha) croissant
 			return objPopos[a].nom>objPopos[b].nom;
 		});
-		
+
 		// Réinjection des options
 		for(i=0 ; i<numPopos.length ; i++) {
 			insertPoint.appendChild(poposDispos[numPopos[i]]);
@@ -1370,28 +1369,28 @@ function initCompetenceMelange() {
 			divAction, null, 7, null
 		),
 		titre4 = document.evaluate(
-            "//div[@class='titre4' and contains(text(),'PA')]",
-            document, null, 9, null
-        ).singleNodeValue,
+			"//div[@class='titre4' and contains(text(),'PA')]",
+			document, null, 9, null
+		).singleNodeValue,
 		i, node, utiliser;
-	
+
 	if(refaire_mise_en_page) {
 		// On vire tous les messages "Choisir un xxx:"
 		for(i=0 ; i<labels.snapshotLength ; i++) {
 			labels.snapshotItem(i).parentNode.removeChild(labels.snapshotItem(i));
 		}
-		
+
 		// On étend les boîtes
 		selectCompo.style.maxWidth = "300px";
 		selectPopo1.style.maxWidth = "300px";
 		selectPopo2.style.maxWidth = "300px";
 	}
-	
+
 	// Insertion des infos dans les menus déroulants
 	enrichitListeCompos();
 	enrichitListePopos(selectPopo1);
 	enrichitListePopos(selectPopo2);
-	
+
 	// Initialisation affichage Risques
 	// On vire le message "[Portée : sur la zone uniquement]":
 	titre4.innerHTML = "[2 PA] ";
@@ -1400,7 +1399,7 @@ function initCompetenceMelange() {
 	selectPopo1.onchange = refreshRisqueExplo;
 	selectPopo2.onchange = refreshRisqueExplo;
 	selectCompo.onchange = refreshRisqueExplo;
-	
+
 	if(utiliser = window.sessionStorage.getObject("mmassistant.utiliser")) {
 		window.console.debug("Items à utiliser:", utiliser);
 		window.sessionStorage.removeObject("mmassistant.utiliser");
@@ -1425,14 +1424,14 @@ function initCompetenceMelange() {
 		window.console.log("[mmassistant] Items à utiliser appliqués");
 		refreshRisqueExplo();
 	}
-	
+
 	window.console.debug("[mmassistant] initCompetenceMelange réussie");
 }
 
 function refreshRisqueExplo() {
 // Met à jour le risque d'explosion en fonction des popos/compos sélectionnés
 	var popo1, popo2, compo, risque;
-	
+
 	// On vérifie si on a bien 2 popos connues sélectionnées
 	afficheRisque.title = "";
 	if(selectPopo1.value=="" || selectPopo2.value=="") {
@@ -1440,7 +1439,7 @@ function refreshRisqueExplo() {
 			"[Risque d'explosion : (nécessite 2 potions)]";
 		return;
 	}
-	
+
 	popo1 = objPopos[selectPopo1.value];
 	popo2 = objPopos[selectPopo2.value];
 	if(popo1==void(0) || popo2==void(0)) {
@@ -1448,7 +1447,7 @@ function refreshRisqueExplo() {
 			"[Potion inconnue : ouvrez l'onglet Équipement]";
 		return;
 	}
-	
+
 	if(selectCompo.value && selectCompo.value!=0) {
 		if(objCompos[selectCompo.value]) {
 			compo = objCompos[selectCompo.value];
@@ -1458,11 +1457,11 @@ function refreshRisqueExplo() {
 			return;
 		}
 	}
-	
+
 	risque = risqueExplo(popo1, popo2, compo);
 	afficheRisque.innerHTML = "[Risque d'explosion : "+risque.texte+"]";
 	afficheRisque.title = risque.details;
-	
+
 	window.console.debug("[mmassistant] refreshRisqueExplo réussi");
 }
 
@@ -1473,12 +1472,17 @@ function isPage(url) {
 	return window.self.location.toString().indexOf(url)!=-1;
 }
 
-if( (isPage("MH_Taniere/TanierePJ_o_Stock") || isPage("MH_Comptoirs/Comptoir_o_Stock")) 
-	&& window.location.href.indexOf("as_type=Compo")!=-1) {
+if(
+	(
+		isPage("MH_Taniere/TanierePJ_o_Stock") ||
+		isPage("MH_Comptoirs/Comptoir_o_Stock")
+	) &&
+	window.location.href.indexOf("as_type=Compo")!=-1
+) {
 	var numCompo = 0,
 		linkAppendNextPage = document.getElementById("stock-ajax-append");
-		
-	if(linkAppendNextPage){		
+
+	if(linkAppendNextPage) {
 		// Ajout du bouton Relaunch (utile si +500 compos)
 		var footer = document.getElementById("footer1"),
 			relaunchButton = document.createElement("input");
@@ -1510,7 +1514,7 @@ if( (isPage("MH_Taniere/TanierePJ_o_Stock") || isPage("MH_Comptoirs/Comptoir_o_S
 	initMatos();
 /*} else if(isPage("MH_Play/Actions/Play_a_ActionYY")) {
 // Utiliser une popo / parcho
-*/	
+*/
 } else if(isPage("MH_Play/Actions/Competences/Play_a_CompetenceYY")) {
 	if(lancer_de_potions && document.body.id=="p_competencelancerdepotions") {
 	// Lancer de Potion
@@ -1556,4 +1560,3 @@ if( (isPage("MH_Taniere/TanierePJ_o_Stock") || isPage("MH_Comptoirs/Comptoir_o_S
 }
 
 window.console.debug("[mmassistant] Script OFF sur : "+WHEREARTTHOU);
-
