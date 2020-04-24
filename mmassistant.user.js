@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.1.4.1
+// @version      2.1.4.2
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -39,7 +39,7 @@
 //     effet  : libellé effet de la potion (string),
 //    [niveau : "niveau" de la potion - cf. initMatos (string),]
 //    [melange: 1 (number) - si la potion est un mélange,]
-//    [GPT    : 1 (number) - si la potion est du type GPT,]
+//    [GPT    : 1 (number) - si la potion est du type GPTJC,]
 //    [zone   : 1 (number) - si la potion est de zone,]
 //     risque : risque lié aux effets de la potion (number, flottant)
 //   }
@@ -572,11 +572,11 @@ function ajouteInfosDeLaPopo(node, popo) {
 	}
 	if(popo.duree!==void(0)) {
 		if(popo.GPT) {
-			titre += "\nFamille GPT: +40";
+			titre += "\nFamille GPTJC: +40";
 		}
 		titre += "\nDurée: +"+popo.duree;
 	} else {
-		titre += "\nFamille GPT? +40";
+		titre += "\nFamille GPTJC? +40";
 		titre += "\nDurée? +1-5";
 	}
 	img.title = titre;
@@ -651,17 +651,17 @@ function risqueExplo(popo1, popo2, compo) {
 		details += "\nMalus zone: +40 ("+risque+")";
 	}
 
-	// Malus mélange hétérogène GPT (Guérison/Painture/Toxine)
+	// Malus mélange hétérogène GPTJC (Guérison/Painture/Toxine/Jus de Cervelle)
 	popoInconnue = popo1.duree==void(0) || popo2.duree==void(0);
 	risqueMax = risque+5;
 	if((popo1.GPT?1:0)^(popo2.GPT?1:0)) { // ^ = XOR binaire
 		risque += 40;
 		risqueMax += 40;
-		details += "\nMalus hétérogène GPT: +40 ("+risque+")";
+		details += "\nMalus hétérogène GPTJC: +40 ("+risque+")";
 	} else if(popoInconnue) {
 		// En cas de popo inconnue, on envisage le pire
 		risqueMax += 40;
-		details += "\nMalus hétérogène GPT: +40 ??";
+		details += "\nMalus hétérogène GPTJC: +40 ??";
 	}
 
 	// Malus durée
@@ -942,7 +942,7 @@ function initMatos() {
 		// Malus Mélange (& extraction racine)
 		if(nom.indexOf(" Melangees")!=-1) {
 		// Si popo issue d'un mélange de 2 popos de base de même famille,
-		// on récupère ladite famille pour computer durée+type (GPT/autre)
+		// on récupère ladite famille pour computer durée+type (GPTJC/autre)
 		// Si mélange niv sup, on récupère "Potions", sans effet.
 			racine = nom.slice(0, nom.indexOf(" Melangees"));
 			objPopos[num].melange = 1;
@@ -994,11 +994,12 @@ function initMatos() {
 			}
 		}
 
-		// Malus GPT
+		// Malus GPTJC
 		if(
 			racine=="Potion de Guerison" ||
 			racine=="Toxine Violente" ||
-			effet.indexOf("Pàïntûré")!=-1
+			effet.indexOf("Pàïntûré")!=-1 ||
+			racine=="Jus de Cervelle"
 		) {
 			objPopos[num].GPT = 1;
 		}
