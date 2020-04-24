@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.1.4.2
+// @version      2.1.4.3
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -700,31 +700,30 @@ function risqueExplo(popo1, popo2, compo) {
 	}
 }
 
-
-function getSetInfo(snap) {
-// Extrait et affiche les infos MM d'un compo *dans un tr standard*
-	if(isNaN(snap.childNodes[1].getElementsByTagName("img")[0].alt[0])) {
-		// Si non identifié, on laisse
-		console.warning('non identifié');
-		return;
-	}
-	var node = snap.childNodes[5],
-		mob = node.firstChild.textContent;
-	mob = mob.slice(mob.indexOf("d'un")+5).trim();
-	var niv = niveauDuMonstre[epure(mob)],
-		qualite = snap.childNodes[7].textContent;
-	qualite = qualite.match(Qualites.regex);
-	if(niv && qualite in Qualites) {
-		ajouteInfosDuCompo(node, {
-			mob: mob,
-			niveau: niv,
-			qualite: qualite,
-			bonus: niv+Qualites[qualite].bonus
-		});
-	}
-}
-
 //--------------------- Désactivé, en attente de refonte ---------------------//
+
+// function getSetInfo(snap) {
+// // Extrait et affiche les infos MM d'un compo *dans un tr standard*
+// 	if(isNaN(snap.childNodes[1].getElementsByTagName("img")[0].alt[0])) {
+// 		// Si non identifié, on laisse
+// 		console.warning('non identifié');
+// 		return;
+// 	}
+// 	var node = snap.childNodes[5],
+// 		mob = node.firstChild.textContent;
+// 	mob = mob.slice(mob.indexOf("d'un")+5).trim();
+// 	var niv = niveauDuMonstre[epure(mob)],
+// 		qualite = snap.childNodes[7].textContent;
+// 	qualite = qualite.match(Qualites.regex);
+// 	if(niv && qualite in Qualites) {
+// 		ajouteInfosDuCompo(node, {
+// 			mob: mob,
+// 			niveau: niv,
+// 			qualite: qualite,
+// 			bonus: niv+Qualites[qualite].bonus
+// 		});
+// 	}
+// }
 
 // function mmListeGowap() {
 // // Traitement de la page qui liste les gowaps
@@ -779,8 +778,43 @@ function getSetInfo(snap) {
 // 	}
 // }
 
+// function mmViewTaniere() {
+// // Traitement de l'étal d'une tanière dans la vue (popup)
+// 	try {
+// 		var mainTab = document.
+// 			getElementsByClassName("listeEquipement")[0].
+// 			getElementsByTagName("table")[0];
+// 		var trstart = document.evaluate(
+// 			"./tbody/tr[@class='mh_tdtitre' and contains(td/b/text(),'Composant')]",
+// 			mainTab, null, 9, null
+// 		).singleNodeValue;
+// 	} catch(e) {
+// 		return;
+// 	}
+// 
+// 	var tr = trstart.nextSibling.nextSibling;
+// 	while(tr && tr.className=="mh_tdpage") {
+// 		// Les tr sont non-standard dans la vue,
+// 		// il faut refaire l'extraction à la main
+// 		var
+// 			node = tr.getElementsByTagName("td")[2],
+// 			txt = node.textContent,
+// 			indQ = txt.indexOf("de Qualit"),
+// 			mob = txt.slice(txt.indexOf("d'un")+5, indQ-1).trim(),
+// 			niv = niveauDuMonstre[epure(mob)],
+// 			qualite = txt.slice(indQ+11, txt.indexOf("[")-1).trim(),
+// 			effet = effetParQualite[epure(qualite)];
+// 		if(niv && effet && node.lastChild.textContent.indexOf("MM")==-1) {
+// 			addInfo(node, mob, niv, qualite, effet);
+// 		}
+// 		tr = tr.nextSibling.nextSibling;
+// 	}
+// }
+
+//---------------------- Traitement des pages de stock -----------------------//
+
 function traitementStockTaniere() {
-// Traitement du stock de tanière perso (onglet tanière)
+// Traitement du stock d'une tanière perso (onglet tanière)
 	try {
 		// On récupère la liste des compos en stock
 		// NB: td[position() = 4] exclut les compos non IdT
@@ -815,39 +849,6 @@ function traitementStockTaniere() {
 		numCompo++;
 	}
 }
-
-// function mmViewTaniere() {
-// // Traitement de l'étal d'une tanière dans la vue (popup)
-// 	try {
-// 		var mainTab = document.
-// 			getElementsByClassName("listeEquipement")[0].
-// 			getElementsByTagName("table")[0];
-// 		var trstart = document.evaluate(
-// 			"./tbody/tr[@class='mh_tdtitre' and contains(td/b/text(),'Composant')]",
-// 			mainTab, null, 9, null
-// 		).singleNodeValue;
-// 	} catch(e) {
-// 		return;
-// 	}
-// 
-// 	var tr = trstart.nextSibling.nextSibling;
-// 	while(tr && tr.className=="mh_tdpage") {
-// 		// Les tr sont non-standard dans la vue,
-// 		// il faut refaire l'extraction à la main
-// 		var
-// 			node = tr.getElementsByTagName("td")[2],
-// 			txt = node.textContent,
-// 			indQ = txt.indexOf("de Qualit"),
-// 			mob = txt.slice(txt.indexOf("d'un")+5, indQ-1).trim(),
-// 			niv = niveauDuMonstre[epure(mob)],
-// 			qualite = txt.slice(indQ+11, txt.indexOf("[")-1).trim(),
-// 			effet = effetParQualite[epure(qualite)];
-// 		if(niv && effet && node.lastChild.textContent.indexOf("MM")==-1) {
-// 			addInfo(node, mob, niv, qualite, effet);
-// 		}
-// 		tr = tr.nextSibling.nextSibling;
-// 	}
-// }
 
 //-------------------- Traitement de la page d'équipement --------------------//
 
@@ -1220,7 +1221,7 @@ function lanceMelange() {
 	);
 }
 
-//--------- Traitement des pages Mélange Magique / Lancer de Potion ----------//
+// Traitement des pages Mélange Magique / Lancer de Potion / Utiliser un item //
 
 function enrichitListeCompos() {
 // Ajoute les infos de compos au menu déroulant lors d'un mélange
