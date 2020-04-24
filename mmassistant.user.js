@@ -72,7 +72,7 @@ if(MODE_DEBUG) {
 
 //----------------------------- Bases de données -----------------------------//
 
-var niveauDuMonstre = {
+var NiveauDuMonstre = {
 	"Abishaii Bleu": 19,
 	"Abishaii Noir": 10,
 	"Abishaii Rouge": 23,
@@ -266,7 +266,7 @@ var Qualites = {
 		bonus: 4,
 		abbr: "TM"
 	},
-	regex: "Très Bonne|Bonne|Moyenne|Mauvaise|Très Mauvaise"
+	regex: "Très Bonne|Bonne|Moyenne|Très Mauvaise|Mauvaise"
 };
 
 var PotionsDeBase = {
@@ -779,18 +779,39 @@ function getSetInfo(snap) {
 // 	}
 // }
 
-function mmStockGT() {
+function traitementStockTaniere() {
 // Traitement du stock de tanière perso (onglet tanière)
 	try {
 		// On récupère la liste des compos en stock
-		var mainTab = document.getElementById("stock");
-		var trList = document.evaluate("./tbody[2]/tr", mainTab, null, 7, null);
+		// NB: td[position() = 4] exclut les compos non IdT
+		var trCompos = document.evaluate(
+			"//table[@id='stock']/tbody[position() mod 2 = 0]/tr/" +
+			"td[position() = 4 and contains(text(),'Composant')]/..",
+			document, null, 7, null
+		);
 	} catch(e) {
 		return;
 	}
+	if(MODE_DEBUG) {
+		window.console.debug("[mmassistant] Lancement traitementStockTaniere");
+	}
 
-	for(var i=numCompo ; i<trList.snapshotLength ; i++) {
-		getSetInfo(trList.snapshotItem(i));
+	for(var i=numCompo ; i<trCompos.snapshotLength ; i++) {
+		var
+			tr = trCompos.snapshotItem(i),
+			mob = tr.cells[2].textContent,
+			qualite = tr.cells[3].textContent.match(Qualites.regex),
+			niv;
+		mob = mob.slice(mob.indexOf("d'un")+5).trim();
+		niv = NiveauDuMonstre[epure(mob)];
+		if(niv && qualite in Qualites) {
+			ajouteInfosDuCompo(tr.cells[2], {
+				mob: mob,
+				niveau: niv,
+				qualite: qualite,
+				bonus: niv+Qualites[qualite].bonus
+			});
+		}
 		numCompo++;
 	}
 }
@@ -889,7 +910,7 @@ function initMatos() {
 		insertNode = tableCompos.rows[i].cells[3];
 		mob = insertNode.textContent;
 		mob = mob.slice(mob.indexOf("d'un")+5).trim();
-		niveau = niveauDuMonstre[epure(mob)];
+		niveau = NiveauDuMonstre[epure(mob)];
 		qualite = tableCompos.rows[i].cells[4].textContent;
 		qualite = qualite.slice(qualite.indexOf("Qualit")+9).trim();
 		num = String(tableCompos.rows[i].cells[2].textContent.match(/\d+/));
@@ -1509,32 +1530,26 @@ function isPage(url) {
 }
 
 if(
-	(
-		isPage("MH_Taniere/TanierePJ_o_Stock") ||
-		isPage("MH_Comptoirs/Comptoir_o_Stock")
-	) &&
-	window.location.href.indexOf("as_type=Compo")!=-1
+	isPage("MH_Taniere/TanierePJ_o_Stock") ||
+	isPage("MH_Comptoirs/Comptoir_o_Stock")
 ) {
-	var numCompo = 0,
-		linkAppendNextPage = document.getElementById("stock-ajax-append");
+	// WARNING: le système de 'numCompo' ne sera pas compatible avec
+	// un éventuel passage des stocks de tanière en footable sortable
+	var numCompo = 0;
 
-	if(linkAppendNextPage) {
-		// Ajout du bouton Relaunch (utile si +500 compos)
-		var footer = document.getElementById("footer1"),
-			relaunchButton = document.createElement("input");
-		relaunchButton.type = "button";
-		relaunchButton.className = "mh_form_submit";
-		relaunchButton.value = "Relancer MountyZilla";
-		relaunchButton.onmouseover = function() {
-			this.style.cursor="pointer";
-		};
-		relaunchButton.onclick = mmStockGT;
-		footer.parentNode.insertBefore(relaunchButton, footer);
-		linkAppendNextPage.addEventListener("click", function() {
-			window.setTimeout(mmStockGT, 5000);
-		});
-	}
-	mmStockGT();
+	// Ajout du bouton Relaunch (utile si +500 compos)
+	var footer = document.getElementById("footer1"),
+		relaunchButton = document.createElement("input");
+	relaunchButton.type = "button";
+	relaunchButton.className = "mh_form_submit";
+	relaunchButton.value = "Réanalyser les Composants";
+	relaunchButton.onmouseover = function() {
+		this.style.cursor="pointer";
+	};
+	relaunchButton.onclick = traitementStockTaniere;
+	footer.parentNode.insertBefore(relaunchButton, footer);
+
+	traitementStockTaniere();
 // } else if(isPage("MH_Follower/FO_Equipement")) {
 // 	mmEquipGowap();
 // } else if(isPage("MH_Play/Play_e_follo")) {
