@@ -483,7 +483,8 @@ function getNumTroll() {
 
 function appendText(paren, text, bold) {
 	if(bold) {
-		var b = document.createElement("b");
+		var b = document.createElement("span");
+		b.style.fontWeight = "bold";
 		b.appendChild(document.createTextNode(text));
 		paren.appendChild(b);
 	} else {
