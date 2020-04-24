@@ -715,60 +715,60 @@ function getSetInfo(snap) {
 }
 
 //--------------------- Désactivé, en attente de refonte ---------------------//
-/*
-function mmListeGowap() {
-// Traitement de la page qui liste les gowaps
-	try {
-		// On extrait les nums de gowaps
-		var gogoList = document.evaluate(
-			".//form/table/descendant::table/tbody/tr/td[@class='mh_titre3']/a",
-			document, null, 7, null
-		);
-		var gogoNumbers = [];
-		for(var i=0 ; i<gogoList.snapshotLength ; i++) {
-			gogoNumbers.push(parseInt(gogoList.snapshotItem(i).textContent));
-		}
-	} catch(e) {
-		return;
-	}
 
-	// Puis pour chaque gowap, on recherche les compos portés et on traite
-	for(var j=0 ; j<gogoNumbers.length ; j++) {
-		var div = document.getElementById(
-			"mh_"+gogoNumbers[j]+"_hidden_Composant"
-		);
-		if(!div) {
-			continue;
-		}
-		var trList = document.evaluate("./table/tbody/tr", div, null, 7, null);
-		if(!(trList.snapshotLength > 0)) {
-			continue;
-		}
-		for(var i=0 ; i<trList.snapshotLength ; i++) {
-			getSetInfo(trList.snapshotItem(i));
-		}
-	}
-}
+// function mmListeGowap() {
+// // Traitement de la page qui liste les gowaps
+// 	try {
+// 		// On extrait les nums de gowaps
+// 		var gogoList = document.evaluate(
+// 			".//form/table/descendant::table/tbody/tr/td[@class='mh_titre3']/a",
+// 			document, null, 7, null
+// 		);
+// 		var gogoNumbers = [];
+// 		for(var i=0 ; i<gogoList.snapshotLength ; i++) {
+// 			gogoNumbers.push(parseInt(gogoList.snapshotItem(i).textContent));
+// 		}
+// 	} catch(e) {
+// 		return;
+// 	}
+// 
+// 	// Puis pour chaque gowap, on recherche les compos portés et on traite
+// 	for(var j=0 ; j<gogoNumbers.length ; j++) {
+// 		var div = document.getElementById(
+// 			"mh_"+gogoNumbers[j]+"_hidden_Composant"
+// 		);
+// 		if(!div) {
+// 			continue;
+// 		}
+// 		var trList = document.evaluate("./table/tbody/tr", div, null, 7, null);
+// 		if(!(trList.snapshotLength > 0)) {
+// 			continue;
+// 		}
+// 		for(var i=0 ; i<trList.snapshotLength ; i++) {
+// 			getSetInfo(trList.snapshotItem(i));
+// 		}
+// 	}
+// }
 
-function mmEquipGowap() {
-// Traitement de la page d'équipement d'un gowap
-	try {
-		// On récupère la liste des compos portés
-		var trList = document.evaluate(
-			".//p/table/tbody/tr/"+
-			"td[contains(table/tbody/tr/td/b/text(),'Composant')]/"+
-			"div/table/tbody/tr",
-			document, null, 7, null
-		);
-	} catch(e) {
-		return;
-	}
+// function mmEquipGowap() {
+// // Traitement de la page d'équipement d'un gowap
+// 	try {
+// 		// On récupère la liste des compos portés
+// 		var trList = document.evaluate(
+// 			".//p/table/tbody/tr/"+
+// 			"td[contains(table/tbody/tr/td/b/text(),'Composant')]/"+
+// 			"div/table/tbody/tr",
+// 			document, null, 7, null
+// 		);
+// 	} catch(e) {
+// 		return;
+// 	}
+// 
+// 	for(var i=0 ; i<trList.snapshotLength ; i++) {
+// 		getSetInfo(trList.snapshotItem(i));
+// 	}
+// }
 
-	for(var i=0 ; i<trList.snapshotLength ; i++) {
-		getSetInfo(trList.snapshotItem(i));
-	}
-}
-*/
 function mmStockGT() {
 // Traitement du stock de tanière perso (onglet tanière)
 	try {
@@ -784,39 +784,39 @@ function mmStockGT() {
 		numCompo++;
 	}
 }
-/*
-function mmViewTaniere() {
-// Traitement de l'étal d'une tanière dans la vue (popup)
-	try {
-		var mainTab = document.
-			getElementsByClassName("listeEquipement")[0].
-			getElementsByTagName("table")[0];
-		var trstart = document.evaluate(
-			"./tbody/tr[@class='mh_tdtitre' and contains(td/b/text(),'Composant')]",
-			mainTab, null, 9, null
-		).singleNodeValue;
-	} catch(e) {
-		return;
-	}
 
-	var tr = trstart.nextSibling.nextSibling;
-	while(tr && tr.className=="mh_tdpage") {
-		// Les tr sont non-standard dans la vue,
-		// il faut refaire l'extraction à la main
-		var
-			node = tr.getElementsByTagName("td")[2],
-			txt = node.textContent,
-			indQ = txt.indexOf("de Qualit"),
-			mob = txt.slice(txt.indexOf("d'un")+5, indQ-1).trim(),
-			niv = niveauDuMonstre[epure(mob)],
-			qualite = txt.slice(indQ+11, txt.indexOf("[")-1).trim(),
-			effet = effetParQualite[epure(qualite)];
-		if(niv && effet && node.lastChild.textContent.indexOf("MM")==-1) {
-			addInfo(node, mob, niv, qualite, effet);
-		}
-		tr = tr.nextSibling.nextSibling;
-	}
-}*/
+// function mmViewTaniere() {
+// // Traitement de l'étal d'une tanière dans la vue (popup)
+// 	try {
+// 		var mainTab = document.
+// 			getElementsByClassName("listeEquipement")[0].
+// 			getElementsByTagName("table")[0];
+// 		var trstart = document.evaluate(
+// 			"./tbody/tr[@class='mh_tdtitre' and contains(td/b/text(),'Composant')]",
+// 			mainTab, null, 9, null
+// 		).singleNodeValue;
+// 	} catch(e) {
+// 		return;
+// 	}
+// 
+// 	var tr = trstart.nextSibling.nextSibling;
+// 	while(tr && tr.className=="mh_tdpage") {
+// 		// Les tr sont non-standard dans la vue,
+// 		// il faut refaire l'extraction à la main
+// 		var
+// 			node = tr.getElementsByTagName("td")[2],
+// 			txt = node.textContent,
+// 			indQ = txt.indexOf("de Qualit"),
+// 			mob = txt.slice(txt.indexOf("d'un")+5, indQ-1).trim(),
+// 			niv = niveauDuMonstre[epure(mob)],
+// 			qualite = txt.slice(indQ+11, txt.indexOf("[")-1).trim(),
+// 			effet = effetParQualite[epure(qualite)];
+// 		if(niv && effet && node.lastChild.textContent.indexOf("MM")==-1) {
+// 			addInfo(node, mob, niv, qualite, effet);
+// 		}
+// 		tr = tr.nextSibling.nextSibling;
+// 	}
+// }
 
 //-------------------- Traitement de la page d'équipement --------------------//
 
@@ -1501,24 +1501,22 @@ if(
 		});
 	}
 	mmStockGT();
-
-/*} else if(isPage("MH_Follower/FO_Equipement")) {
-	mmEquipGowap();
-} else if(isPage("MH_Play/Play_e_follo")) {
-	mmListeGowap();
-} else if(isPage("View/TaniereDescription")) {
-	mmViewTaniere();
-} else if(isPage("MH_Play/Play_equipement")) {*/
+// } else if(isPage("MH_Follower/FO_Equipement")) {
+// 	mmEquipGowap();
+// } else if(isPage("MH_Play/Play_e_follo")) {
+// 	mmListeGowap();
+// } else if(isPage("View/TaniereDescription")) {
+// 	mmViewTaniere();
 } else if(isPage("MH_Play/Play_equipement")) {
-// Page d'équipement
+	// Page d'équipement
 	getNumTroll();
 	initMatos();
-/*} else if(isPage("MH_Play/Actions/Play_a_ActionYY")) {
-// Utiliser une popo / parcho
-*/
+// } else if(isPage("MH_Play/Actions/Play_a_ActionYY")) {
+// // Utiliser une popo / parcho
+// TODO
 } else if(isPage("MH_Play/Actions/Competences/Play_a_CompetenceYY")) {
 	if(lancer_de_potions && document.body.id=="p_competencelancerdepotions") {
-	// Lancer de Potion
+		// Lancer de Potion
 		window.console.log("[mmassistant] Compétence : Lancer de potion");
 		getNumTroll();
 		try {
