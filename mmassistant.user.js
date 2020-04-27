@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.1.4.3
+// @version      2.1.4.4
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -484,7 +484,7 @@ function getNumTroll() {
 		window.console.warn(
 			"[mmassistant] Aucun numéro de troll trouvé : choix par défaut"
 		);
-		numTroll = window.localStorage.getItem("mmassistant.lastNumTroll") ?? "defaut";
+		numTroll = window.localStorage.getItem("mmassistant.lastNumTroll") || "defaut";
 	}
 	window.localStorage.setItem("mmassistant.lastNumTroll", numTroll);
 }
@@ -1292,7 +1292,7 @@ function enrichitListePopos(select) {
 		container = document.evaluate(
 			"./optgroup[@label='Potion']",
 			select, null, 9, null
-		).singleNodeValue ?? select,
+		).singleNodeValue || select,
 		initialValue = select.value;
 
 	// Enrichissement de la liste (niveaux, effet en title)
