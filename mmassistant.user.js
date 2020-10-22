@@ -907,14 +907,14 @@ function initMatos() {
 	for(i=0 ; i<tableCompos.rows.length ; i++) {
 		insertNode = tableCompos.rows[i].cells[3];
 		mob = insertNode.textContent;
-    	mob = mob.slice(mob.indexOf("d'un")+5).trim();    
-    	mob = mob.split("de Qualit")[0].trim();
+		mob = mob.slice(mob.indexOf("d'un")+5).trim();    
+		mob = mob.split("de Qualit")[0].trim();
         
 		niveau = NiveauDuMonstre[epure(mob)];
 		qualite = tableCompos.rows[i].cells[3].textContent;
 		qualite = qualite.slice(qualite.indexOf("Qualit")+8).trim();
-    	qualite = qualite.split('[')[0].trim();
-    	num = String(tableCompos.rows[i].cells[2].textContent.match(/\d+/));
+		qualite = qualite.split('[')[0].trim();
+		num = String(tableCompos.rows[i].cells[2].textContent.match(/\d+/));
 		if(niveau && qualite in Qualites) {
 			objCompos[num] = {
 				mob: mob,
