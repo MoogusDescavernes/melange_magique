@@ -877,10 +877,7 @@ function initMatos() {
 			// 1: "Potion"
 			// 2: nb popos
 			// 3: poids total
-			titrePopos = document.evaluate(
-				"./preceding-sibling::tr[1]//table//tr[1]",
-				tr, null, 9, null
-			).singleNodeValue;
+			titrePopos = tr.previousSibling.getElementsByTagName('tr')[0];
 		} else {
 			window.console.warn("[mmassistant] Aucune potion trouvée");
 		}
@@ -910,11 +907,14 @@ function initMatos() {
 	for(i=0 ; i<tableCompos.rows.length ; i++) {
 		insertNode = tableCompos.rows[i].cells[3];
 		mob = insertNode.textContent;
-		mob = mob.slice(mob.indexOf("d'un")+5).trim();
+    	mob = mob.slice(mob.indexOf("d'un")+5).trim();    
+    	mob = mob.split("de Qualit")[0].trim();
+        
 		niveau = NiveauDuMonstre[epure(mob)];
-		qualite = tableCompos.rows[i].cells[4].textContent;
-		qualite = qualite.slice(qualite.indexOf("Qualit")+9).trim();
-		num = String(tableCompos.rows[i].cells[2].textContent.match(/\d+/));
+		qualite = tableCompos.rows[i].cells[3].textContent;
+		qualite = qualite.slice(qualite.indexOf("Qualit")+8).trim();
+    	qualite = qualite.split('[')[0].trim();
+    	num = String(tableCompos.rows[i].cells[2].textContent.match(/\d+/));
 		if(niveau && qualite in Qualites) {
 			objCompos[num] = {
 				mob: mob,
