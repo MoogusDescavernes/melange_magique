@@ -541,7 +541,7 @@ function ajouteInfosDuCompo(node, compo) {
 		span = document.createElement("span"),
 		str;
 	appendText(node," ");
-	span.className = "mminfos";
+	span.className = "mmassistant_infos";
 	span.appendChild(creeIconeMelange());
 	appendText(span," [-"+compo.bonus+" %]");
 	switch(compo.mob[0]) {
@@ -1398,7 +1398,7 @@ function traitementStockTaniere() {
 	var qte = 0;
 	for(var i=0 ; i<trCompos.snapshotLength ; i++) {
 		var tr = trCompos.snapshotItem(i);
-		if (tr.getElementsByClassName("mminfos").length > 0) {
+		if (tr.getElementsByClassName("mmassistant_infos").length > 0) {
 			continue;
 		}
 		var
