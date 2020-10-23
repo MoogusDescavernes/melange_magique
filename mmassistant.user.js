@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.1.4.4
+// @version      2.1.4.5
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -856,20 +856,20 @@ function initMatos() {
 	var
 		// Si pas de compos / popos, on mime une table vide
 		tablePopos = tableCompos = {rows:{length:0}},
-		titrePopos, tr;
+		titrePopos, div;
 	try {
 		// Recherche d'éventuels compos
-		tr = document.getElementById("mh_objet_hidden_"+numTroll+"Composant");
-		if(tr) {
-			tableCompos = tr.getElementsByTagName("table")[0];
+		div = document.getElementById("mh_objet_hidden_"+numTroll+"Composant");
+		if(div) {
+			tableCompos = div.getElementsByTagName("table")[0];
 		} else {
 			window.console.warn("[mmassistant] Aucun composant trouvé");
 		}
 
 		// Recherche d'éventuelles popos
-		tr = document.getElementById("mh_objet_hidden_"+numTroll+"Potion");
-		if(tr) {
-			tablePopos = tr.getElementsByTagName("table")[0];
+		div = document.getElementById("mh_objet_hidden_"+numTroll+"Potion");
+		if(div) {
+			tablePopos = div.getElementsByTagName("table")[0];
 
 			// Récupération de la ligne de titre des popos
 			// titrePopos.cells:
@@ -878,8 +878,8 @@ function initMatos() {
 			// 2: nb popos
 			// 3: poids total
 			titrePopos = document.evaluate(
-				"./preceding-sibling::tr[1]//table//tr[1]",
-				tr, null, 9, null
+				"(./preceding-sibling::table)[last()]//tr[1]",
+				div, null, 9, null
 			).singleNodeValue;
 		} else {
 			window.console.warn("[mmassistant] Aucune potion trouvée");
@@ -911,9 +911,11 @@ function initMatos() {
 		insertNode = tableCompos.rows[i].cells[3];
 		mob = insertNode.textContent;
 		mob = mob.slice(mob.indexOf("d'un")+5).trim();
+		mob = mob.split("de Qualit")[0].trim();
 		niveau = NiveauDuMonstre[epure(mob)];
-		qualite = tableCompos.rows[i].cells[4].textContent;
-		qualite = qualite.slice(qualite.indexOf("Qualit")+9).trim();
+		qualite = insertNode.textContent;
+		qualite = qualite.slice(qualite.indexOf("Qualit")+7).trim();
+		qualite = qualite.split('[')[0].trim();
 		num = String(tableCompos.rows[i].cells[2].textContent.match(/\d+/));
 		if(niveau && qualite in Qualites) {
 			objCompos[num] = {
@@ -1071,7 +1073,7 @@ function initMatos() {
 	window.localStorage.setObject("mmassistant.popos."+numTroll, objPopos);
 
 	// Ajout du bouton de Mélange
-	if(!tr) { return; }
+	if(!div) { return; }
 	titrePopos.cells[1].style.width = "100px";
 	td = titrePopos.insertCell(2);
 	td.id = "mmassistant_tdmelange";
