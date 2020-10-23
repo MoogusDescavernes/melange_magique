@@ -1092,9 +1092,7 @@ function enrichitListeCompos() {
 	for(option of selectCompo.options) {
 		if(option.value in objCompos) {
 			compo = objCompos[option.value];
-			appendText(option,
-				" "+Qualites[compo.qualite].abbr+" (-"+compo.bonus+"%)"
-			);
+			appendText(option, " (-"+compo.bonus+"%)");
 		} else if(option.value!=0) {
 			option.title = "Composant inconnu: ouvrez l'onglet Équipement";
 		}
