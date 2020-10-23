@@ -820,6 +820,9 @@ function initMatos() {
 		// Si mélange niv sup, on récupère "Potions", sans effet.
 			racine = nom.slice(0, nom.indexOf(" Melangees"));
 			objPopos[num].melange = 1;
+		} else if(nom.indexOf(" (Niv")!=-1) {
+		// Ajustement pour les anciennes popos de painture
+			racine = nom.slice(0, nom.indexOf(" (Niv"));
 		} else {
 			racine = nom;
 		}
@@ -869,12 +872,12 @@ function initMatos() {
 		}
 
 		// Malus GPTJC
-		if(
-			racine=="Potion de Guerison" ||
-			racine=="Toxine Violente" ||
-			effet.indexOf("Pàïntûré")!=-1 ||
-			racine=="Jus de Cervelle"
-		) {
+		if([
+			"Potion de Guerison",
+			"Toxine Violente",
+			"Potion de Painture",
+			"Jus de Cervelle"
+		].includes(racine)) {
 			objPopos[num].GPT = 1;
 		}
 
