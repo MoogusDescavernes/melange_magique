@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.1.6.0
+// @version      2.2.0.0
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -1392,7 +1392,7 @@ function traitementStockTaniere() {
 		);
 	} catch(e) {
 		window.console.error(
-			"[mmassistant] Erreur durant le traitement du stock", e
+			"[mmassistant] Erreur pour obtenir le stock", e
 		);
 		return;
 	}
@@ -1494,6 +1494,60 @@ function traitementListeGowaps() {
 	}
 }
 
+function traitementEquipementGowap() {
+	if(MODE_DEBUG) {
+		window.console.debug(
+			"[mmassistant] Lancement traitementEquipementGowap"
+		);
+	}
+	var
+		urlParams = new URLSearchParams(window.location.search),
+		numGogo = urlParams.get('ai_IdFollower'),
+		div = document.getElementById(
+			"mh_objet_hidden_"+numGogo+"Composant"
+		),
+		tableCompos, row, insertNode, mob, niveau, qualite;
+	if(div) {
+		tableCompos = div.getElementsByTagName("table")[0];
+	} else {
+		window.console.warn(
+			"[mmassistant] Aucun composant trouvé sur le gowap " + numGogo
+		);
+		return;
+	}
+
+	// Récupération & Stockage des données des Composants
+	// tableCompos.cells:
+	// 0: ?
+	// 1: numéro
+	// 2: nom | emplacement | qualité
+	// 3: ?
+	// 4: usure
+	// 5: poids
+	// 6: ?
+	for(row of tableCompos.rows) {
+		insertNode = row.cells[2];
+		mob = insertNode.textContent;
+		mob = mob.slice(mob.indexOf("d'un")+5)
+			.split("de Qualit")[0]
+			.trim();
+		niveau = NiveauDuMonstre[epure(mob)];
+		qualite = insertNode.textContent.match(Qualites.regex);
+		if(niveau && qualite) {
+			ajouteInfosDuCompo(insertNode, {
+				mob: mob,
+				niveau: niveau,
+				qualite: qualite,
+				bonus: niveau+Qualites[qualite].bonus
+			});
+		}
+	}
+
+	if(MODE_DEBUG) {
+		window.console.debug("[mmassistant] traitementEquipementGowap réussi");
+	}
+}
+
 //------------------------------ Main Dispatch -------------------------------//
 
 function isPage(url) {
@@ -1519,6 +1573,8 @@ if(
 	traitementStockTaniere();
 } else if (isPage("MH_Play/Play_e_follo")) {
 	traitementListeGowaps();
+} else if (isPage("MH_Follower/FO_Equipement")) {
+	traitementEquipementGowap();
 } else if(isPage("MH_Play/Play_equipement")) {
 	// Page d'équipement
 	getNumTroll();
