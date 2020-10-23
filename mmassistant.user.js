@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.1.4.5
+// @version      2.1.5.0
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -541,6 +541,7 @@ function ajouteInfosDuCompo(node, compo) {
 		span = document.createElement("span"),
 		str;
 	appendText(node," ");
+	span.className = "mminfos";
 	span.appendChild(creeIconeMelange());
 	appendText(span," [-"+compo.bonus+" %]");
 	switch(compo.mob[0]) {
@@ -760,14 +761,12 @@ function initMatos() {
 	for(i=0 ; i<tableCompos.rows.length ; i++) {
 		insertNode = tableCompos.rows[i].cells[3];
 		mob = insertNode.textContent;
-		mob = mob.slice(mob.indexOf("d'un")+5).trim();
+		mob = mob.slice(mob.indexOf("d'un")+5);
 		mob = mob.split("de Qualit")[0].trim();
 		niveau = NiveauDuMonstre[epure(mob)];
-		qualite = insertNode.textContent;
-		qualite = qualite.slice(qualite.indexOf("Qualit")+7).trim();
-		qualite = qualite.split('[')[0].trim();
+		qualite = insertNode.textContent.match(Qualites.regex);
 		num = String(tableCompos.rows[i].cells[2].textContent.match(/\d+/));
-		if(niveau && qualite in Qualites) {
+		if(niveau && qualite) {
 			objCompos[num] = {
 				mob: mob,
 				niveau: niveau,
@@ -1381,54 +1380,62 @@ function traitementStockTaniere() {
 // Traitement du stock d'une tanière perso (onglet tanière)
 	try {
 		// On récupère la liste des compos en stock
-		// NB: td[position() = 4] exclut les compos non IdT
 		var trCompos = document.evaluate(
 			"//table[@id='stock']/tbody[position() mod 2 = 0]/tr/" +
 			"td[position() = 4 and contains(text(),'Composant')]/..",
 			document, null, 7, null
 		);
 	} catch(e) {
+		window.console.error(
+			"[mmassistant] Erreur durant le traitement du stock", e
+		);
 		return;
 	}
 	if(MODE_DEBUG) {
 		window.console.debug("[mmassistant] Lancement traitementStockTaniere");
 	}
 
-	for(var i=numCompo ; i<trCompos.snapshotLength ; i++) {
+	var qte = 0;
+	for(var i=0 ; i<trCompos.snapshotLength ; i++) {
+		var tr = trCompos.snapshotItem(i);
+		if (tr.getElementsByClassName("mminfos").length > 0) {
+			continue;
+		}
 		var
-			tr = trCompos.snapshotItem(i),
 			mob = tr.cells[2].textContent,
-			qualite = tr.cells[3].textContent.match(Qualites.regex),
-			niv;
-		mob = mob.slice(mob.indexOf("d'un")+5).trim();
-		niv = NiveauDuMonstre[epure(mob)];
-		if(niv && qualite in Qualites) {
+			qualite = tr.cells[2].textContent.match(Qualites.regex),
+			niveau;
+		mob = mob.slice(mob.indexOf("d'un")+5);
+		mob = mob.split("de Qualit")[0].trim();
+		niveau = NiveauDuMonstre[epure(mob)];
+		if(niveau && qualite) {
 			ajouteInfosDuCompo(tr.cells[2], {
 				mob: mob,
-				niveau: niv,
+				niveau: niveau,
 				qualite: qualite,
-				bonus: niv+Qualites[qualite].bonus
+				bonus: niveau+Qualites[qualite].bonus
 			});
+			qte++;
 		}
-		numCompo++;
 	}
+
+	window.console.log(
+		"[mmassistant] traitementStockTaniere : " + qte +
+		" composant(s) traité(s)"
+	);
 }
 
 
 //------------------------------ Main Dispatch -------------------------------//
 
 function isPage(url) {
-	return window.self.location.toString().indexOf(url)!=-1;
+	return window.location.pathname.indexOf('/mountyhall/'+url) == 0;
 }
 
 if(
 	isPage("MH_Taniere/TanierePJ_o_Stock") ||
 	isPage("MH_Comptoirs/Comptoir_o_Stock")
 ) {
-	// WARNING: le système de 'numCompo' ne sera pas compatible avec
-	// un éventuel passage des stocks de tanière en footable sortable
-	var numCompo = 0;
-
 	// Ajout du bouton Relaunch (utile si +500 compos)
 	var footer = document.getElementById("footer1"),
 		relaunchButton = document.createElement("input");
