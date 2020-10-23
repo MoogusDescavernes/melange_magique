@@ -705,8 +705,8 @@ function risqueExplo(popo1, popo2, compo) {
 
 function initMatos() {
 	var
-		// Si pas de compos / popos, on mime une table vide
-		tablePopos = tableCompos = {rows:{length:0}},
+		// Si pas de compos / popos, on mime une HTMLCollection vide
+		tablePopos = tableCompos = {rows:[]},
 		titrePopos, div;
 	try {
 		// Recherche d'éventuels compos
@@ -745,27 +745,29 @@ function initMatos() {
 		window.console.debug("[mmassistant] Lancement initMatos");
 	}
 	var
-		i, j, insertNode, mob, niveau, qualite, effet,
-		nom, num, effets, racine, risque, magie, nb, carac;
+		row, insertNode, mob, niveau, qualite,
+		nom, num, effetTotal, effets, effet, racine,
+		risque, magie, nb, carac;
 
 	// Récupération & Stockage des données des Composants
 	// trCompos.cells:
 	// 0: ?
 	// 1: menu contextuel
 	// 2: numéro
-	// 3: nom
-	// 4: emplacement | qualité
+	// 3: nom | emplacement | qualité
+	// 4: ?
 	// 5: usure
 	// 6: poids
 	// 7: ceinture
-	for(i=0 ; i<tableCompos.rows.length ; i++) {
-		insertNode = tableCompos.rows[i].cells[3];
+	for(row of tableCompos.rows) {
+		insertNode = row.cells[3];
 		mob = insertNode.textContent;
-		mob = mob.slice(mob.indexOf("d'un")+5);
-		mob = mob.split("de Qualit")[0].trim();
+		mob = mob.slice(mob.indexOf("d'un")+5)
+			.split("de Qualit")[0]
+			.trim();
 		niveau = NiveauDuMonstre[epure(mob)];
 		qualite = insertNode.textContent.match(Qualites.regex);
-		num = String(tableCompos.rows[i].cells[2].textContent.match(/\d+/));
+		num = String(row.cells[2].textContent.match(/\d+/));
 		if(niveau && qualite) {
 			objCompos[num] = {
 				mob: mob,
@@ -777,7 +779,7 @@ function initMatos() {
 		}
 
 		// Ajout de la checkbox de mélange
-		ajouteCheckboxMelange(tableCompos.rows[i].cells[0], num, "compo");
+		ajouteCheckboxMelange(row.cells[0], num, "compo");
 	}
 	if(MODE_DEBUG) {
 		window.console.debug(objCompos);
@@ -794,23 +796,23 @@ function initMatos() {
 	// 5: usure
 	// 6: poids
 	// 7: ceinture
-	for(i=0 ; i<tablePopos.rows.length ; i++) {
-		insertNode = tablePopos.rows[i].cells[3];
+	for(row of tablePopos.rows) {
+		insertNode = row.cells[3];
 		nom = epure(insertNode.textContent.trim());
-		num = String(tablePopos.rows[i].cells[2].textContent.match(/\d+/));
+		num = String(row.cells[2].textContent.match(/\d+/));
 
 		// Ajout de la checkbox de mélange
-		ajouteCheckboxMelange(tablePopos.rows[i].cells[0], num, "popo");
+		ajouteCheckboxMelange(row.cells[0], num, "popo");
 
 		// Si popo non identifiée, pas de traitement
 		if(nom=="Potion") { continue; }
 
 		// Sinon début du stockage
-		effet = tablePopos.rows[i].cells[4].textContent.trim();
-		effets = effet.split(" | ");
+		effetTotal = row.cells[4].textContent.trim();
+		effets = effetTotal.split(" | ");
 		objPopos[num] = {
 			nom: nom,
-			effet: effet
+			effet: effetTotal
 		};
 
 		// Malus Mélange (& extraction racine)
@@ -835,13 +837,13 @@ function initMatos() {
 
 			// Attribution d'un "niveau" (pour affichage)
 			// Par défaut, niveau = valeur du 1er effet
-			niveau = effet.match(/\d+/);
+			niveau = effetTotal.match(/\d+/);
 			// Cas particuliers:
 			switch(racine) {
 				case "Dover Powa":
 				case "Sinne Khole":
 					// "niveau" = MM/RM
-					niveau = effet.match(/\d+/g).join("/");
+					niveau = effetTotal.match(/\d+/g).join("/");
 					break;
 				case "Metomol":
 					// niveau = malus armure
@@ -884,14 +886,14 @@ function initMatos() {
 		// Calcul du risque associé aux effets de la popo
 		risque=0;
 		magie=0;
-		for(j=0 ; j<effets.length ; j++) {
-			nb = effets[j].match(/\d+/);
+		for(effet of effets) {
+			nb = effet.match(/\d+/);
 			if(nb) {
-				carac = effets[j].split(":")[0].trim();
+				carac = effet.split(":")[0].trim();
 				if(carac=="RM" || carac=="MM") {
 					// Si MM/RM, on attrape le signe pour faire la somme
 					// algébrique et on divise la carac par 10
-					nb = effets[j].match(/-?\d+/);
+					nb = effet.match(/-?\d+/);
 					magie = magie ? magie+nb/10 : nb/10;
 					// Mini-mélange: on stocke la valeur pour le cap
 					objPopos[num][carac] = Math.abs(nb);
@@ -904,11 +906,11 @@ function initMatos() {
 				} else {
 					risque += Number(nb);
 				}
-			} else if(/Zone/.test(effets[j])) {
+			} else if(/Zone/.test(effet)) {
 				// Malus de Zone
 				objPopos[num].zone = 1;
 			} else {
-				window.console.warn("[mmassistant] Effet inconnu:", effets[j]);
+				window.console.warn("[mmassistant] Effet inconnu:", effet);
 			}
 		}
 		if(magie) {
@@ -945,15 +947,15 @@ function activeMelangeur() {
 		plus = document.getElementById("mh_plus_"+numTroll+"Potion"),
 		btn = document.getElementById("mmassistant_btnmelange"),
 		td = document.getElementById("mmassistant_tdmelange"),
-		i, span;
+		checkbox, span;
 	if(div.style.display=="none") {
 		plus.click();
 	}
-	for(i=0 ; i<checkboxsCompo.length ; i++) {
-		checkboxsCompo[i].style.display = "";
+	for(checkbox of checkboxsCompo) {
+		checkbox.style.display = "";
 	}
-	for(i=0 ; i<checkboxsPopo.length ; i++) {
-		checkboxsPopo[i].style.display = "";
+	for(checkbox of checkboxsPopo) {
+		checkbox.style.display = "";
 	}
 	btn.value = "Mélanger!!";
 	btn.onclick = lanceMelange;
@@ -976,21 +978,21 @@ function refreshMelangeur() {
 		chercheMemoire = false,
 		erreur = "",
 		popos = [],
-		compo, risque, i;
+		checkbox, compo, risque;
 
 	// Parsage des Compos
-	for(i=0 ; i<checkboxsCompo.length ; i++) {
-		if(checkboxsCompo[i].checked) {
-			if(typeItem=="popo" || checkboxsCompo[i].num==num) {
+	for(checkbox of checkboxsCompo) {
+		if(checkbox.checked) {
+			if(typeItem=="popo" || checkbox.num==num) {
 				// Sélection du compo actif
-				if(checkboxsCompo[i].num in objCompos) {
-					compo = objCompos[checkboxsCompo[i].num];
+				if(checkbox.num in objCompos) {
+					compo = objCompos[checkbox.num];
 				} else {
 					erreur = "Composant inconnu";
 				}
 			} else {
 				// Nettoyage ancien compo
-				checkboxsCompo[i].checked = false;
+				checkbox.checked = false;
 			}
 		}
 	}
@@ -998,23 +1000,23 @@ function refreshMelangeur() {
 	// Parsage des Popos
 	if(typeItem=="popo" && (!numMemoire || num==numMemoire)) {
 		chercheMemoire = true;
-		numMemoire = "";
+		numMemoire = 0;
 	}
-	for(i=0 ; i<checkboxsPopo.length ; i++) {
-		if(checkboxsPopo[i].checked) {
+	for(checkbox of checkboxsPopo) {
+		if(checkbox.checked) {
 			if(chercheMemoire) {
-				numMemoire = checkboxsPopo[i].num;
+				numMemoire = checkbox.num;
 				chercheMemoire = false;
 			}
 			if(
 				typeItem=="popo" &&
-				checkboxsPopo[i].num!=num &&
-				checkboxsPopo[i].num!=numMemoire
+				checkbox.num!=num &&
+				checkbox.num!=numMemoire
 			) {
-				checkboxsPopo[i].checked = false;
+				checkbox.checked = false;
 			} else {
-				if(checkboxsPopo[i].num in objPopos) {
-					popos.push(objPopos[checkboxsPopo[i].num]);
+				if(checkbox.num in objPopos) {
+					popos.push(objPopos[checkbox.num]);
 				} else {
 					popos.push({});
 					erreur += (erreur ? "\n" : "") + "Potion inconnue";
@@ -1044,22 +1046,23 @@ function lanceMelange() {
 		utiliser = {
 			popos: [],
 			compo: ""
-		};
+		},
+		checkbox;
 
 	// Récupération d'un éventuel compo
 	// On s'arrête dès qu'on en trouve un
-	for(i=0 ; i<checkboxsCompo.length ; i++) {
-		if(checkboxsCompo[i].checked) {
-			utiliser.compo = checkboxsCompo[i].num;
+	for(checkbox of checkboxsCompo) {
+		if(checkbox.checked) {
+			utiliser.compo = checkbox.num;
 			break;
 		}
 	}
 
 	// Récupération des popos
 	// On s'arrête à la 2e popo trouvée
-	for(i=0 ; i<checkboxsPopo.length ; i++) {
-		if(checkboxsPopo[i].checked) {
-			utiliser.popos.push(checkboxsPopo[i].num);
+	for(checkbox of checkboxsPopo) {
+		if(checkbox.checked) {
+			utiliser.popos.push(checkbox.num);
 			if(utiliser.popos.length>=2) {
 				break;
 			}
@@ -1081,18 +1084,16 @@ function enrichitListeCompos() {
 // Ajoute les infos de compos au menu déroulant lors d'un mélange
 	if(!objCompos) { return; }
 	var
-		i, option, compo,
+		option, compo, i,
 		optgroup = selectCompo.getElementsByTagName("optgroup")[0];
 
 	selectCompo.style.maxWidth = "300px";
 
-	for(i=1 ; i<selectCompo.options.length ; i++) {
-		option = selectCompo.options[i];
+	for(option of selectCompo.options) {
 		if(option.value in objCompos) {
 			compo = objCompos[option.value];
 			appendText(option,
-				" "+Qualites[compo.qualite].abbr+
-				" (-"+compo.bonus+"%)"
+				" "+Qualites[compo.qualite].abbr+" (-"+compo.bonus+"%)"
 			);
 		} else if(option.value!=0) {
 			option.title = "Composant inconnu: ouvrez l'onglet Équipement";
@@ -1132,8 +1133,8 @@ function enrichitListeCompos() {
 			return Number(objCompos[a].bonus)>Number(objCompos[b].bonus);
 		});
 
-		for(i=0 ; i<numCompos.length ; i++) {
-			optgroup.appendChild(composDispos[numCompos[i]]);
+		for(num of numCompos) {
+			optgroup.appendChild(composDispos[num]);
 		}
 	}
 }
@@ -1381,6 +1382,9 @@ function refreshRisqueExplo() {
 
 function traitementStockTaniere() {
 // Traitement du stock d'une tanière perso (onglet tanière)
+	if(MODE_DEBUG) {
+		window.console.debug("[mmassistant] Lancement traitementStockTaniere");
+	}
 	try {
 		// On récupère la liste des compos en stock
 		var trCompos = document.evaluate(
@@ -1394,9 +1398,6 @@ function traitementStockTaniere() {
 		);
 		return;
 	}
-	if(MODE_DEBUG) {
-		window.console.debug("[mmassistant] Lancement traitementStockTaniere");
-	}
 
 	var qte = 0;
 	for(var i=0 ; i<trCompos.snapshotLength ; i++) {
@@ -1408,8 +1409,9 @@ function traitementStockTaniere() {
 			mob = tr.cells[2].textContent,
 			qualite = tr.cells[2].textContent.match(Qualites.regex),
 			niveau;
-		mob = mob.slice(mob.indexOf("d'un")+5);
-		mob = mob.split("de Qualit")[0].trim();
+		mob = mob.slice(mob.indexOf("d'un")+5)
+			.split("de Qualit")[0]
+			.trim();
 		niveau = NiveauDuMonstre[epure(mob)];
 		if(niveau && qualite) {
 			ajouteInfosDuCompo(tr.cells[2], {
