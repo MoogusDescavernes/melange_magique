@@ -67,7 +67,7 @@ var
 
 if(MODE_DEBUG) {
 	var URL = window.location.pathname;
-	window.console.debug("[mmassistant] script ON! sur :"+URL);
+	window.console.debug("[mmassistant] script ON! sur : "+URL);
 }
 
 //----------------------------- Bases de données -----------------------------//
@@ -700,156 +700,6 @@ function risqueExplo(popo1, popo2, compo) {
 	}
 }
 
-//--------------------- Désactivé, en attente de refonte ---------------------//
-
-// function getSetInfo(snap) {
-// // Extrait et affiche les infos MM d'un compo *dans un tr standard*
-// 	if(isNaN(snap.childNodes[1].getElementsByTagName("img")[0].alt[0])) {
-// 		// Si non identifié, on laisse
-// 		console.warning('non identifié');
-// 		return;
-// 	}
-// 	var node = snap.childNodes[5],
-// 		mob = node.firstChild.textContent;
-// 	mob = mob.slice(mob.indexOf("d'un")+5).trim();
-// 	var niv = niveauDuMonstre[epure(mob)],
-// 		qualite = snap.childNodes[7].textContent;
-// 	qualite = qualite.match(Qualites.regex);
-// 	if(niv && qualite in Qualites) {
-// 		ajouteInfosDuCompo(node, {
-// 			mob: mob,
-// 			niveau: niv,
-// 			qualite: qualite,
-// 			bonus: niv+Qualites[qualite].bonus
-// 		});
-// 	}
-// }
-
-// function mmListeGowap() {
-// // Traitement de la page qui liste les gowaps
-// 	try {
-// 		// On extrait les nums de gowaps
-// 		var gogoList = document.evaluate(
-// 			".//form/table/descendant::table/tbody/tr/td[@class='mh_titre3']/a",
-// 			document, null, 7, null
-// 		);
-// 		var gogoNumbers = [];
-// 		for(var i=0 ; i<gogoList.snapshotLength ; i++) {
-// 			gogoNumbers.push(parseInt(gogoList.snapshotItem(i).textContent));
-// 		}
-// 	} catch(e) {
-// 		return;
-// 	}
-// 
-// 	// Puis pour chaque gowap, on recherche les compos portés et on traite
-// 	for(var j=0 ; j<gogoNumbers.length ; j++) {
-// 		var div = document.getElementById(
-// 			"mh_"+gogoNumbers[j]+"_hidden_Composant"
-// 		);
-// 		if(!div) {
-// 			continue;
-// 		}
-// 		var trList = document.evaluate("./table/tbody/tr", div, null, 7, null);
-// 		if(!(trList.snapshotLength > 0)) {
-// 			continue;
-// 		}
-// 		for(var i=0 ; i<trList.snapshotLength ; i++) {
-// 			getSetInfo(trList.snapshotItem(i));
-// 		}
-// 	}
-// }
-
-// function mmEquipGowap() {
-// // Traitement de la page d'équipement d'un gowap
-// 	try {
-// 		// On récupère la liste des compos portés
-// 		var trList = document.evaluate(
-// 			".//p/table/tbody/tr/"+
-// 			"td[contains(table/tbody/tr/td/b/text(),'Composant')]/"+
-// 			"div/table/tbody/tr",
-// 			document, null, 7, null
-// 		);
-// 	} catch(e) {
-// 		return;
-// 	}
-// 
-// 	for(var i=0 ; i<trList.snapshotLength ; i++) {
-// 		getSetInfo(trList.snapshotItem(i));
-// 	}
-// }
-
-// function mmViewTaniere() {
-// // Traitement de l'étal d'une tanière dans la vue (popup)
-// 	try {
-// 		var mainTab = document.
-// 			getElementsByClassName("listeEquipement")[0].
-// 			getElementsByTagName("table")[0];
-// 		var trstart = document.evaluate(
-// 			"./tbody/tr[@class='mh_tdtitre' and contains(td/b/text(),'Composant')]",
-// 			mainTab, null, 9, null
-// 		).singleNodeValue;
-// 	} catch(e) {
-// 		return;
-// 	}
-// 
-// 	var tr = trstart.nextSibling.nextSibling;
-// 	while(tr && tr.className=="mh_tdpage") {
-// 		// Les tr sont non-standard dans la vue,
-// 		// il faut refaire l'extraction à la main
-// 		var
-// 			node = tr.getElementsByTagName("td")[2],
-// 			txt = node.textContent,
-// 			indQ = txt.indexOf("de Qualit"),
-// 			mob = txt.slice(txt.indexOf("d'un")+5, indQ-1).trim(),
-// 			niv = niveauDuMonstre[epure(mob)],
-// 			qualite = txt.slice(indQ+11, txt.indexOf("[")-1).trim(),
-// 			effet = effetParQualite[epure(qualite)];
-// 		if(niv && effet && node.lastChild.textContent.indexOf("MM")==-1) {
-// 			addInfo(node, mob, niv, qualite, effet);
-// 		}
-// 		tr = tr.nextSibling.nextSibling;
-// 	}
-// }
-
-//---------------------- Traitement des pages de stock -----------------------//
-
-function traitementStockTaniere() {
-// Traitement du stock d'une tanière perso (onglet tanière)
-	try {
-		// On récupère la liste des compos en stock
-		// NB: td[position() = 4] exclut les compos non IdT
-		var trCompos = document.evaluate(
-			"//table[@id='stock']/tbody[position() mod 2 = 0]/tr/" +
-			"td[position() = 4 and contains(text(),'Composant')]/..",
-			document, null, 7, null
-		);
-	} catch(e) {
-		return;
-	}
-	if(MODE_DEBUG) {
-		window.console.debug("[mmassistant] Lancement traitementStockTaniere");
-	}
-
-	for(var i=numCompo ; i<trCompos.snapshotLength ; i++) {
-		var
-			tr = trCompos.snapshotItem(i),
-			mob = tr.cells[2].textContent,
-			qualite = tr.cells[3].textContent.match(Qualites.regex),
-			niv;
-		mob = mob.slice(mob.indexOf("d'un")+5).trim();
-		niv = NiveauDuMonstre[epure(mob)];
-		if(niv && qualite in Qualites) {
-			ajouteInfosDuCompo(tr.cells[2], {
-				mob: mob,
-				niveau: niv,
-				qualite: qualite,
-				bonus: niv+Qualites[qualite].bonus
-			});
-		}
-		numCompo++;
-	}
-}
-
 //-------------------- Traitement de la page d'équipement --------------------//
 
 function initMatos() {
@@ -1089,12 +939,12 @@ function activeMelangeur() {
 	var
 		checkboxsCompo = document.querySelectorAll(".mmassistant_compo"),
 		checkboxsPopo = document.querySelectorAll(".mmassistant_popo"),
-		tr = document.getElementById("mh_objet_hidden_"+numTroll+"Potion"),
+		div = document.getElementById("mh_objet_hidden_"+numTroll+"Potion"),
 		plus = document.getElementById("mh_plus_"+numTroll+"Potion"),
 		btn = document.getElementById("mmassistant_btnmelange"),
 		td = document.getElementById("mmassistant_tdmelange"),
 		i, span;
-	if(tr.style.display=="none") {
+	if(div.style.display=="none") {
 		plus.click();
 	}
 	for(i=0 ; i<checkboxsCompo.length ; i++) {
@@ -1414,7 +1264,7 @@ function enrichitListePopos(select) {
 function initCompetenceMelange() {
 // Mise en place du calculateur de risque
 	if(MODE_DEBUG) {
-		window.console.debug("[mmassistant] lancement initCompetenceMelange");
+		window.console.debug("[mmassistant] Lancement initCompetenceMelange");
 	}
 	var
 		divAction = document.querySelector("div.Action"),
@@ -1525,6 +1375,45 @@ function refreshRisqueExplo() {
 	}
 }
 
+//---------------------- Traitement des pages de stock -----------------------//
+
+function traitementStockTaniere() {
+// Traitement du stock d'une tanière perso (onglet tanière)
+	try {
+		// On récupère la liste des compos en stock
+		// NB: td[position() = 4] exclut les compos non IdT
+		var trCompos = document.evaluate(
+			"//table[@id='stock']/tbody[position() mod 2 = 0]/tr/" +
+			"td[position() = 4 and contains(text(),'Composant')]/..",
+			document, null, 7, null
+		);
+	} catch(e) {
+		return;
+	}
+	if(MODE_DEBUG) {
+		window.console.debug("[mmassistant] Lancement traitementStockTaniere");
+	}
+
+	for(var i=numCompo ; i<trCompos.snapshotLength ; i++) {
+		var
+			tr = trCompos.snapshotItem(i),
+			mob = tr.cells[2].textContent,
+			qualite = tr.cells[3].textContent.match(Qualites.regex),
+			niv;
+		mob = mob.slice(mob.indexOf("d'un")+5).trim();
+		niv = NiveauDuMonstre[epure(mob)];
+		if(niv && qualite in Qualites) {
+			ajouteInfosDuCompo(tr.cells[2], {
+				mob: mob,
+				niveau: niv,
+				qualite: qualite,
+				bonus: niv+Qualites[qualite].bonus
+			});
+		}
+		numCompo++;
+	}
+}
+
 
 //------------------------------ Main Dispatch -------------------------------//
 
@@ -1553,12 +1442,6 @@ if(
 	footer.parentNode.insertBefore(relaunchButton, footer);
 
 	traitementStockTaniere();
-// } else if(isPage("MH_Follower/FO_Equipement")) {
-// 	mmEquipGowap();
-// } else if(isPage("MH_Play/Play_e_follo")) {
-// 	mmListeGowap();
-// } else if(isPage("View/TaniereDescription")) {
-// 	mmViewTaniere();
 } else if(isPage("MH_Play/Play_equipement")) {
 	// Page d'équipement
 	getNumTroll();
@@ -1627,5 +1510,5 @@ if(
 }
 
 if(MODE_DEBUG) {
-	window.console.debug("[mmassistant] Script OFF sur : "+URL);
+	window.console.debug("[mmassistant] script OFF sur : "+URL);
 }
