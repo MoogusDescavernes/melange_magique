@@ -751,15 +751,14 @@ function initMatos() {
 		risque, magie, nb, carac;
 
 	// Récupération & Stockage des données des Composants
-	// trCompos.cells:
-	// 0: ?
-	// 1: menu contextuel
-	// 2: numéro
-	// 3: nom | emplacement | qualité
-	// 4: ?
-	// 5: usure
-	// 6: poids
-	// 7: ceinture
+	// tableCompos.row.cells:
+	// 0: menu contextuel
+	// 1: numéro
+	// 2: nom | emplacement | qualité
+	// 3: effet (aucun)
+	// 4: usure
+	// 5: poids
+	// 6: ceinture
 	for(row of tableCompos.rows) {
 		insertNode = row.cells[2];
 		mob = insertNode.textContent;
@@ -788,15 +787,15 @@ function initMatos() {
 	window.localStorage.setObject("mmassistant.compos."+numTroll, objCompos);
 
 	// Récupération & Stockage des données des Potions
-	// trPopos.cells:
-	// 0: ?
-	// 1: menu contextuel
-	// 2: numéro
-	// 3: nom
-	// 4: effets
-	// 5: usure
-	// 6: poids
-	// 7: ceinture
+	// tablePopos.rows.cells [ intialement ] :
+	// 0: menu contextuel
+	// 1: numéro
+	// 2: nom
+	// 3: effets
+	// 4: usure
+	// 5: poids
+	// 6: ceinture
+	// [ +1 après insertion de la checkbox de mélange ]
 	for(row of tablePopos.rows) {
 		nom = epure(row.cells[2].textContent.trim());
 		num = String(row.cells[1].textContent.match(/\d+/));
@@ -1461,15 +1460,14 @@ function traitementListeGowaps() {
 			return;
 		}
 
-		// Récupération & Stockage des données des Composants
-		// tableCompos.cells:
-		// 0: ?
-		// 1: numéro
-		// 2: nom | emplacement | qualité
-		// 3: ?
-		// 4: usure
-		// 5: poids
-		// 6: ?
+		// Traitement des Composants
+		// tableCompos.row.cells:
+		// 0: numéro
+		// 1: nom | emplacement | qualité
+		// 2: effet (aucun)
+		// 3: usure
+		// 4: poids
+		// 5: [en gueule]
 		for(row of tableCompos.rows) {
 			insertNode = row.cells[1];
 			mob = insertNode.textContent;
@@ -1516,15 +1514,14 @@ function traitementEquipementGowap() {
 		return;
 	}
 
-	// Récupération & Stockage des données des Composants
-	// tableCompos.cells:
-	// 0: ?
-	// 1: numéro
-	// 2: nom | emplacement | qualité
-	// 3: ?
-	// 4: usure
-	// 5: poids
-	// 6: ?
+	// Traitement des Composants
+	// tableCompos.row.cells:
+	// 0: numéro
+	// 1: nom | emplacement | qualité
+	// 2: effet (aucun)
+	// 3: usure
+	// 4: poids
+	// 5: [en gueule]
 	for(row of tableCompos.rows) {
 		insertNode = row.cells[1];
 		mob = insertNode.textContent;
