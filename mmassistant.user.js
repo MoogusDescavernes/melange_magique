@@ -3,11 +3,12 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.2.1.0
+// @version      2.3.0.0
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
 // @include      */mountyhall/MH_Play/Play_e_follo*
+// @include      */mountyhall/MH_Lieux/Lieu_TaniereAchat*
 // @include      */mountyhall/View/TaniereDescription*
 // @include      */mountyhall/MH_Play/Play_equipement*
 // @include      */mountyhall/MH_Play/Actions/Play_a_ActionYY*
@@ -1390,8 +1391,8 @@ function traitementStockTaniere() {
 			document, null, 7, null
 		);
 	} catch(e) {
-		window.console.error(
-			"[mmassistant] Erreur pour obtenir le stock", e
+		window.console.warn(
+			"[mmassistant] Aucun composant dans le stock", e
 		);
 		return;
 	}
@@ -1425,6 +1426,53 @@ function traitementStockTaniere() {
 		"[mmassistant] traitementStockTaniere : " + qte +
 		" composant(s) traité(s)"
 	);
+}
+
+function traitementListeAchatTaniere() {
+// Traitement de la liste d'Achat d'un lieu tanière (onglet lieu)
+	if(MODE_DEBUG) {
+		window.console.debug(
+			"[mmassistant] Lancement traitementListeAchatTaniere"
+		);
+	}
+	try {
+		var div = document.getElementById('mh_objet_hidden_Composant');
+		if(div) {
+			tableCompos = div.getElementsByTagName("table")[0];
+		} else {
+			window.console.warn("[mmassistant] Aucun composant en vente");
+			return;
+		}
+	} catch(e) {
+		window.console.error(
+			"[mmassistant] Erreur durant le traitement de la liste de vente", e
+		);
+		return;
+	}
+
+	for(row of tableCompos.rows) {
+		insertNode = row.cells[3];
+		mob = insertNode.textContent;
+		mob = mob.slice(mob.indexOf("d'un")+5)
+			.split("de Qualit")[0]
+			.trim();
+		niveau = NiveauDuMonstre[epure(mob)];
+		qualite = insertNode.textContent.match(Qualites.regex);
+		if(niveau && qualite) {
+			ajouteInfosDuCompo(insertNode, {
+				mob: mob,
+				niveau: niveau,
+				qualite: qualite,
+				bonus: niveau+Qualites[qualite].bonus
+			});
+		}
+	}
+
+	if(MODE_DEBUG) {
+		window.console.debug(
+			"[mmassistant] traitementListeAchatTaniere réussi"
+		);
+	}
 }
 
 //-------------------------- Traitement des gowaps ---------------------------//
@@ -1568,6 +1616,8 @@ if(
 	footer.parentNode.insertBefore(relaunchButton, footer);
 
 	traitementStockTaniere();
+} else if (isPage("MH_Lieux/Lieu_TaniereAchat")) {
+	traitementListeAchatTaniere();
 } else if (isPage("MH_Play/Play_e_follo")) {
 	traitementListeGowaps();
 } else if (isPage("MH_Follower/FO_Equipement")) {
