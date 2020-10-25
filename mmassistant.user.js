@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.3.0.0
+// @version      2.3.1.0
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -1435,36 +1435,41 @@ function traitementListeAchatTaniere() {
 			"[mmassistant] Lancement traitementListeAchatTaniere"
 		);
 	}
-	try {
-		var div = document.getElementById('mh_objet_hidden_Composant');
-		if(div) {
-			tableCompos = div.getElementsByTagName("table")[0];
-		} else {
-			window.console.warn("[mmassistant] Aucun composant en vente");
-			return;
-		}
-	} catch(e) {
-		window.console.error(
-			"[mmassistant] Erreur durant le traitement de la liste de vente", e
-		);
-		return;
-	}
+	var divs = document.evaluate(
+			"//div[contains(@id, 'Composant')]",
+			document, null, 7, null
+		),
+		div, tableCompos,
+		row, insertNode, mob, niveau, qualite;
 
-	for(row of tableCompos.rows) {
-		insertNode = row.cells[3];
-		mob = insertNode.textContent;
-		mob = mob.slice(mob.indexOf("d'un")+5)
-			.split("de Qualit")[0]
-			.trim();
-		niveau = NiveauDuMonstre[epure(mob)];
-		qualite = insertNode.textContent.match(Qualites.regex);
-		if(niveau && qualite) {
-			ajouteInfosDuCompo(insertNode, {
-				mob: mob,
-				niveau: niveau,
-				qualite: qualite,
-				bonus: niveau+Qualites[qualite].bonus
-			});
+	for(i=0; i<divs.snapshotLength; i++) {
+		div = divs.snapshotItem(i);
+		try {
+			tableCompos = div.getElementsByTagName("table")[0];
+		} catch(e) {
+			window.console.error(
+				"[mmassistant] Erreur durant le traitement de la liste d'achat",
+				e
+			);
+			continue;
+		}
+
+		for(row of tableCompos.rows) {
+			insertNode = row.cells[3];
+			mob = insertNode.textContent;
+			mob = mob.slice(mob.indexOf("d'un")+5)
+				.split("de Qualit")[0]
+				.trim();
+			niveau = NiveauDuMonstre[epure(mob)];
+			qualite = insertNode.textContent.match(Qualites.regex);
+			if(niveau && qualite) {
+				ajouteInfosDuCompo(insertNode, {
+					mob: mob,
+					niveau: niveau,
+					qualite: qualite,
+					bonus: niveau+Qualites[qualite].bonus
+				});
+			}
 		}
 	}
 
