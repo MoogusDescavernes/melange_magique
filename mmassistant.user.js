@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.2.0.0
+// @version      2.2.1.0
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -513,15 +513,16 @@ function ajouteBouton(node, value) {
 	return input;
 }
 
-function ajouteCheckboxMelange(node, num, typeItem) {
-	var input = document.createElement("input");
+function ajouteCheckboxMelange(row, num, typeItem) {
+	var cell = row.insertCell(0),
+		input = document.createElement("input");
+	cell.style = "width:12px;display:none;";
 	input.type = "checkbox";
 	input.className = "mmassistant_"+typeItem;
 	input.num = num;
 	input.typeItem = typeItem;
-	input.style.display = "none";
 	input.onchange = refreshMelangeur;
-	node.appendChild(input);
+	cell.appendChild(input);
 	return input;
 }
 
@@ -710,7 +711,7 @@ function initMatos() {
 		titrePopos, div;
 	try {
 		// Recherche d'éventuels compos
-		div = document.getElementById("mh_objet_hidden_"+numTroll+"Composant");
+		div = document.getElementById("mh_objet_hidden_"+numTroll+"_Composant");
 		if(div) {
 			tableCompos = div.getElementsByTagName("table")[0];
 		} else {
@@ -718,7 +719,7 @@ function initMatos() {
 		}
 
 		// Recherche d'éventuelles popos
-		div = document.getElementById("mh_objet_hidden_"+numTroll+"Potion");
+		div = document.getElementById("mh_objet_hidden_"+numTroll+"_Potion");
 		if(div) {
 			tablePopos = div.getElementsByTagName("table")[0];
 
@@ -760,14 +761,14 @@ function initMatos() {
 	// 6: poids
 	// 7: ceinture
 	for(row of tableCompos.rows) {
-		insertNode = row.cells[3];
+		insertNode = row.cells[2];
 		mob = insertNode.textContent;
 		mob = mob.slice(mob.indexOf("d'un")+5)
 			.split("de Qualit")[0]
 			.trim();
 		niveau = NiveauDuMonstre[epure(mob)];
 		qualite = insertNode.textContent.match(Qualites.regex);
-		num = String(row.cells[2].textContent.match(/\d+/));
+		num = String(row.cells[1].textContent.match(/\d+/));
 		if(niveau && qualite) {
 			objCompos[num] = {
 				mob: mob,
@@ -779,7 +780,7 @@ function initMatos() {
 		}
 
 		// Ajout de la checkbox de mélange
-		ajouteCheckboxMelange(row.cells[0], num, "compo");
+		ajouteCheckboxMelange(row, num, "compo");
 	}
 	if(MODE_DEBUG) {
 		window.console.debug(objCompos);
@@ -797,12 +798,11 @@ function initMatos() {
 	// 6: poids
 	// 7: ceinture
 	for(row of tablePopos.rows) {
-		insertNode = row.cells[3];
-		nom = epure(insertNode.textContent.trim());
-		num = String(row.cells[2].textContent.match(/\d+/));
+		nom = epure(row.cells[2].textContent.trim());
+		num = String(row.cells[1].textContent.match(/\d+/));
 
 		// Ajout de la checkbox de mélange
-		ajouteCheckboxMelange(row.cells[0], num, "popo");
+		ajouteCheckboxMelange(row, num, "popo");
 
 		// Si popo non identifiée, pas de traitement
 		if(nom=="Potion") { continue; }
@@ -919,7 +919,7 @@ function initMatos() {
 		}
 		objPopos[num].risque = Math.round(10*risque)/10;
 
-		ajouteInfosDeLaPopo(insertNode, objPopos[num]);
+		ajouteInfosDeLaPopo(row.cells[3], objPopos[num]);
 	}
 	if(MODE_DEBUG) {
 		window.console.debug(objPopos);
@@ -943,8 +943,8 @@ function activeMelangeur() {
 	var
 		checkboxsCompo = document.querySelectorAll(".mmassistant_compo"),
 		checkboxsPopo = document.querySelectorAll(".mmassistant_popo"),
-		div = document.getElementById("mh_objet_hidden_"+numTroll+"Potion"),
-		plus = document.getElementById("mh_plus_"+numTroll+"Potion"),
+		div = document.getElementById("mh_objet_hidden_"+numTroll+"_Potion"),
+		plus = document.getElementById("mh_plus_"+numTroll+"_Potion"),
 		btn = document.getElementById("mmassistant_btnmelange"),
 		td = document.getElementById("mmassistant_tdmelange"),
 		checkbox, span;
@@ -952,10 +952,10 @@ function activeMelangeur() {
 		plus.click();
 	}
 	for(checkbox of checkboxsCompo) {
-		checkbox.style.display = "";
+		checkbox.parentElement.style.display = "";
 	}
 	for(checkbox of checkboxsPopo) {
-		checkbox.style.display = "";
+		checkbox.parentElement.style.display = "";
 	}
 	btn.value = "Mélanger!!";
 	btn.onclick = lanceMelange;
@@ -1443,7 +1443,7 @@ function traitementListeGowaps() {
 		try {
 			// Recherche d'éventuels compos
 			div = document.getElementById(
-				"mh_objet_hidden_"+numGogo+"Composant"
+				"mh_objet_hidden_"+numGogo+"_Composant"
 			);
 			if(div) {
 				tableCompos = div.getElementsByTagName("table")[0];
@@ -1471,7 +1471,7 @@ function traitementListeGowaps() {
 		// 5: poids
 		// 6: ?
 		for(row of tableCompos.rows) {
-			insertNode = row.cells[2];
+			insertNode = row.cells[1];
 			mob = insertNode.textContent;
 			mob = mob.slice(mob.indexOf("d'un")+5)
 				.split("de Qualit")[0]
@@ -1504,7 +1504,7 @@ function traitementEquipementGowap() {
 		urlParams = new URLSearchParams(window.location.search),
 		numGogo = urlParams.get('ai_IdFollower'),
 		div = document.getElementById(
-			"mh_objet_hidden_"+numGogo+"Composant"
+			"mh_objet_hidden_"+numGogo+"_Composant"
 		),
 		tableCompos, row, insertNode, mob, niveau, qualite;
 	if(div) {
@@ -1526,7 +1526,7 @@ function traitementEquipementGowap() {
 	// 5: poids
 	// 6: ?
 	for(row of tableCompos.rows) {
-		insertNode = row.cells[2];
+		insertNode = row.cells[1];
 		mob = insertNode.textContent;
 		mob = mob.slice(mob.indexOf("d'un")+5)
 			.split("de Qualit")[0]
