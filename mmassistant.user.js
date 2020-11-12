@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.3.1.0
+// @version      2.3.1.1
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -906,7 +906,7 @@ function initMatos() {
 				} else {
 					risque += Number(nb);
 				}
-			} else if(/Zone/.test(effet)) {
+			} else if(/[Z,z]one/.test(effet)) {
 				// Malus de Zone
 				objPopos[num].zone = 1;
 			} else {
