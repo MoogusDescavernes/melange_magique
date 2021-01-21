@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.3.1.1
+// @version      2.3.1.2
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -1655,6 +1655,7 @@ if(
 		// Lancer de Potion
 		window.console.log("[mmassistant] Compétence : Lancer de potion");
 		getNumTroll();
+		var run = true;
 		try {
 			var
 				selectPopo = document.getElementById("potion"),
@@ -1663,35 +1664,39 @@ if(
 			window.console.error(
 				"[mmassistant] Erreur durant l'initialisation - OFF", e
 			);
-			return;
+			run = false;
 		}
-		enrichitListePopos(selectPopo);
-		return;
-	} else if(document.body.id!="p_competencemlangemagique") {
+		if (run) {
+			enrichitListePopos(selectPopo);
+		}
+	} else if(document.body.id=="p_competencemlangemagique") {
+		// Mélange Magique
+		window.console.log("[mmassistant] Compétence : Mélange Magique");
+		getNumTroll();
+		var run = true;
+		try {
+			var
+				selectPopo1 = document.getElementById("potion1"),
+				selectPopo2 = document.getElementById("potion2"),
+				selectCompo = document.getElementById("cible"),
+				numMemoire, afficheRisque;
+			objCompos =
+				window.localStorage.getObject("mmassistant.compos."+numTroll);
+			objPopos =
+				window.localStorage.getObject("mmassistant.popos."+numTroll);
+		} catch(e) {
+			window.console.error(
+				"[mmassistant] Erreur durant l'initialisation du calculateur", e
+			);
+			run = false;
+		}
+		if (run) {
+			afficheRisque = document.createElement("span");
+			initCompetenceMelange();
+		}
+	} else {
 		window.console.warn("[mmassistant] Compétence non reconnue - OFF");
-		return;
 	}
-	// Mélange Magique
-	getNumTroll();
-	try {
-		var
-			selectPopo1 = document.getElementById("potion1"),
-			selectPopo2 = document.getElementById("potion2"),
-			selectCompo = document.getElementById("cible"),
-			numMemoire, afficheRisque;
-		objCompos =
-			window.localStorage.getObject("mmassistant.compos."+numTroll);
-		objPopos =
-			window.localStorage.getObject("mmassistant.popos."+numTroll);
-	} catch(e) {
-		window.console.error(
-			"[mmassistant] Erreur durant l'initialisation du calculateur", e
-		);
-		return;
-	}
-	window.console.log("[mmassistant] Compétence : Mélange Magique");
-	afficheRisque = document.createElement("span");
-	initCompetenceMelange();
 }
 
 if(MODE_DEBUG) {
