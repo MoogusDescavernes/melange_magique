@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.3.1.2
+// @version      2.3.2.0
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -1639,6 +1639,7 @@ if(
 	// Utiliser une popo / parcho
 	window.console.log("[mmassistant] Utiliser une potion");
 	getNumTroll();
+	var run = true;
 	try {
 		var
 			select = document.getElementsByTagName("select")[0],
@@ -1647,9 +1648,11 @@ if(
 		window.console.error(
 			"[mmassistant] Erreur durant l'initialisation - OFF", e
 		);
-		return;
+		run = false;
 	}
-	enrichitListePopos(select);
+	if (run) {
+		enrichitListePopos(select);
+	}
 } else if(isPage("MH_Play/Actions/Competences/Play_a_CompetenceYY")) {
 	if(lancer_de_potions && document.body.id=="p_competencelancerdepotions") {
 		// Lancer de Potion
