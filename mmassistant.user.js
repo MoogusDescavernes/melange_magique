@@ -1415,7 +1415,7 @@ function initCompetenceMelange() {
 		window.console.debug("[mmassistant] lancement initCompetenceMelange");
 	}
 	var
-		divAction = document.querySelector("div.Action"),
+		divAction = document.querySelector("div.ActionFrame"),
 		labels = document.evaluate(
 			".//text()[contains(.,'Choisir')]",
 			divAction, null, 7, null
