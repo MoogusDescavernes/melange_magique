@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.3.2.0
+// @version      2.3.3.0
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -1268,7 +1268,7 @@ function initCompetenceMelange() {
 		window.console.debug("[mmassistant] Lancement initCompetenceMelange");
 	}
 	var
-		divAction = document.querySelector("div.Action"),
+		divAction = document.querySelector("div.ActionFrame"),
 		labels = document.evaluate(
 			".//text()[contains(.,'Choisir')]",
 			divAction, null, 7, null
