@@ -3,11 +3,12 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
 // @author       Dabihul
-// @version      2.1.4.4
+// @version      2.3.3.0
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
 // @include      */mountyhall/MH_Play/Play_e_follo*
+// @include      */mountyhall/MH_Lieux/Lieu_TaniereAchat*
 // @include      */mountyhall/View/TaniereDescription*
 // @include      */mountyhall/MH_Play/Play_equipement*
 // @include      */mountyhall/MH_Play/Actions/Play_a_ActionYY*
@@ -67,7 +68,7 @@ var
 
 if(MODE_DEBUG) {
 	var URL = window.location.pathname;
-	window.console.debug("[mmassistant] script ON! sur :"+URL);
+	window.console.debug("[mmassistant] script ON! sur : "+URL);
 }
 
 //----------------------------- Bases de données -----------------------------//
@@ -513,15 +514,16 @@ function ajouteBouton(node, value) {
 	return input;
 }
 
-function ajouteCheckboxMelange(node, num, typeItem) {
-	var input = document.createElement("input");
+function ajouteCheckboxMelange(row, num, typeItem) {
+	var cell = row.insertCell(0),
+		input = document.createElement("input");
+	cell.style = "width:12px;display:none;";
 	input.type = "checkbox";
 	input.className = "mmassistant_"+typeItem;
 	input.num = num;
 	input.typeItem = typeItem;
-	input.style.display = "none";
 	input.onchange = refreshMelangeur;
-	node.appendChild(input);
+	cell.appendChild(input);
 	return input;
 }
 
@@ -541,6 +543,7 @@ function ajouteInfosDuCompo(node, compo) {
 		span = document.createElement("span"),
 		str;
 	appendText(node," ");
+	span.className = "mmassistant_infos";
 	span.appendChild(creeIconeMelange());
 	appendText(span," [-"+compo.bonus+" %]");
 	switch(compo.mob[0]) {
@@ -700,176 +703,26 @@ function risqueExplo(popo1, popo2, compo) {
 	}
 }
 
-//--------------------- Désactivé, en attente de refonte ---------------------//
-
-// function getSetInfo(snap) {
-// // Extrait et affiche les infos MM d'un compo *dans un tr standard*
-// 	if(isNaN(snap.childNodes[1].getElementsByTagName("img")[0].alt[0])) {
-// 		// Si non identifié, on laisse
-// 		console.warning('non identifié');
-// 		return;
-// 	}
-// 	var node = snap.childNodes[5],
-// 		mob = node.firstChild.textContent;
-// 	mob = mob.slice(mob.indexOf("d'un")+5).trim();
-// 	var niv = niveauDuMonstre[epure(mob)],
-// 		qualite = snap.childNodes[7].textContent;
-// 	qualite = qualite.match(Qualites.regex);
-// 	if(niv && qualite in Qualites) {
-// 		ajouteInfosDuCompo(node, {
-// 			mob: mob,
-// 			niveau: niv,
-// 			qualite: qualite,
-// 			bonus: niv+Qualites[qualite].bonus
-// 		});
-// 	}
-// }
-
-// function mmListeGowap() {
-// // Traitement de la page qui liste les gowaps
-// 	try {
-// 		// On extrait les nums de gowaps
-// 		var gogoList = document.evaluate(
-// 			".//form/table/descendant::table/tbody/tr/td[@class='mh_titre3']/a",
-// 			document, null, 7, null
-// 		);
-// 		var gogoNumbers = [];
-// 		for(var i=0 ; i<gogoList.snapshotLength ; i++) {
-// 			gogoNumbers.push(parseInt(gogoList.snapshotItem(i).textContent));
-// 		}
-// 	} catch(e) {
-// 		return;
-// 	}
-// 
-// 	// Puis pour chaque gowap, on recherche les compos portés et on traite
-// 	for(var j=0 ; j<gogoNumbers.length ; j++) {
-// 		var div = document.getElementById(
-// 			"mh_"+gogoNumbers[j]+"_hidden_Composant"
-// 		);
-// 		if(!div) {
-// 			continue;
-// 		}
-// 		var trList = document.evaluate("./table/tbody/tr", div, null, 7, null);
-// 		if(!(trList.snapshotLength > 0)) {
-// 			continue;
-// 		}
-// 		for(var i=0 ; i<trList.snapshotLength ; i++) {
-// 			getSetInfo(trList.snapshotItem(i));
-// 		}
-// 	}
-// }
-
-// function mmEquipGowap() {
-// // Traitement de la page d'équipement d'un gowap
-// 	try {
-// 		// On récupère la liste des compos portés
-// 		var trList = document.evaluate(
-// 			".//p/table/tbody/tr/"+
-// 			"td[contains(table/tbody/tr/td/b/text(),'Composant')]/"+
-// 			"div/table/tbody/tr",
-// 			document, null, 7, null
-// 		);
-// 	} catch(e) {
-// 		return;
-// 	}
-// 
-// 	for(var i=0 ; i<trList.snapshotLength ; i++) {
-// 		getSetInfo(trList.snapshotItem(i));
-// 	}
-// }
-
-// function mmViewTaniere() {
-// // Traitement de l'étal d'une tanière dans la vue (popup)
-// 	try {
-// 		var mainTab = document.
-// 			getElementsByClassName("listeEquipement")[0].
-// 			getElementsByTagName("table")[0];
-// 		var trstart = document.evaluate(
-// 			"./tbody/tr[@class='mh_tdtitre' and contains(td/b/text(),'Composant')]",
-// 			mainTab, null, 9, null
-// 		).singleNodeValue;
-// 	} catch(e) {
-// 		return;
-// 	}
-// 
-// 	var tr = trstart.nextSibling.nextSibling;
-// 	while(tr && tr.className=="mh_tdpage") {
-// 		// Les tr sont non-standard dans la vue,
-// 		// il faut refaire l'extraction à la main
-// 		var
-// 			node = tr.getElementsByTagName("td")[2],
-// 			txt = node.textContent,
-// 			indQ = txt.indexOf("de Qualit"),
-// 			mob = txt.slice(txt.indexOf("d'un")+5, indQ-1).trim(),
-// 			niv = niveauDuMonstre[epure(mob)],
-// 			qualite = txt.slice(indQ+11, txt.indexOf("[")-1).trim(),
-// 			effet = effetParQualite[epure(qualite)];
-// 		if(niv && effet && node.lastChild.textContent.indexOf("MM")==-1) {
-// 			addInfo(node, mob, niv, qualite, effet);
-// 		}
-// 		tr = tr.nextSibling.nextSibling;
-// 	}
-// }
-
-//---------------------- Traitement des pages de stock -----------------------//
-
-function traitementStockTaniere() {
-// Traitement du stock d'une tanière perso (onglet tanière)
-	try {
-		// On récupère la liste des compos en stock
-		// NB: td[position() = 4] exclut les compos non IdT
-		var trCompos = document.evaluate(
-			"//table[@id='stock']/tbody[position() mod 2 = 0]/tr/" +
-			"td[position() = 4 and contains(text(),'Composant')]/..",
-			document, null, 7, null
-		);
-	} catch(e) {
-		return;
-	}
-	if(MODE_DEBUG) {
-		window.console.debug("[mmassistant] Lancement traitementStockTaniere");
-	}
-
-	for(var i=numCompo ; i<trCompos.snapshotLength ; i++) {
-		var
-			tr = trCompos.snapshotItem(i),
-			mob = tr.cells[2].textContent,
-			qualite = tr.cells[3].textContent.match(Qualites.regex),
-			niv;
-		mob = mob.slice(mob.indexOf("d'un")+5).trim();
-		niv = NiveauDuMonstre[epure(mob)];
-		if(niv && qualite in Qualites) {
-			ajouteInfosDuCompo(tr.cells[2], {
-				mob: mob,
-				niveau: niv,
-				qualite: qualite,
-				bonus: niv+Qualites[qualite].bonus
-			});
-		}
-		numCompo++;
-	}
-}
-
 //-------------------- Traitement de la page d'équipement --------------------//
 
 function initMatos() {
 	var
-		// Si pas de compos / popos, on mime une table vide
-		tablePopos = tableCompos = {rows:{length:0}},
-		titrePopos, tr;
+		// Si pas de compos / popos, on mime une HTMLCollection vide
+		tablePopos = tableCompos = {rows:[]},
+		titrePopos, div;
 	try {
 		// Recherche d'éventuels compos
-		tr = document.getElementById("mh_objet_hidden_"+numTroll+"Composant");
-		if(tr) {
-			tableCompos = tr.getElementsByTagName("table")[0];
+		div = document.getElementById("mh_objet_hidden_"+numTroll+"_Composant");
+		if(div) {
+			tableCompos = div.getElementsByTagName("table")[0];
 		} else {
 			window.console.warn("[mmassistant] Aucun composant trouvé");
 		}
 
 		// Recherche d'éventuelles popos
-		tr = document.getElementById("mh_objet_hidden_"+numTroll+"Potion");
-		if(tr) {
-			tablePopos = tr.getElementsByTagName("table")[0];
+		div = document.getElementById("mh_objet_hidden_"+numTroll+"_Potion");
+		if(div) {
+			tablePopos = div.getElementsByTagName("table")[0];
 
 			// Récupération de la ligne de titre des popos
 			// titrePopos.cells:
@@ -877,7 +730,10 @@ function initMatos() {
 			// 1: "Potion"
 			// 2: nb popos
 			// 3: poids total
-			titrePopos = tr.previousSibling.getElementsByTagName('tr')[0];
+			titrePopos = document.evaluate(
+				"(./preceding-sibling::table)[last()]//tr[1]",
+				div, null, 9, null
+			).singleNodeValue;
 		} else {
 			window.console.warn("[mmassistant] Aucune potion trouvée");
 		}
@@ -891,31 +747,29 @@ function initMatos() {
 		window.console.debug("[mmassistant] Lancement initMatos");
 	}
 	var
-		i, j, insertNode, mob, niveau, qualite, effet,
-		nom, num, effets, racine, risque, magie, nb, carac;
+		row, insertNode, mob, niveau, qualite,
+		nom, num, effetTotal, effets, effet, racine,
+		risque, magie, nb, carac;
 
 	// Récupération & Stockage des données des Composants
-	// trCompos.cells:
-	// 0: ?
-	// 1: menu contextuel
-	// 2: numéro
-	// 3: nom
-	// 4: emplacement | qualité
-	// 5: usure
-	// 6: poids
-	// 7: ceinture
-	for(i=0 ; i<tableCompos.rows.length ; i++) {
-		insertNode = tableCompos.rows[i].cells[3];
+	// tableCompos.row.cells:
+	// 0: menu contextuel
+	// 1: numéro
+	// 2: nom | emplacement | qualité
+	// 3: effet (aucun)
+	// 4: usure
+	// 5: poids
+	// 6: ceinture
+	for(row of tableCompos.rows) {
+		insertNode = row.cells[2];
 		mob = insertNode.textContent;
-		mob = mob.slice(mob.indexOf("d'un")+5).trim();    
-		mob = mob.split("de Qualit")[0].trim();
-        
+		mob = mob.slice(mob.indexOf("d'un")+5)
+			.split("de Qualit")[0]
+			.trim();
 		niveau = NiveauDuMonstre[epure(mob)];
-		qualite = tableCompos.rows[i].cells[3].textContent;
-		qualite = qualite.slice(qualite.indexOf("Qualit")+8).trim();
-		qualite = qualite.split('[')[0].trim();
-		num = String(tableCompos.rows[i].cells[2].textContent.match(/\d+/));
-		if(niveau && qualite in Qualites) {
+		qualite = insertNode.textContent.match(Qualites.regex);
+		num = String(row.cells[1].textContent.match(/\d+/));
+		if(niveau && qualite) {
 			objCompos[num] = {
 				mob: mob,
 				niveau: niveau,
@@ -926,7 +780,7 @@ function initMatos() {
 		}
 
 		// Ajout de la checkbox de mélange
-		ajouteCheckboxMelange(tableCompos.rows[i].cells[0], num, "compo");
+		ajouteCheckboxMelange(row, num, "compo");
 	}
 	if(MODE_DEBUG) {
 		window.console.debug(objCompos);
@@ -934,32 +788,31 @@ function initMatos() {
 	window.localStorage.setObject("mmassistant.compos."+numTroll, objCompos);
 
 	// Récupération & Stockage des données des Potions
-	// trPopos.cells:
-	// 0: ?
-	// 1: menu contextuel
-	// 2: numéro
-	// 3: nom
-	// 4: effets
-	// 5: usure
-	// 6: poids
-	// 7: ceinture
-	for(i=0 ; i<tablePopos.rows.length ; i++) {
-		insertNode = tablePopos.rows[i].cells[3];
-		nom = epure(insertNode.textContent.trim());
-		num = String(tablePopos.rows[i].cells[2].textContent.match(/\d+/));
+	// tablePopos.rows.cells [ intialement ] :
+	// 0: menu contextuel
+	// 1: numéro
+	// 2: nom
+	// 3: effets
+	// 4: usure
+	// 5: poids
+	// 6: ceinture
+	// [ +1 après insertion de la checkbox de mélange ]
+	for(row of tablePopos.rows) {
+		nom = epure(row.cells[2].textContent.trim());
+		num = String(row.cells[1].textContent.match(/\d+/));
 
 		// Ajout de la checkbox de mélange
-		ajouteCheckboxMelange(tablePopos.rows[i].cells[0], num, "popo");
+		ajouteCheckboxMelange(row, num, "popo");
 
 		// Si popo non identifiée, pas de traitement
 		if(nom=="Potion") { continue; }
 
 		// Sinon début du stockage
-		effet = tablePopos.rows[i].cells[4].textContent.trim();
-		effets = effet.split(" | ");
+		effetTotal = row.cells[4].textContent.trim();
+		effets = effetTotal.split(" | ");
 		objPopos[num] = {
 			nom: nom,
-			effet: effet
+			effet: effetTotal
 		};
 
 		// Malus Mélange (& extraction racine)
@@ -969,6 +822,9 @@ function initMatos() {
 		// Si mélange niv sup, on récupère "Potions", sans effet.
 			racine = nom.slice(0, nom.indexOf(" Melangees"));
 			objPopos[num].melange = 1;
+		} else if(nom.indexOf(" (Niv")!=-1) {
+		// Ajustement pour les anciennes popos de painture
+			racine = nom.slice(0, nom.indexOf(" (Niv"));
 		} else {
 			racine = nom;
 		}
@@ -981,13 +837,13 @@ function initMatos() {
 
 			// Attribution d'un "niveau" (pour affichage)
 			// Par défaut, niveau = valeur du 1er effet
-			niveau = effet.match(/\d+/);
+			niveau = effetTotal.match(/\d+/);
 			// Cas particuliers:
 			switch(racine) {
 				case "Dover Powa":
 				case "Sinne Khole":
 					// "niveau" = MM/RM
-					niveau = effet.match(/\d+/g).join("/");
+					niveau = effetTotal.match(/\d+/g).join("/");
 					break;
 				case "Metomol":
 					// niveau = malus armure
@@ -1018,26 +874,26 @@ function initMatos() {
 		}
 
 		// Malus GPTJC
-		if(
-			racine=="Potion de Guerison" ||
-			racine=="Toxine Violente" ||
-			effet.indexOf("Pàïntûré")!=-1 ||
-			racine=="Jus de Cervelle"
-		) {
+		if([
+			"Potion de Guerison",
+			"Toxine Violente",
+			"Potion de Painture",
+			"Jus de Cervelle"
+		].includes(racine)) {
 			objPopos[num].GPT = 1;
 		}
 
 		// Calcul du risque associé aux effets de la popo
 		risque=0;
 		magie=0;
-		for(j=0 ; j<effets.length ; j++) {
-			nb = effets[j].match(/\d+/);
+		for(effet of effets) {
+			nb = effet.match(/\d+/);
 			if(nb) {
-				carac = effets[j].split(":")[0].trim();
+				carac = effet.split(":")[0].trim();
 				if(carac=="RM" || carac=="MM") {
 					// Si MM/RM, on attrape le signe pour faire la somme
 					// algébrique et on divise la carac par 10
-					nb = effets[j].match(/-?\d+/);
+					nb = effet.match(/-?\d+/);
 					magie = magie ? magie+nb/10 : nb/10;
 					// Mini-mélange: on stocke la valeur pour le cap
 					objPopos[num][carac] = Math.abs(nb);
@@ -1050,11 +906,11 @@ function initMatos() {
 				} else {
 					risque += Number(nb);
 				}
-			} else if(/Zone/.test(effets[j])) {
+			} else if(/[Z,z]one/.test(effet)) {
 				// Malus de Zone
 				objPopos[num].zone = 1;
 			} else {
-				window.console.warn("[mmassistant] Effet inconnu:", effets[j]);
+				window.console.warn("[mmassistant] Effet inconnu:", effet);
 			}
 		}
 		if(magie) {
@@ -1063,7 +919,7 @@ function initMatos() {
 		}
 		objPopos[num].risque = Math.round(10*risque)/10;
 
-		ajouteInfosDeLaPopo(insertNode, objPopos[num]);
+		ajouteInfosDeLaPopo(row.cells[3], objPopos[num]);
 	}
 	if(MODE_DEBUG) {
 		window.console.debug(objPopos);
@@ -1071,7 +927,7 @@ function initMatos() {
 	window.localStorage.setObject("mmassistant.popos."+numTroll, objPopos);
 
 	// Ajout du bouton de Mélange
-	if(!tr) { return; }
+	if(!div) { return; }
 	titrePopos.cells[1].style.width = "100px";
 	td = titrePopos.insertCell(2);
 	td.id = "mmassistant_tdmelange";
@@ -1087,19 +943,19 @@ function activeMelangeur() {
 	var
 		checkboxsCompo = document.querySelectorAll(".mmassistant_compo"),
 		checkboxsPopo = document.querySelectorAll(".mmassistant_popo"),
-		tr = document.getElementById("mh_objet_hidden_"+numTroll+"Potion"),
-		plus = document.getElementById("mh_plus_"+numTroll+"Potion"),
+		div = document.getElementById("mh_objet_hidden_"+numTroll+"_Potion"),
+		plus = document.getElementById("mh_plus_"+numTroll+"_Potion"),
 		btn = document.getElementById("mmassistant_btnmelange"),
 		td = document.getElementById("mmassistant_tdmelange"),
-		i, span;
-	if(tr.style.display=="none") {
+		checkbox, span;
+	if(div.style.display=="none") {
 		plus.click();
 	}
-	for(i=0 ; i<checkboxsCompo.length ; i++) {
-		checkboxsCompo[i].style.display = "";
+	for(checkbox of checkboxsCompo) {
+		checkbox.parentElement.style.display = "";
 	}
-	for(i=0 ; i<checkboxsPopo.length ; i++) {
-		checkboxsPopo[i].style.display = "";
+	for(checkbox of checkboxsPopo) {
+		checkbox.parentElement.style.display = "";
 	}
 	btn.value = "Mélanger!!";
 	btn.onclick = lanceMelange;
@@ -1122,21 +978,21 @@ function refreshMelangeur() {
 		chercheMemoire = false,
 		erreur = "",
 		popos = [],
-		compo, risque, i;
+		checkbox, compo, risque;
 
 	// Parsage des Compos
-	for(i=0 ; i<checkboxsCompo.length ; i++) {
-		if(checkboxsCompo[i].checked) {
-			if(typeItem=="popo" || checkboxsCompo[i].num==num) {
+	for(checkbox of checkboxsCompo) {
+		if(checkbox.checked) {
+			if(typeItem=="popo" || checkbox.num==num) {
 				// Sélection du compo actif
-				if(checkboxsCompo[i].num in objCompos) {
-					compo = objCompos[checkboxsCompo[i].num];
+				if(checkbox.num in objCompos) {
+					compo = objCompos[checkbox.num];
 				} else {
 					erreur = "Composant inconnu";
 				}
 			} else {
 				// Nettoyage ancien compo
-				checkboxsCompo[i].checked = false;
+				checkbox.checked = false;
 			}
 		}
 	}
@@ -1144,23 +1000,23 @@ function refreshMelangeur() {
 	// Parsage des Popos
 	if(typeItem=="popo" && (!numMemoire || num==numMemoire)) {
 		chercheMemoire = true;
-		numMemoire = "";
+		numMemoire = 0;
 	}
-	for(i=0 ; i<checkboxsPopo.length ; i++) {
-		if(checkboxsPopo[i].checked) {
+	for(checkbox of checkboxsPopo) {
+		if(checkbox.checked) {
 			if(chercheMemoire) {
-				numMemoire = checkboxsPopo[i].num;
+				numMemoire = checkbox.num;
 				chercheMemoire = false;
 			}
 			if(
 				typeItem=="popo" &&
-				checkboxsPopo[i].num!=num &&
-				checkboxsPopo[i].num!=numMemoire
+				checkbox.num!=num &&
+				checkbox.num!=numMemoire
 			) {
-				checkboxsPopo[i].checked = false;
+				checkbox.checked = false;
 			} else {
-				if(checkboxsPopo[i].num in objPopos) {
-					popos.push(objPopos[checkboxsPopo[i].num]);
+				if(checkbox.num in objPopos) {
+					popos.push(objPopos[checkbox.num]);
 				} else {
 					popos.push({});
 					erreur += (erreur ? "\n" : "") + "Potion inconnue";
@@ -1190,22 +1046,23 @@ function lanceMelange() {
 		utiliser = {
 			popos: [],
 			compo: ""
-		};
+		},
+		checkbox;
 
 	// Récupération d'un éventuel compo
 	// On s'arrête dès qu'on en trouve un
-	for(i=0 ; i<checkboxsCompo.length ; i++) {
-		if(checkboxsCompo[i].checked) {
-			utiliser.compo = checkboxsCompo[i].num;
+	for(checkbox of checkboxsCompo) {
+		if(checkbox.checked) {
+			utiliser.compo = checkbox.num;
 			break;
 		}
 	}
 
 	// Récupération des popos
 	// On s'arrête à la 2e popo trouvée
-	for(i=0 ; i<checkboxsPopo.length ; i++) {
-		if(checkboxsPopo[i].checked) {
-			utiliser.popos.push(checkboxsPopo[i].num);
+	for(checkbox of checkboxsPopo) {
+		if(checkbox.checked) {
+			utiliser.popos.push(checkbox.num);
 			if(utiliser.popos.length>=2) {
 				break;
 			}
@@ -1227,19 +1084,15 @@ function enrichitListeCompos() {
 // Ajoute les infos de compos au menu déroulant lors d'un mélange
 	if(!objCompos) { return; }
 	var
-		i, option, compo,
+		option, compo, i,
 		optgroup = selectCompo.getElementsByTagName("optgroup")[0];
 
 	selectCompo.style.maxWidth = "300px";
 
-	for(i=1 ; i<selectCompo.options.length ; i++) {
-		option = selectCompo.options[i];
+	for(option of selectCompo.options) {
 		if(option.value in objCompos) {
 			compo = objCompos[option.value];
-			appendText(option,
-				" "+Qualites[compo.qualite].abbr+
-				" (-"+compo.bonus+"%)"
-			);
+			appendText(option, " (-"+compo.bonus+"%)");
 		} else if(option.value!=0) {
 			option.title = "Composant inconnu: ouvrez l'onglet Équipement";
 		}
@@ -1278,8 +1131,8 @@ function enrichitListeCompos() {
 			return Number(objCompos[a].bonus)>Number(objCompos[b].bonus);
 		});
 
-		for(i=0 ; i<numCompos.length ; i++) {
-			optgroup.appendChild(composDispos[numCompos[i]]);
+		for(num of numCompos) {
+			optgroup.appendChild(composDispos[num]);
 		}
 	}
 }
@@ -1412,7 +1265,7 @@ function enrichitListePopos(select) {
 function initCompetenceMelange() {
 // Mise en place du calculateur de risque
 	if(MODE_DEBUG) {
-		window.console.debug("[mmassistant] lancement initCompetenceMelange");
+		window.console.debug("[mmassistant] Lancement initCompetenceMelange");
 	}
 	var
 		divAction = document.querySelector("div.ActionFrame"),
@@ -1523,21 +1376,238 @@ function refreshRisqueExplo() {
 	}
 }
 
+//---------------------- Traitement des pages de stock -----------------------//
+
+function traitementStockTaniere() {
+// Traitement du stock d'une tanière perso (onglet tanière)
+	if(MODE_DEBUG) {
+		window.console.debug("[mmassistant] Lancement traitementStockTaniere");
+	}
+	try {
+		// On récupère la liste des compos en stock
+		var trCompos = document.evaluate(
+			"//table[@id='stock']/tbody[position() mod 2 = 0]/tr/" +
+			"td[position() = 4 and contains(text(),'Composant')]/..",
+			document, null, 7, null
+		);
+	} catch(e) {
+		window.console.warn(
+			"[mmassistant] Aucun composant dans le stock", e
+		);
+		return;
+	}
+
+	var qte = 0;
+	for(var i=0 ; i<trCompos.snapshotLength ; i++) {
+		var tr = trCompos.snapshotItem(i);
+		if (tr.getElementsByClassName("mmassistant_infos").length > 0) {
+			continue;
+		}
+		var
+			mob = tr.cells[2].textContent,
+			qualite = tr.cells[2].textContent.match(Qualites.regex),
+			niveau;
+		mob = mob.slice(mob.indexOf("d'un")+5)
+			.split("de Qualit")[0]
+			.trim();
+		niveau = NiveauDuMonstre[epure(mob)];
+		if(niveau && qualite) {
+			ajouteInfosDuCompo(tr.cells[2], {
+				mob: mob,
+				niveau: niveau,
+				qualite: qualite,
+				bonus: niveau+Qualites[qualite].bonus
+			});
+			qte++;
+		}
+	}
+
+	window.console.log(
+		"[mmassistant] traitementStockTaniere : " + qte +
+		" composant(s) traité(s)"
+	);
+}
+
+function traitementListeAchatTaniere() {
+// Traitement de la liste d'Achat d'un lieu tanière (onglet lieu)
+	if(MODE_DEBUG) {
+		window.console.debug(
+			"[mmassistant] Lancement traitementListeAchatTaniere"
+		);
+	}
+	var divs = document.evaluate(
+			"//div[contains(@id, 'Composant')]",
+			document, null, 7, null
+		),
+		div, tableCompos,
+		row, insertNode, mob, niveau, qualite;
+
+	for(i=0; i<divs.snapshotLength; i++) {
+		div = divs.snapshotItem(i);
+		try {
+			tableCompos = div.getElementsByTagName("table")[0];
+		} catch(e) {
+			window.console.error(
+				"[mmassistant] Erreur durant le traitement de la liste d'achat",
+				e
+			);
+			continue;
+		}
+
+		for(row of tableCompos.rows) {
+			insertNode = row.cells[3];
+			mob = insertNode.textContent;
+			mob = mob.slice(mob.indexOf("d'un")+5)
+				.split("de Qualit")[0]
+				.trim();
+			niveau = NiveauDuMonstre[epure(mob)];
+			qualite = insertNode.textContent.match(Qualites.regex);
+			if(niveau && qualite) {
+				ajouteInfosDuCompo(insertNode, {
+					mob: mob,
+					niveau: niveau,
+					qualite: qualite,
+					bonus: niveau+Qualites[qualite].bonus
+				});
+			}
+		}
+	}
+
+	if(MODE_DEBUG) {
+		window.console.debug(
+			"[mmassistant] traitementListeAchatTaniere réussi"
+		);
+	}
+}
+
+//-------------------------- Traitement des gowaps ---------------------------//
+
+function traitementListeGowaps() {
+	if(MODE_DEBUG) {
+		window.console.debug("[mmassistant] Lancement traitementListeGowaps");
+	}
+	var
+		titresGogos = document.getElementsByClassName("mh_tdtitre_fo"),
+		titre, numGogo, div, tableCompos,
+		row, insertNode, mob, niveau, qualite;
+	for(titre of titresGogos) {
+		numGogo = titre.textContent.match(/\d+/);
+		try {
+			// Recherche d'éventuels compos
+			div = document.getElementById(
+				"mh_objet_hidden_"+numGogo+"_Composant"
+			);
+			if(div) {
+				tableCompos = div.getElementsByTagName("table")[0];
+			} else {
+				window.console.warn(
+					"[mmassistant] Aucun composant trouvé sur le gowap " +
+					numGogo
+				);
+				continue;
+			}
+		} catch(e) {
+			window.console.error(
+				"[mmassistant] Erreur durant l'analyse des gowaps", e
+			);
+			return;
+		}
+
+		// Traitement des Composants
+		// tableCompos.row.cells:
+		// 0: numéro
+		// 1: nom | emplacement | qualité
+		// 2: effet (aucun)
+		// 3: usure
+		// 4: poids
+		// 5: [en gueule]
+		for(row of tableCompos.rows) {
+			insertNode = row.cells[1];
+			mob = insertNode.textContent;
+			mob = mob.slice(mob.indexOf("d'un")+5)
+				.split("de Qualit")[0]
+				.trim();
+			niveau = NiveauDuMonstre[epure(mob)];
+			qualite = insertNode.textContent.match(Qualites.regex);
+			if(niveau && qualite) {
+				ajouteInfosDuCompo(insertNode, {
+					mob: mob,
+					niveau: niveau,
+					qualite: qualite,
+					bonus: niveau+Qualites[qualite].bonus
+				});
+			}
+		}
+	}
+
+	if(MODE_DEBUG) {
+		window.console.debug("[mmassistant] traitementListeGowaps réussi");
+	}
+}
+
+function traitementEquipementGowap() {
+	if(MODE_DEBUG) {
+		window.console.debug(
+			"[mmassistant] Lancement traitementEquipementGowap"
+		);
+	}
+	var
+		urlParams = new URLSearchParams(window.location.search),
+		numGogo = urlParams.get('ai_IdFollower'),
+		div = document.getElementById(
+			"mh_objet_hidden_"+numGogo+"_Composant"
+		),
+		tableCompos, row, insertNode, mob, niveau, qualite;
+	if(div) {
+		tableCompos = div.getElementsByTagName("table")[0];
+	} else {
+		window.console.warn(
+			"[mmassistant] Aucun composant trouvé sur le gowap " + numGogo
+		);
+		return;
+	}
+
+	// Traitement des Composants
+	// tableCompos.row.cells:
+	// 0: numéro
+	// 1: nom | emplacement | qualité
+	// 2: effet (aucun)
+	// 3: usure
+	// 4: poids
+	// 5: [en gueule]
+	for(row of tableCompos.rows) {
+		insertNode = row.cells[1];
+		mob = insertNode.textContent;
+		mob = mob.slice(mob.indexOf("d'un")+5)
+			.split("de Qualit")[0]
+			.trim();
+		niveau = NiveauDuMonstre[epure(mob)];
+		qualite = insertNode.textContent.match(Qualites.regex);
+		if(niveau && qualite) {
+			ajouteInfosDuCompo(insertNode, {
+				mob: mob,
+				niveau: niveau,
+				qualite: qualite,
+				bonus: niveau+Qualites[qualite].bonus
+			});
+		}
+	}
+
+	if(MODE_DEBUG) {
+		window.console.debug("[mmassistant] traitementEquipementGowap réussi");
+	}
+}
 
 //------------------------------ Main Dispatch -------------------------------//
 
 function isPage(url) {
-	return window.self.location.toString().indexOf(url)!=-1;
+	return window.location.pathname.indexOf('/mountyhall/'+url) == 0;
 }
 
 if(
 	isPage("MH_Taniere/TanierePJ_o_Stock") ||
 	isPage("MH_Comptoirs/Comptoir_o_Stock")
 ) {
-	// WARNING: le système de 'numCompo' ne sera pas compatible avec
-	// un éventuel passage des stocks de tanière en footable sortable
-	var numCompo = 0;
-
 	// Ajout du bouton Relaunch (utile si +500 compos)
 	var footer = document.getElementById("footer1"),
 		relaunchButton = document.createElement("input");
@@ -1551,12 +1621,12 @@ if(
 	footer.parentNode.insertBefore(relaunchButton, footer);
 
 	traitementStockTaniere();
-// } else if(isPage("MH_Follower/FO_Equipement")) {
-// 	mmEquipGowap();
-// } else if(isPage("MH_Play/Play_e_follo")) {
-// 	mmListeGowap();
-// } else if(isPage("View/TaniereDescription")) {
-// 	mmViewTaniere();
+} else if (isPage("MH_Lieux/Lieu_TaniereAchat")) {
+	traitementListeAchatTaniere();
+} else if (isPage("MH_Play/Play_e_follo")) {
+	traitementListeGowaps();
+} else if (isPage("MH_Follower/FO_Equipement")) {
+	traitementEquipementGowap();
 } else if(isPage("MH_Play/Play_equipement")) {
 	// Page d'équipement
 	getNumTroll();
@@ -1569,6 +1639,7 @@ if(
 	// Utiliser une popo / parcho
 	window.console.log("[mmassistant] Utiliser une potion");
 	getNumTroll();
+	var run = true;
 	try {
 		var
 			select = document.getElementsByTagName("select")[0],
@@ -1577,14 +1648,17 @@ if(
 		window.console.error(
 			"[mmassistant] Erreur durant l'initialisation - OFF", e
 		);
-		return;
+		run = false;
 	}
-	enrichitListePopos(select);
+	if (run) {
+		enrichitListePopos(select);
+	}
 } else if(isPage("MH_Play/Actions/Competences/Play_a_CompetenceYY")) {
 	if(lancer_de_potions && document.body.id=="p_competencelancerdepotions") {
 		// Lancer de Potion
 		window.console.log("[mmassistant] Compétence : Lancer de potion");
 		getNumTroll();
+		var run = true;
 		try {
 			var
 				selectPopo = document.getElementById("potion"),
@@ -1593,37 +1667,41 @@ if(
 			window.console.error(
 				"[mmassistant] Erreur durant l'initialisation - OFF", e
 			);
-			return;
+			run = false;
 		}
-		enrichitListePopos(selectPopo);
-		return;
-	} else if(document.body.id!="p_competencemlangemagique") {
+		if (run) {
+			enrichitListePopos(selectPopo);
+		}
+	} else if(document.body.id=="p_competencemlangemagique") {
+		// Mélange Magique
+		window.console.log("[mmassistant] Compétence : Mélange Magique");
+		getNumTroll();
+		var run = true;
+		try {
+			var
+				selectPopo1 = document.getElementById("potion1"),
+				selectPopo2 = document.getElementById("potion2"),
+				selectCompo = document.getElementById("cible"),
+				numMemoire, afficheRisque;
+			objCompos =
+				window.localStorage.getObject("mmassistant.compos."+numTroll);
+			objPopos =
+				window.localStorage.getObject("mmassistant.popos."+numTroll);
+		} catch(e) {
+			window.console.error(
+				"[mmassistant] Erreur durant l'initialisation du calculateur", e
+			);
+			run = false;
+		}
+		if (run) {
+			afficheRisque = document.createElement("span");
+			initCompetenceMelange();
+		}
+	} else {
 		window.console.warn("[mmassistant] Compétence non reconnue - OFF");
-		return;
 	}
-	// Mélange Magique
-	getNumTroll();
-	try {
-		var
-			selectPopo1 = document.getElementById("potion1"),
-			selectPopo2 = document.getElementById("potion2"),
-			selectCompo = document.getElementById("cible"),
-			numMemoire, afficheRisque;
-		objCompos =
-			window.localStorage.getObject("mmassistant.compos."+numTroll);
-		objPopos =
-			window.localStorage.getObject("mmassistant.popos."+numTroll);
-	} catch(e) {
-		window.console.error(
-			"[mmassistant] Erreur durant l'initialisation du calculateur", e
-		);
-		return;
-	}
-	window.console.log("[mmassistant] Compétence : Mélange Magique");
-	afficheRisque = document.createElement("span");
-	initCompetenceMelange();
 }
 
 if(MODE_DEBUG) {
-	window.console.debug("[mmassistant] Script OFF sur : "+URL);
+	window.console.debug("[mmassistant] script OFF sur : "+URL);
 }
