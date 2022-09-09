@@ -1274,7 +1274,7 @@ function initCompetenceMelange() {
 			divAction, null, 7, null
 		),
 		titre4 = document.evaluate(
-			"//div[@class='titre4' and contains(text(),'PA')]",
+			"//div[@class='titre4']",
 			document, null, 9, null
 		).singleNodeValue,
 		i, node, utiliser;
@@ -1672,7 +1672,7 @@ if(
 		if (run) {
 			enrichitListePopos(selectPopo);
 		}
-	} else if(document.body.id=="p_competencemlangemagique") {
+	} else if(document.body.id=="p_comptencemlangemagique") {
 		// Mélange Magique
 		window.console.log("[mmassistant] Compétence : Mélange Magique");
 		getNumTroll();
