@@ -1672,7 +1672,7 @@ if(
 		if (run) {
 			enrichitListePopos(selectPopo);
 		}
-	} else if(document.body.id=="p_competencemlangemagique") {
+	} else if(document.body.id=="p_comptencemlangemagique") {
 		// Mélange Magique
 		window.console.log("[mmassistant] Compétence : Mélange Magique");
 		getNumTroll();
