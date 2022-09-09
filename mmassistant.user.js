@@ -1274,7 +1274,7 @@ function initCompetenceMelange() {
 			divAction, null, 7, null
 		),
 		titre4 = document.evaluate(
-			"//div[@class='titre4' and contains(text(),'PA')]",
+			"//div[@class='titre4']",
 			document, null, 9, null
 		).singleNodeValue,
 		i, node, utiliser;
