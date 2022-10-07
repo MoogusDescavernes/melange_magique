@@ -1,9 +1,10 @@
 // ==UserScript==
-// @name         [Mountyhall] Assistant Mélange Magique
+// @name         [Mountyhall] Assistant Mélange Magique (Version corrigée par Hennet/Law
 // @namespace    Mountyhall
-// @description  Assistant Mélange Magique & Affichage % de stabilisation des compos
+// @description  Assistant Mélange Magique & Affichage % de stabilisation des compos.
 // @author       Dabihul
-// @version      2.3.3.1 (Hennet/Law) 
+// @version      2.3.3.1
+// @license MIT
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
