@@ -12,8 +12,8 @@
 // @include      */mountyhall/MH_Lieux/Lieu_TaniereAchat*
 // @include      */mountyhall/View/TaniereDescription*
 // @include      */mountyhall/MH_Play/Play_equipement*
-// @include      */mountyhall/MH_Play/Actions/Play_a_ActionYY*
-// @include      */mountyhall/MH_Play/Actions/Competences/Play_a_CompetenceYY*
+// @include      */mountyhall/MH_Play/Actions/Play_a_Action*
+// @include      */mountyhall/MH_Play/Actions/Play_a_Competence*
 // @grant        none
 // ==/UserScript==
 
@@ -238,7 +238,7 @@ var NiveauDuMonstre = {
 	"Vampire": 29,
 	"Ver Carnivore Geant": 12,
 	"Ver Carnivore": 11,
-	"Veskan Du Chaos": 14,
+	"Veskan du Chaos": 14,
 	"Vouivre": 33,
 	"Worg": 5,
 	"Xorn": 14,
@@ -1634,7 +1634,7 @@ if(
 	initMatos();
 } else if(
 	utiliser_popo &&
-	isPage("MH_Play/Actions/Play_a_ActionYY") &&
+	isPage("MH_Play/Actions/Play_a_Action") &&
 	document.body.id=="p_utiliserunepotionouunparchemin"
 ) {
 	// Utiliser une popo / parcho
@@ -1654,7 +1654,7 @@ if(
 	if (run) {
 		enrichitListePopos(select);
 	}
-} else if(isPage("MH_Play/Actions/Competences/Play_a_CompetenceYY")) {
+} else if(isPage("MH_Play/Actions/Play_a_Competence")) {
 	if(lancer_de_potions && document.body.id=="p_competencelancerdepotions") {
 		// Lancer de Potion
 		window.console.log("[mmassistant] Compétence : Lancer de potion");
