@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         [Mountyhall] Assistant Mélange Magique (Version corrigée par Hennet/Law
+// @name         [Mountyhall] Assistant Mélange Magique (Version corrigée par Hennet/Law puis par Lokidor
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos.
 // @author       Dabihul
