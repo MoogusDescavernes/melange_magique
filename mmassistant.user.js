@@ -471,12 +471,12 @@ function epure(texte) {
 function getNumTroll() {
 // Récupère le num de trõll dans la frame Menu
 // Menu = top.frames["Sommaire"].document
-// onclick du nom du trõll: "EnterPJView(numTroll,750,550)"
+// href du nom du trõll: "javascript:EnterPJView(numTroll,750,550)"
 	var liens, str;
 	try {
 		liens = top.frames["Sommaire"].document.getElementsByTagName("a");
-		if(liens.length>0 && liens[0].onclick!==void(0)) {
-			str = liens[0].onclick.toString();
+		if(liens.length>0 && liens[0].href.startsWith('javascript:')) {
+			str = liens[0].href.toString();
 			numTroll = parseInt(/\d+/.exec(str)[0]);
 			if (MODE_DEBUG) {
 				window.console.debug("[mmassistant] numTroll = "+numTroll);
