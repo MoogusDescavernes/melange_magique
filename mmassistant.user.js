@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         [Mountyhall] Assistant Mélange Magique (Version corrigée par Hennet/Law
+// @name         [Mountyhall] Assistant Mélange Magique (Version corrigée par Hennet/Law puis par Lokidor
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos.
 // @author       Dabihul
@@ -13,7 +13,7 @@
 // @include      */mountyhall/View/TaniereDescription*
 // @include      */mountyhall/MH_Play/Play_equipement*
 // @include      */mountyhall/MH_Play/Actions/Play_a_Action*
-// @include      */mountyhall/MH_Play/Actions/Play_a_Competence*
+// @include      */mountyhall/MH_Play/Actions/Play_a_Talent*
 // @grant        none
 // ==/UserScript==
 
@@ -1635,7 +1635,7 @@ if(
 } else if(
 	utiliser_popo &&
 	isPage("MH_Play/Actions/Play_a_Action") &&
-	document.body.id=="p_utiliserunepotionouunparchemin"
+	document.body.id=="p_utiliserunparcheminouunepotion"
 ) {
 	// Utiliser une popo / parcho
 	window.console.log("[mmassistant] Utiliser une potion");
@@ -1654,7 +1654,7 @@ if(
 	if (run) {
 		enrichitListePopos(select);
 	}
-} else if(isPage("MH_Play/Actions/Play_a_Competence")) {
+} else if(isPage("MH_Play/Actions/Play_a_Talent")) {
 	if(lancer_de_potions && document.body.id=="p_competencelancerdepotions") {
 		// Lancer de Potion
 		window.console.log("[mmassistant] Compétence : Lancer de potion");
