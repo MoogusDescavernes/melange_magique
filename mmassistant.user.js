@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos.
 // @author       Dabihul
-// @version      2.3.3.4
+// @version      2.3.3.5
 // @license      MIT
 // @match       *://games.mountyhall.com/*
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
