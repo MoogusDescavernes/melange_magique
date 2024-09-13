@@ -5,7 +5,6 @@
 // @author       Dabihul
 // @version      2.3.3.5
 // @license      MIT
-// @match       *://games.mountyhall.com/*
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
 // @include      */mountyhall/MH_Follower/FO_Equipement*
@@ -16,8 +15,6 @@
 // @include      */mountyhall/MH_Play/Actions/Play_a_Action*
 // @include      */mountyhall/MH_Play/Actions/Play_a_Talent*
 // @grant        none
-// @downloadURL https://update.greasyfork.org/scripts/452606/%5BMountyhall%5D%20Assistant%20M%C3%A9lange%20Magique%20%28Version%20corrig%C3%A9e%20par%20HennetLaw%20puis%20par%20Lokidor.user.js
-// @updateURL https://update.greasyfork.org/scripts/452606/%5BMountyhall%5D%20Assistant%20M%C3%A9lange%20Magique%20%28Version%20corrig%C3%A9e%20par%20HennetLaw%20puis%20par%20Lokidor.meta.js
 // ==/UserScript==
 
 
@@ -717,20 +714,20 @@ function initMatos() {
 	try {
 		// Recherche d'éventuels compos
 		// 11/09/2024 => "mh_objet_hidden_"+numTroll+"_Composant" devient "part2toggle_"+numTroll+"_Composant"
-    div = document.getElementById("part2toggle_"+numTroll+"_Composant");
+		div = document.getElementById("part2toggle_"+numTroll+"_Composant");
 		if(div) {
 			tableCompos = div.getElementsByTagName("table")[0];
-      if(MODE_DEBUG) {window.console.debug(tableCompos);}
+			if(MODE_DEBUG) {window.console.debug(tableCompos);}
 		} else {
 			window.console.warn("[mmassistant] Aucun composant trouvé");
 		}
 
 		// Recherche d'éventuelles popos
-    // 11/09/2024 => "mh_objet_hidden_"+numTroll+"_Potion" devient "part2toggle_"+numTroll+"_Potion"
+		// 11/09/2024 => "mh_objet_hidden_"+numTroll+"_Potion" devient "part2toggle_"+numTroll+"_Potion"
 		div = document.getElementById("part2toggle_"+numTroll+"_Potion");
 		if(div) {
 			tablePopos = div.getElementsByTagName("table")[0];
-      if(MODE_DEBUG) {window.console.debug(tablePopos);}
+			if(MODE_DEBUG) {window.console.debug(tablePopos);}
 
 			// Récupération de la ligne de titre des popos
 			// titrePopos.cells:
@@ -742,7 +739,7 @@ function initMatos() {
 				"(./preceding-sibling::table)[last()]//tr[1]",
 				div, null, 9, null
 			).singleNodeValue;
-      if(MODE_DEBUG) {window.console.debug(titrePopos);}
+			if(MODE_DEBUG) {window.console.debug(titrePopos);}
 		} else {
 			window.console.warn("[mmassistant] Aucune potion trouvée");
 		}
@@ -949,22 +946,22 @@ function initMatos() {
 }
 
 function activeMelangeur() {
-  // 11/09/2024 => "mh_objet_hidden_"+numTroll+"_Composant" devient "part2toggle_"+numTroll+"_Composant"
-  // 11/09/2024 => "mh_plus_"+numTroll+"_Potion" devient "toggle_"+numTroll+"_Potion"
+	// 11/09/2024 => "mh_objet_hidden_"+numTroll+"_Composant" devient "part2toggle_"+numTroll+"_Composant"
+	// 11/09/2024 => "mh_plus_"+numTroll+"_Potion" devient "toggle_"+numTroll+"_Potion"
 	var
 		checkboxsCompo = document.querySelectorAll(".mmassistant_compo"),
 		checkboxsPopo = document.querySelectorAll(".mmassistant_popo"),
 		div = document.getElementById("part2toggle_"+numTroll+"_Potion"),
-    plus = document.getElementById("toggle_"+numTroll+"_Potion"),
-    div_compo = document.getElementById("part2toggle_"+numTroll+"_Composant"),
-    plus_compo = document.getElementById("toggle_"+numTroll+"_Composant"),
+		plus = document.getElementById("toggle_"+numTroll+"_Potion"),
+		div_compo = document.getElementById("part2toggle_"+numTroll+"_Composant"),
+		plus_compo = document.getElementById("toggle_"+numTroll+"_Composant"),
 		btn = document.getElementById("mmassistant_btnmelange"),
 		td = document.getElementById("mmassistant_tdmelange"),
 		checkbox, span;
 	if(div.style.display=="none") {
 		plus.click();
 	}
-  if(div_compo.style.display=="none") {
+	if(div_compo.style.display=="none") {
 		plus_compo.click();
 	}
 	for(checkbox of checkboxsCompo) {
@@ -1155,7 +1152,7 @@ function enrichitListeCompos() {
 
 function enrichitListePopos(select) {
 // Ajoute les infos de popo à un menu déroulant lors d'un MM / LdP
-  if(MODE_DEBUG) {window.console.debug(select);}
+	if(MODE_DEBUG) {window.console.debug(select);}
 	if(!objPopos) { return; }
 	var
 		i, option, popo,
@@ -1164,7 +1161,7 @@ function enrichitListePopos(select) {
 			select, null, 9, null
 		).singleNodeValue || select,
 		initialValue = select.value;
-  if(MODE_DEBUG) {window.console.debug(container);}
+	if(MODE_DEBUG) {window.console.debug(container);}
 	// Enrichissement de la liste (niveaux, effet en title)
 	for(i=0 ; i<container.children.length ; i++) {
 		option = container.children[i];
@@ -1173,19 +1170,19 @@ function enrichitListePopos(select) {
 			continue;
 		}
 
-    if(MODE_DEBUG) {window.console.debug(option);}
-    if(MODE_DEBUG) {window.console.debug(objPopos[option.value]);}
+		if(MODE_DEBUG) {window.console.debug(option);}
+		if(MODE_DEBUG) {window.console.debug(objPopos[option.value]);}
 
 		if(option.value in objPopos) {
 			// Cas de Lancer de Potion:
 			// on supprime la mention inutile " (Potion)"
-      // 11/09/2024 : le libellé Potion n'est plus entre parenthèse ([13642852] Potion de Guérison - PV : +2 D3)
+			// 11/09/2024 : le libellé Potion n'est plus entre parenthèse ([13642852] Potion de Guérison - PV : +2 D3)
 			/*if(option.innerHTML.indexOf("(Potion)")!=-1) {
 				option.innerHTML = option.textContent.slice(0,
 					option.textContent.indexOf(" (Potion)")
 				).trim();
 			}*/
-      option.innerHTML = (option.innerHTML).replace(" Potion de ", " ");
+			option.innerHTML = (option.innerHTML).replace(" Potion de ", " ");
 
 			popo = objPopos[option.value];
 			if(popo.effet) {
@@ -1205,7 +1202,7 @@ function enrichitListePopos(select) {
 	}
 
 	// Tri des potions (si l'option est activée)
-  // Potion trié par nom par MH
+	// Potion trié par nom par MH
 	/*if(popos_par_nom) {
 		var
 			poposDispos = {},
@@ -1507,7 +1504,7 @@ function traitementListeAchatTaniere() {
 //-------------------------- Traitement des gowaps ---------------------------//
 
 function traitementListeGowaps() {
-  // Corrigé (uniquement problème de balise) 11/09/2024 David
+	// Corrigé (uniquement problème de balise) 11/09/2024 David
 	if(MODE_DEBUG) {
 		window.console.debug("[mmassistant] Lancement traitementListeGowaps");
 	}
@@ -1516,20 +1513,20 @@ function traitementListeGowaps() {
 		titre, numGogo, div, tableCompos,
 		row, insertNode, mob, niveau, qualite, data_json;
 	for(titre of titresGogos) {
-    // 11/09/2024 => Utilisation de l'attribut "data_json" pour récupérer l'ID du suivant
-    data_json = JSON.parse(titre.getAttribute("data-json"));
-    if(MODE_DEBUG) {window.console.debug(data_json);}
+		// 11/09/2024 => Utilisation de l'attribut "data_json" pour récupérer l'ID du suivant
+		data_json = JSON.parse(titre.getAttribute("data-json"));
+		if(MODE_DEBUG) {window.console.debug(data_json);}
 		numGogo = data_json.id;
-    if(MODE_DEBUG) {window.console.debug(numGogo);}
+		if(MODE_DEBUG) {window.console.debug(numGogo);}
 		try {
 			// Recherche d'éventuels compos
 			div = document.getElementById(
-        // 11/09/2024 => "mh_objet_hidden_"+numTroll+"_Composant" devient "part2toggle_"+numTroll+"_Composant"
+				// 11/09/2024 => "mh_objet_hidden_"+numTroll+"_Composant" devient "part2toggle_"+numTroll+"_Composant"
 				"part2toggle_"+numGogo+"_Composant"
 			);
 			if(div) {
 				tableCompos = div.getElementsByTagName("table")[0];
-        if(MODE_DEBUG) {window.console.debug(tableCompos);}
+				if(MODE_DEBUG) {window.console.debug(tableCompos);}
 			} else {
 				window.console.warn(
 					"[mmassistant] Aucun composant trouvé sur le gowap " +
