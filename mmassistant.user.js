@@ -1456,43 +1456,38 @@ function traitementListeAchatTaniere() {
 			"[mmassistant] Lancement traitementListeAchatTaniere"
 		);
 	}
-	var divs = document.evaluate(
-			"//div[contains(@id, 'Composant')]",
-			document, null, 7, null
-		),
-		div, tableCompos,
+	var divs = divs = document.getElementById("part2toggle_Composant"), // 11/09/2024 => remplacement du "document.evaluate" par "getElementById"
+		tableCompos,
 		row, insertNode, mob, niveau, qualite;
 
-	for(i=0; i<divs.snapshotLength; i++) {
-		div = divs.snapshotItem(i);
-		try {
-			tableCompos = div.getElementsByTagName("table")[0];
-		} catch(e) {
-			window.console.error(
-				"[mmassistant] Erreur durant le traitement de la liste d'achat",
-				e
-			);
-			continue;
-		}
+	try {
+		tableCompos = divs.getElementsByTagName("table")[0];
+	} catch(e) {
+		window.console.error(
+			"[mmassistant] Erreur durant le traitement de la liste d'achat",
+			e
+		);
+		continue;
+	}
 
-		for(row of tableCompos.rows) {
-			insertNode = row.cells[3];
-			mob = insertNode.textContent;
-			mob = mob.slice(mob.indexOf("d'un")+5)
-				.split("de Qualit")[0]
-				.trim();
-			niveau = NiveauDuMonstre[epure(mob)];
-			qualite = insertNode.textContent.match(Qualites.regex);
-			if(niveau && qualite) {
-				ajouteInfosDuCompo(insertNode, {
-					mob: mob,
-					niveau: niveau,
-					qualite: qualite,
-					bonus: niveau+Qualites[qualite].bonus
-				});
-			}
+	for(row of tableCompos.rows) {
+		insertNode = row.cells[2];
+		mob = insertNode.textContent;
+		mob = mob.slice(mob.indexOf("d'un")+5)
+			.split("de Qualit")[0]
+			.trim();
+		niveau = NiveauDuMonstre[epure(mob)];
+		qualite = insertNode.textContent.match(Qualites.regex);
+		if(niveau && qualite) {
+			ajouteInfosDuCompo(insertNode, {
+				mob: mob,
+				niveau: niveau,
+				qualite: qualite,
+				bonus: niveau+Qualites[qualite].bonus
+			});
 		}
 	}
+
 
 	if(MODE_DEBUG) {
 		window.console.debug(
@@ -1636,20 +1631,17 @@ function isPage(url) {
 if(isPage("MH_Taniere/TanierePJ_o_Stock") ||	isPage("MH_Comptoirs/Comptoir_o_Stock")) {
 	// Ajout du bouton Relaunch (utile si +500 compos)
 	var footer = document.getElementById("footer1"),
-		relaunchButton = document.createElement("input");
+	relaunchButton = document.createElement("input");
 	relaunchButton.type = "button";
 	relaunchButton.className = "mh_form_submit";
 	relaunchButton.value = "Réanalyser les Composants";
 	relaunchButton.onmouseover = function() {
-		this.style.cursor="pointer";
+	this.style.cursor="pointer";
 	};
 	relaunchButton.onclick = traitementStockTaniere;
 	footer.parentNode.insertBefore(relaunchButton, footer);
-
+	
 	traitementStockTaniere();
-}
-else if (isPage("MH_Lieux/Lieu_TaniereAchat")) {
-	traitementListeAchatTaniere();
 }
 else if (isPage("MH_Play/Play_e_follo")) {
 	traitementListeGowaps();
@@ -1661,28 +1653,31 @@ else if(isPage("MH_Play/Play_equipement")) {
 } // page équipement troll => 11/09/2024 Corrigé (uniquement problème de balise)
 else if(isPage("MH_Play/Play_a_Action")) {
 	let urlParams = new URLSearchParams(document.location.search);
-  if (utiliser_popo && location.search.startsWith("?type=A&id=11")) {
-    // Utiliser une popo / parcho
-    window.console.log("[mmassistant] Utiliser une potion");
-    getNumTroll();
-    var run = true;
-    try {
-      var
-        select = document.getElementsByTagName("select")[0],
-        objPopos = window.localStorage.getObject("mmassistant.popos."+numTroll);
-    } catch(e) {
-      window.console.error(
-        "[mmassistant] Erreur durant l'initialisation - OFF", e
-      );
-      run = false;
-    }
-    if (run) {
-      enrichitListePopos(select);
-    }
-  } // Utiliser une popo / parcho à 2 PA =>  11/09/2024 Corrigé
-  else if (location.search.startsWith("?type=F&id=-4") && urlParams.get('sub') == 'tresors') {
-    traitementEquipementGowap();
-  } // page Trésors du Suivant => 11/09/2024 Corrigé (uniquement problème de balise)
+	if (utiliser_popo && location.search.startsWith("?type=A&id=11")) {
+		// Utiliser une popo / parcho
+		window.console.log("[mmassistant] Utiliser une potion");
+		getNumTroll();
+		var run = true;
+		try {
+			var
+			select = document.getElementsByTagName("select")[0],
+			objPopos = window.localStorage.getObject("mmassistant.popos."+numTroll);
+		} catch(e) {
+			window.console.error(
+			"[mmassistant] Erreur durant l'initialisation - OFF", e
+			);
+			run = false;
+		}
+		if (run) {
+			enrichitListePopos(select);
+		}
+	} // Utiliser une popo / parcho à 2 PA =>  11/09/2024 Corrigé
+	else if (location.search.startsWith("?type=F&id=-4") && urlParams.get('sub') == 'tresors') {
+		traitementEquipementGowap();
+	} // page Trésors du Suivant => 11/09/2024 Corrigé (uniquement problème de balise)
+	else if (location.search.startsWith("?type=L&id=-3&service=13")) {
+		traitementListeAchatTaniere();
+	} // page d'achat des tanières => 11/09/2024 Corrigé (uniquement problème de DOM)
 }
 else if(isPage("MH_Play/Actions/Play_a_Talent")) {
 	if(lancer_de_potions && document.body.id=="p_competencelancerdepotions") {
@@ -1692,11 +1687,11 @@ else if(isPage("MH_Play/Actions/Play_a_Talent")) {
 		var run = true;
 		try {
 			var
-				selectPopo = document.getElementById("potion"),
-				objPopos = window.localStorage.getObject("mmassistant.popos."+numTroll);
+			selectPopo = document.getElementById("potion"),
+			objPopos = window.localStorage.getObject("mmassistant.popos."+numTroll);
 		} catch(e) {
 			window.console.error(
-				"[mmassistant] Erreur durant l'initialisation - OFF", e
+			"[mmassistant] Erreur durant l'initialisation - OFF", e
 			);
 			run = false;
 		}
@@ -1704,24 +1699,24 @@ else if(isPage("MH_Play/Actions/Play_a_Talent")) {
 			enrichitListePopos(selectPopo);
 		}
 	}
-  else if(document.body.id=="p_comptencemlangemagique") {
+	else if(document.body.id=="p_comptencemlangemagique") {
 		// Mélange Magique
 		window.console.log("[mmassistant] Compétence : Mélange Magique");
 		getNumTroll();
 		var run = true;
 		try {
 			var
-				selectPopo1 = document.getElementById("potion1"),
-				selectPopo2 = document.getElementById("potion2"),
-				selectCompo = document.getElementById("cible"),
-				numMemoire, afficheRisque;
+			selectPopo1 = document.getElementById("potion1"),
+			selectPopo2 = document.getElementById("potion2"),
+			selectCompo = document.getElementById("cible"),
+			numMemoire, afficheRisque;
 			objCompos =
-				window.localStorage.getObject("mmassistant.compos."+numTroll);
+			window.localStorage.getObject("mmassistant.compos."+numTroll);
 			objPopos =
-				window.localStorage.getObject("mmassistant.popos."+numTroll);
+			window.localStorage.getObject("mmassistant.popos."+numTroll);
 		} catch(e) {
 			window.console.error(
-				"[mmassistant] Erreur durant l'initialisation du calculateur", e
+			"[mmassistant] Erreur durant l'initialisation du calculateur", e
 			);
 			run = false;
 		}
@@ -1730,9 +1725,9 @@ else if(isPage("MH_Play/Actions/Play_a_Talent")) {
 			initCompetenceMelange();
 		}
 	}
-  else {window.console.warn("[mmassistant] Compétence non reconnue - OFF");}
+	else {window.console.warn("[mmassistant] Compétence non reconnue - OFF");}
 }
 
 if(MODE_DEBUG) {
-	//window.console.debug("[mmassistant] script OFF sur : "+URL);
+	window.console.debug("[mmassistant] script OFF sur : "+URL);
 }
