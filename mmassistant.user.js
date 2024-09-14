@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos.
 // @author       Dabihul
-// @version      2.3.3.6
+// @version      2.3.3.7
 // @license      MIT
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
@@ -1496,6 +1496,100 @@ function traitementListeAchatTaniere() {
 	}
 }
 
+function traitementListeDepotConsigne() {
+	// Traitement de la liste de dépôt dans une consigne
+	if(MODE_DEBUG) {
+		window.console.debug(
+		"[mmassistant] Lancement traitementListeDepotConsigne"
+		);
+	}
+	getNumTroll();
+	//var divs = document.evaluate("//div[contains(@id, 'Composant')]",document, null, 7, null),
+	var divs = document.getElementById("part2toggle_"+numTroll+"_Composant"),
+	tableCompos,
+	row, insertNode, mob, niveau, qualite;
+	
+	try {
+		tableCompos = divs.getElementsByTagName("table")[0];
+	} catch(e) {
+		window.console.error(
+		"[mmassistant] Erreur durant le traitement de la liste d'achat",
+		e
+		);
+	}
+	
+	for(row of tableCompos.rows) {
+		insertNode = row.cells[1];
+		mob = insertNode.textContent;
+		mob = mob.slice(mob.indexOf("d'un")+5)
+			.split("de Qualit")[0]
+			.trim();
+		niveau = NiveauDuMonstre[epure(mob)];
+		qualite = insertNode.textContent.match(Qualites.regex);
+		if(niveau && qualite) {
+			ajouteInfosDuCompo(insertNode, {
+			mob: mob,
+			niveau: niveau,
+			qualite: qualite,
+			bonus: niveau+Qualites[qualite].bonus
+			});
+		}
+	}
+	
+	if(MODE_DEBUG) {
+		window.console.debug(
+		"[mmassistant] traitementListeDepotConsigne réussi"
+		);
+	}
+}
+
+function traitementListeRetraitConsigne() {
+	// Traitement de la liste de retrait dans une consigne
+	if(MODE_DEBUG) {
+		window.console.debug(
+		"[mmassistant] Lancement traitementListeRetraitConsigne"
+		);
+	}
+	getNumTroll();
+	//var divs = document.evaluate("//div[contains(@id, 'Composant')]",document, null, 7, null),
+	var divs = document.getElementById("part2toggle_res"+numTroll+"_Composant"),
+	tableCompos,
+	row, insertNode, mob, niveau, qualite;
+	
+	try {
+		tableCompos = divs.getElementsByTagName("table")[0];
+	} catch(e) {
+		window.console.error(
+		"[mmassistant] Erreur durant le traitement de la liste d'achat",
+		e
+		);
+	}
+	
+	for(row of tableCompos.rows) {
+		insertNode = row.cells[1];
+		mob = insertNode.textContent;
+		mob = mob.slice(mob.indexOf("d'un")+5)
+		.split("de Qualit")[0]
+		.trim();
+		niveau = NiveauDuMonstre[epure(mob)];
+		qualite = insertNode.textContent.match(Qualites.regex);
+		if(niveau && qualite) {
+			ajouteInfosDuCompo(insertNode, {
+			mob: mob,
+			niveau: niveau,
+			qualite: qualite,
+			bonus: niveau+Qualites[qualite].bonus
+			});
+		}
+	}
+	
+	if(MODE_DEBUG) {
+		window.console.debug(
+		"[mmassistant] traitementListeRetraitConsigne réussi"
+		);
+	}
+}
+
 //-------------------------- Traitement des gowaps ---------------------------//
 
 function traitementListeGowaps() {
@@ -1679,6 +1773,10 @@ else if(isPage("MH_Play/Play_a_Action")) {
 		traitementListeAchatTaniere();
 	} // page d'achat des tanières => 11/09/2024 Corrigé (uniquement problème de DOM)
 }
+else if(isPage("MH_Lieux/Lieu_TaniereConsigne")) {
+	traitementListeDepotConsigne();
+	traitementListeRetraitConsigne();
+} // page de consigne description/prolongation/dépôt/retrait/aide
 else if(isPage("MH_Play/Actions/Play_a_Talent")) {
 	if(lancer_de_potions && document.body.id=="p_competencelancerdepotions") {
 		// Lancer de Potion
