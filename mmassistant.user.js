@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos.
 // @author       Dabihul
-// @version      2.3.3.7
+// @version      2.3.3.8
 // @license      MIT
 // @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
 // @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
@@ -1508,12 +1508,13 @@ function traitementListeDepotConsigne() {
 	var divs = document.getElementById("part2toggle_"+numTroll+"_Composant"),
 	tableCompos,
 	row, insertNode, mob, niveau, qualite;
-	
+
+	if (!divs) {return};
 	try {
 		tableCompos = divs.getElementsByTagName("table")[0];
 	} catch(e) {
 		window.console.error(
-		"[mmassistant] Erreur durant le traitement de la liste d'achat",
+		"[mmassistant] Erreur durant le traitement de la liste de dépôt dans une consigne",
 		e
 		);
 	}
@@ -1555,12 +1556,13 @@ function traitementListeRetraitConsigne() {
 	var divs = document.getElementById("part2toggle_res"+numTroll+"_Composant"),
 	tableCompos,
 	row, insertNode, mob, niveau, qualite;
-	
+
+	if (!divs) {return};
 	try {
 		tableCompos = divs.getElementsByTagName("table")[0];
 	} catch(e) {
 		window.console.error(
-		"[mmassistant] Erreur durant le traitement de la liste d'achat",
+		"[mmassistant] Erreur durant le traitement de la liste de retrait dans une consigne",
 		e
 		);
 	}
