@@ -3,17 +3,13 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos.
 // @author       Dabihul, Hennet, Lokidor, Nak1oeil
-// @version      2.3.3.9
+// @version      2.3.3.10
 // @license      MIT
-// @include      */mountyhall/MH_Taniere/TanierePJ_o_Stock*
-// @include      */mountyhall/MH_Comptoirs/Comptoir_o_Stock*
-// @include      */mountyhall/MH_Follower/FO_Equipement*
-// @include      */mountyhall/MH_Play/Play_e_follo*
-// @include      */mountyhall/MH_Lieux/Lieu_TaniereAchat*
-// @include      */mountyhall/View/TaniereDescription*
-// @include      */mountyhall/MH_Play/Play_equipement*
-// @include      */mountyhall/MH_Play/Actions/Play_a_Action*
-// @include      */mountyhall/MH_Play/Actions/Play_a_Talent*
+// @include      */mountyhall/MH_Play/Play_e_follo* 
+// @include      */mountyhall/MH_Play/Play_equipement* 
+// @include      */mountyhall/MH_Play/Play_a_Action* 
+// @include      */mountyhall/MH_Lieux/Lieu_TaniereConsigne*
+// @include	 */mountyhall/MH_Play/Liste_Vente/ListeVente_Creer2*
 // @grant        none
 // ==/UserScript==
 
@@ -1591,6 +1587,57 @@ function traitementListeRetraitConsigne() {
 	}
 }
 
+function traitementCreationListePrivee() {
+	// Traitement de la liste de retrait dans une consigne
+	if(MODE_DEBUG) {
+		window.console.debug(
+		"[mmassistant] Lancement traitementCreationListePrivee"
+		);
+	}
+	
+	let tables = document.getElementsByTagName('table');
+	//tables = tables.getElementsByClassName('mh_tdborder');
+	window.console.debug(tables);
+	
+	try {
+		for (i=0; i<tables.length; i++) {
+			table = tables[i];	
+			for (j=0; j<table.rows.length; j++){
+				if (table.rows[j].cells[2]) {
+					if (table.rows[j].cells[2].textContent == 'Composant') {
+						insertNode = table.rows[j].cells[1];
+						mob = insertNode.textContent;
+						mob = mob.slice(mob.indexOf("d'un")+5)
+						.split("de Qualit")[0]
+						.trim();
+						niveau = NiveauDuMonstre[epure(mob)];
+						qualite = insertNode.textContent.match(Qualites.regex);
+						if(niveau && qualite) {
+							ajouteInfosDuCompo(insertNode, {
+							mob: mob,
+							niveau: niveau,
+							qualite: qualite,
+							bonus: niveau+Qualites[qualite].bonus
+							});
+						}
+					}
+				}
+			}
+		}
+	} catch(e) {
+		window.console.error(
+		"[mmassistant] Erreur durant le traitement de la création de liste privée",
+		e
+		);
+	}
+	
+	if(MODE_DEBUG) {
+		window.console.debug(
+		"[mmassistant] traitementCreationListePrivee réussi"
+		);
+	}
+}
+
 //-------------------------- Traitement des gowaps ---------------------------//
 
 function traitementListeGowaps() {
@@ -1773,11 +1820,17 @@ else if(isPage("MH_Play/Play_a_Action")) {
 	else if (location.search.startsWith("?type=L&id=-3&service=13")) {
 		traitementListeAchatTaniere();
 	} // page d'achat des tanières => 11/09/2024 Corrigé (uniquement problème de DOM)
+	else if (location.search.startsWith("?type=L&id=-3&service=14")) {
+		traitementListeDepotConsigne();
+	} // page de dépôt des tanières => 16/09/2024 Corrigé (uniquement problème de DOM + chgt URL)
 }
 else if(isPage("MH_Lieux/Lieu_TaniereConsigne")) {
 	traitementListeDepotConsigne();
 	traitementListeRetraitConsigne();
 } // page de consigne description/prolongation/dépôt/retrait/aide
+else if(isPage("MH_Play/Liste_Vente/ListeVente_Creer2")) {
+	traitementCreationListePrivee();
+} // page de création d'une liste privée => Ajouté le 16/09/2024
 else if(isPage("MH_Play/Actions/Play_a_Talent")) {
 	if(lancer_de_potions && document.body.id=="p_competencelancerdepotions") {
 		// Lancer de Potion
