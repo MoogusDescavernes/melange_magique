@@ -1467,7 +1467,6 @@ function traitementListeAchatTaniere() {
 			"[mmassistant] Erreur durant le traitement de la liste d'achat",
 			e
 		);
-		continue;
 	}
 
 	for(row of tableCompos.rows) {
