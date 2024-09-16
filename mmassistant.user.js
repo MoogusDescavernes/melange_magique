@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos.
 // @author       Dabihul, Hennet, Lokidor, Nak1oeil
-// @version      2.3.3.12
+// @version      2.3.3.13
 // @license      MIT
 // @include      */mountyhall/MH_Play/Play_e_follo* 
 // @include      */mountyhall/MH_Play/Play_equipement* 
@@ -1414,7 +1414,7 @@ function traitementStockTaniere() {
 
 	var qte = 0;
 	for(i=0; i<trCompos.rows.length; i++) {
-		var tr = tableCompos.rows[i];
+		var tr = trCompos.rows[i];
 		if (tr.getElementsByClassName("mmassistant_infos").length > 0) {
 			continue;
 		}
