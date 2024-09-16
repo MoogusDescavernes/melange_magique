@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos.
 // @author       Dabihul, Hennet, Lokidor, Nak1oeil
-// @version      2.3.3.11
+// @version      2.3.3.12
 // @license      MIT
 // @include      */mountyhall/MH_Play/Play_e_follo* 
 // @include      */mountyhall/MH_Play/Play_equipement* 
@@ -1284,16 +1284,18 @@ function initCompetenceMelange() {
 	if(MODE_DEBUG) {
 		window.console.debug("[mmassistant] Lancement initCompetenceMelange");
 	}
+
+	let mmassistant_text = document.createElement('h4');
+	mmassistant_text.setAttribute('id', 'mmassistant_text');
+	document.getElementById('cible').after(mmassistant_text);
+	
 	var
 		divAction = document.querySelector("div.ActionFrame"),
 		labels = document.evaluate(
 			".//text()[contains(.,'Choisir')]",
 			divAction, null, 7, null
 		),
-		titre4 = document.evaluate(
-			"//div[@class='titre4']",
-			document, null, 9, null
-		).singleNodeValue,
+		titre4 = document.getElementById('mmassistant_text'),
 		i, node, utiliser;
 
 	if(refaire_mise_en_page) {
