@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos.
 // @author       Dabihul, Hennet, Lokidor, Nak1oeil
-// @version      2.3.3.13
+// @version      2.3.3.14
 // @license      MIT
 // @include      */mountyhall/MH_Play/Play_e_follo* 
 // @include      */mountyhall/MH_Play/Play_equipement* 
@@ -1882,20 +1882,35 @@ else if(isPage("MH_Play/Play_a_Action")) {
 		traitementListeAchatTaniere();
 	} // page d'achat des tanières => 11/09/2024 Corrigé (uniquement problème de DOM)
 	else if (location.search.startsWith("?type=L&id=-3&service=13") && urlParams.get('lieu') && urlParams.get('s_t') == 'Composant') {
-			// Ajout du bouton Relaunch (utile si +500 compos)
-	    var button = document.getElementById('stock-append-rows');
-	    relaunchButton = document.createElement("input");
-	    relaunchButton.type = "button";
-	    relaunchButton.className = "mh_form_submit";
-	    relaunchButton.value = "Réanalyser les Composants";
-	    relaunchButton.onmouseover = function() {
-	    this.style.cursor="pointer";
-	    };
-	    relaunchButton.onclick = traitementStockTaniere;
-	    button.after(relaunchButton);
-	    document.getElementById('service13').onload = function() {traitementStockTaniere()};
-	    //traitementStockTaniere();
-	} // page de stock des tanières => 16/09/2024 Corrigé (problème de DOM + chgt URL)
+		// Ajout du bouton Relaunch (utile si +500 compos)
+		var button = document.getElementById('stock-append-rows');
+		relaunchButton = document.createElement("input");
+		relaunchButton.type = "button";
+		relaunchButton.className = "mh_form_submit";
+		relaunchButton.value = "Réanalyser les Composants";
+		relaunchButton.onmouseover = function() {
+		this.style.cursor="pointer";
+		};
+		relaunchButton.onclick = traitementStockTaniere;
+		button.after(relaunchButton);
+		document.getElementById('service13').onload = function() {traitementStockTaniere()};
+		//traitementStockTaniere();
+	} // page de stock des tanières par type => 16/09/2024 Corrigé (problème de DOM + chgt URL)
+	else if (location.search.startsWith("?type=L&id=-3&service=13") && urlParams.get('lieu') && urlParams.get('s_c')) {
+		// Ajout du bouton Relaunch (utile si +500 compos)
+		var button = document.getElementById('stock-append-rows');
+		relaunchButton = document.createElement("input");
+		relaunchButton.type = "button";
+		relaunchButton.className = "mh_form_submit";
+		relaunchButton.value = "Réanalyser les Composants";
+		relaunchButton.onmouseover = function() {
+		this.style.cursor="pointer";
+		};
+		relaunchButton.onclick = traitementStockTaniere;
+		button.after(relaunchButton);
+		document.getElementById('service13').onload = function() {traitementStockTaniere()};
+		//traitementStockTaniere();
+	} // page de stock des tanières par catégorie => 25/09/2024 ajout
 	else if (location.search.startsWith("?type=L&id=-3&service=14")) {
 		traitementListeDepotConsigne();
 	} // page de dépôt des tanières => 16/09/2024 Corrigé (uniquement problème de DOM + chgt URL)
