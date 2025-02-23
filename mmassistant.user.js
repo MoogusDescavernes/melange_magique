@@ -3,7 +3,7 @@
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos.
 // @author       Dabihul, Hennet, Lokidor, Nak1oeil
-// @version      2.3.3.14
+// @version      2.3.3.15
 // @license      MIT
 // @include      */mountyhall/MH_Play/Play_e_follo* 
 // @include      */mountyhall/MH_Play/Play_equipement* 
