@@ -911,7 +911,8 @@ function initMatos() {
 			} else if(/[Z,z]one/.test(effet)) {
 				// Malus de Zone
 				objPopos[num].zone = 1;
-			} else {
+			} else if (carac!="Durée") {
+				// Ne pas prendre en compte la durée dans le risque de la potion
 				window.console.warn("[mmassistant] Effet inconnu:", effet);
 			}
 		}
