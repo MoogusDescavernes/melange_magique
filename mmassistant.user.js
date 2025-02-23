@@ -909,14 +909,14 @@ function initMatos() {
 				} else if(carac.indexOf("Pàïntûré")!=-1) {
 					// Si Painture, malus = niv x 10
 					risque += nb*10;
-				} else {
+				} else if (carac!="Durée") {
+					// Ne pas prendre en compte la durée dans le risque de la potion
 					risque += Number(nb);
 				}
 			} else if(/[Z,z]one/.test(effet)) {
 				// Malus de Zone
 				objPopos[num].zone = 1;
-			} else if (carac!="Durée") {
-				// Ne pas prendre en compte la durée dans le risque de la potion
+			} else {
 				window.console.warn("[mmassistant] Effet inconnu:", effet);
 			}
 		}
