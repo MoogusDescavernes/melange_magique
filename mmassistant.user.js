@@ -268,6 +268,10 @@ var Qualites = {
 };
 
 var PotionsDeBase = {
+	"Biskot" : {
+		duree : 2,
+		nivMax : 2
+	},
 	"Dover Powa" : {
 		duree    : 2,
 		magieMax : 100
