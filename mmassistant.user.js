@@ -862,12 +862,12 @@ function initMatos() {
 				case "PufPuff":
 					// niveau = malus Vue
 					// Si malus PV, on ajoute "Tox."
-					niveau = effets.length>4 ?
+					niveau = effets.length>5 ?
 						"3 Tox." : effets[effets.length-2].match(/\d+/);
 					break;
 				case "Elixir de Corruption":
 					// niveau = niveau + MM/RM
-					if(effets.length>6) {
+					if(effets.length>7) {
 						niveau += " ("+
 							effets[6].match(/\d+/)+"/"+
 							effets[7].match(/\d+/)+")";
