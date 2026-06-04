@@ -2,12 +2,12 @@
 // @name         Assistant Melange Magique
 // @namespace    Mountyhall
 // @description  Assistant Mélange Magique & Affichage % de stabilisation des compos.
-// @author       Dabihul, Hennet, Lokidor, Nak1oeil
-// @version      2.3.3.17
+// @author       Dabihul, Hennet, Lokidor, Nak1oeil, Mooga, Cageux
+// @version      2.3.3.18
 // @license      MIT
-// @include      */mountyhall/MH_Play/Play_e_follo* 
-// @include      */mountyhall/MH_Play/Play_equipement* 
-// @include      */mountyhall/MH_Play/Play_a_Action* 
+// @include      */mountyhall/MH_Play/Play_e_follo*
+// @include      */mountyhall/MH_Play/Play_equipement*
+// @include      */mountyhall/MH_Play/Play_a_Action*
 // @include      */mountyhall/MH_Lieux/Lieu_TaniereConsigne*
 // @include      */mountyhall/MH_Play/Liste_Vente/ListeVente_Creer2*
 // @grant        none
@@ -1293,7 +1293,7 @@ function initCompetenceMelange() {
 	let mmassistant_text = document.createElement('h4');
 	mmassistant_text.setAttribute('id', 'mmassistant_text');
 	document.getElementById('cible').after(mmassistant_text);
-	
+
 	var
 		divAction = document.querySelector("div.ActionFrame"),
 		labels = document.evaluate(
@@ -1407,19 +1407,26 @@ function traitementStockTaniere() {
 	if(MODE_DEBUG) {
 		window.console.debug("[mmassistant] Lancement traitementStockTaniere");
 	}
-	try {
-		// On récupère la liste des compos en stock
-		var trCompos = document.getElementById('stock');
-	} catch(e) {
-		window.console.warn(
-			"[mmassistant] Aucun composant dans le stock", e
-		);
+
+	// Correction le 18/03/2026 par cageux (92255)
+	var stockDiv = document.getElementById('stock');
+	if (!stockDiv) {
+		window.console.warn("[mmassistant] Aucun stock trouvé");
+		return;
+	}
+	var trCompos = stockDiv.getElementsByTagName('table')[0];
+	if (!trCompos) {
+		window.console.warn("[mmassistant] Aucune table dans le stock");
 		return;
 	}
 
 	var qte = 0;
 	for(i=0; i<trCompos.rows.length; i++) {
 		var tr = trCompos.rows[i];
+		// Skip rows that don't have enough cells (e.g. header row, empty rows)
+		if (!tr.cells || tr.cells.length < 3) {
+			continue;
+		}
 		if (tr.getElementsByClassName("mmassistant_infos").length > 0) {
 			continue;
 		}
@@ -1516,7 +1523,7 @@ function traitementListeDepotConsigne() {
 		e
 		);
 	}
-	
+
 	for(row of tableCompos.rows) {
 		insertNode = row.cells[1];
 		mob = insertNode.textContent;
@@ -1534,7 +1541,7 @@ function traitementListeDepotConsigne() {
 			});
 		}
 	}
-	
+
 	if(MODE_DEBUG) {
 		window.console.debug(
 		"[mmassistant] traitementListeDepotConsigne réussi"
@@ -1564,7 +1571,7 @@ function traitementListeRetraitConsigne() {
 		e
 		);
 	}
-	
+
 	for(row of tableCompos.rows) {
 		insertNode = row.cells[1];
 		mob = insertNode.textContent;
@@ -1582,7 +1589,7 @@ function traitementListeRetraitConsigne() {
 			});
 		}
 	}
-	
+
 	if(MODE_DEBUG) {
 		window.console.debug(
 		"[mmassistant] traitementListeRetraitConsigne réussi"
@@ -1597,11 +1604,13 @@ function traitementCreationListePrivee() {
 		"[mmassistant] Lancement traitementCreationListePrivee"
 		);
 	}
-	
+
 	let tables = document.getElementsByTagName('table');
 	//tables = tables.getElementsByClassName('mh_tdborder');
-	window.console.debug(tables);
-	
+	if(MODE_DEBUG) {
+		window.console.debug(tables);
+	}
+
 	try {
 		for (j=0; j<tables[1].rows.length; j++){
 			if (tables[1].rows[j].cells[2]) {
@@ -1651,7 +1660,7 @@ function traitementCreationListePrivee() {
 		e
 		);
 	}
-	
+
 	if(MODE_DEBUG) {
 		window.console.debug(
 		"[mmassistant] traitementCreationListePrivee réussi"
@@ -1727,7 +1736,7 @@ function traitementListeGowaps() {
 	}
 
 	if(MODE_DEBUG) {
-		//window.console.debug("[mmassistant] traitementListeGowaps réussi");
+		window.console.debug("[mmassistant] traitementListeGowaps réussi");
 	}
 }
 
@@ -1791,6 +1800,11 @@ function isPage(url) {
 	return window.location.pathname.indexOf('/mountyhall/'+url) == 0;
 }
 
+
+if(MODE_DEBUG) {
+	window.console.debug("[mmassistant] location : " + location);
+}
+
 if(isPage("MH_Taniere/TanierePJ_o_Stock") ||	isPage("MH_Comptoirs/Comptoir_o_Stock")) {
 	// Ajout du bouton Relaunch (utile si +500 compos)
 	var footer = document.getElementById("footer1"),
@@ -1803,7 +1817,7 @@ if(isPage("MH_Taniere/TanierePJ_o_Stock") ||	isPage("MH_Comptoirs/Comptoir_o_Sto
 	};
 	relaunchButton.onclick = traitementStockTaniere;
 	footer.parentNode.insertBefore(relaunchButton, footer);
-	
+
 	traitementStockTaniere();
 }
 else if (isPage("MH_Play/Play_e_follo")) {
@@ -1888,7 +1902,7 @@ else if(isPage("MH_Play/Play_a_Action")) {
 	} // page d'achat des tanières => 11/09/2024 Corrigé (uniquement problème de DOM)
 	else if (location.search.startsWith("?type=L&id=-3&service=13") && urlParams.get('lieu') && urlParams.get('s_t') == 'Composant') {
 		// Ajout du bouton Relaunch (utile si +500 compos)
-		var button = document.getElementById('stock-append-rows');
+		var button = document.getElementById('loadMore');
 		relaunchButton = document.createElement("input");
 		relaunchButton.type = "button";
 		relaunchButton.className = "mh_form_submit";
@@ -1897,7 +1911,9 @@ else if(isPage("MH_Play/Play_a_Action")) {
 		this.style.cursor="pointer";
 		};
 		relaunchButton.onclick = traitementStockTaniere;
-		button.after(relaunchButton);
+		if (button && button.parentNode) {
+			button.parentNode.insertBefore(relaunchButton, button);
+		}
 		document.getElementById('service13').onload = function() {traitementStockTaniere()};
 		//traitementStockTaniere();
 	} // page de stock des tanières par type => 16/09/2024 Corrigé (problème de DOM + chgt URL)
@@ -1912,7 +1928,7 @@ else if(isPage("MH_Play/Play_a_Action")) {
 		this.style.cursor="pointer";
 		};
 		relaunchButton.onclick = traitementStockTaniere;
-		button.after(relaunchButton);
+		button.loadMore(relaunchButton);
 		document.getElementById('service13').onload = function() {traitementStockTaniere()};
 		//traitementStockTaniere();
 	} // page de stock des tanières par catégorie => 25/09/2024 ajout
